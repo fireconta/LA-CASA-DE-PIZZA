@@ -4,11 +4,11 @@ const config = {
   adminPassword: "senha123",
 
   // URL da API (simulada, substitua pela URL real do Google Sheets ou outra API)
-  googleSheetsApiUrl: "https://api.exemplo.com/sheets",
+  googleSheetsApiUrl: "https://docs.google.com/spreadsheets/d/1i99w6-PZ0Q9uwI0zL_DhsI_SUX0tUQuuQ2e5KsNtU_g/edit?usp=drivesdk",
 
   // Configurações visuais
   nomePizzaria: "La Casa de Pizza's",
-  logoUrl: "https://via.placeholder.com/150x150.png?text=Logo+Pizzaria",
+  logoUrl: "https://imgur.com/a/ANag4EQ",
   corPrimaria: "#FF6347",  // Tom de vermelho/tomate
   corSecundaria: "#FFD700", // Amarelo para detalhes
   corFundo: "#FFF5EE",     // Fundo claro (Seashell)
