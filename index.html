@@ -45,8 +45,13 @@
   <title>La Casa de Pizza's</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getFirestore, collection, getDocs, addDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+    // Exportar funções para uso no script principal
+    window.firebaseApp = { initializeApp, getFirestore, collection, getDocs, addDoc };
+  </script>
   <!-- Carregar config.js primeiro -->
   <script src="config.js" defer onload="onConfigLoaded()"></script>
 </head>
@@ -122,11 +127,11 @@
       // Configurar a logo
       document.getElementById('logo').src = config.logoUrl;
 
-      // Inicializar Firebase
+      // Inicializar Firebase com sintaxe modular
       let db;
       try {
-        firebase.initializeApp(config.firebaseConfig);
-        db = firebase.firestore();
+        const app = window.firebaseApp.initializeApp(config.firebaseConfig);
+        db = window.firebaseApp.getFirestore(app);
       } catch (error) {
         console.error('Erro ao inicializar Firebase:', error);
         alert('Erro ao conectar com o Firebase. Verifique as credenciais.');
@@ -138,7 +143,7 @@
         const cardapioLista = document.getElementById('cardapio-lista');
         cardapioLista.innerHTML = '';
         try {
-          const snapshot = await db.collection('cardapio').get();
+          const snapshot = await window.firebaseApp.getDocs(window.firebaseApp.collection(db, 'cardapio'));
           if (snapshot.empty) {
             cardapioLista.innerHTML = '<p class="text-center text-gray-600">Nenhuma pizza cadastrada.</p>';
             return;
@@ -203,7 +208,7 @@
         mensagem += `Total: ${total}`;
 
         try {
-          await db.collection('pedidos').add({
+          await window.firebaseApp.addDoc(window.firebaseApp.collection(db, 'pedidos'), {
             nome,
             endereco,
             itens,

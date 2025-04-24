@@ -45,8 +45,13 @@
   <title>Painel Administrador - La Casa de Pizza's</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+    // Exportar funções para uso no script principal
+    window.firebaseApp = { initializeApp, getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc };
+  </script>
   <!-- Carregar config.js primeiro -->
   <script src="config.js" defer onload="onConfigLoaded()"></script>
 </head>
@@ -115,11 +120,11 @@
       // Configurar a logo
       document.getElementById('logo').src = config.logoUrl;
 
-      // Inicializar Firebase
+      // Inicializar Firebase com sintaxe modular
       let db;
       try {
-        firebase.initializeApp(config.firebaseConfig);
-        db = firebase.firestore();
+        const app = window.firebaseApp.initializeApp(config.firebaseConfig);
+        db = window.firebaseApp.getFirestore(app);
       } catch (error) {
         console.error('Erro ao inicializar Firebase:', error);
         alert('Erro ao conectar com o Firebase. Verifique as credenciais.');
@@ -154,7 +159,7 @@
         const cardapioAdmin = document.getElementById('cardapio-admin');
         cardapioAdmin.innerHTML = '';
         try {
-          const snapshot = await db.collection('cardapio').get();
+          const snapshot = await window.firebaseApp.getDocs(window.firebaseApp.collection(db, 'cardapio'));
           if (snapshot.empty) {
             cardapioAdmin.innerHTML = '<p class="text-center text-gray-600">Nenhuma pizza cadastrada.</p>';
             return;
@@ -193,7 +198,7 @@
         }
 
         try {
-          await db.collection('cardapio').add({
+          await window.firebaseApp.addDoc(window.firebaseApp.collection(db, 'cardapio'), {
             nome,
             descricao,
             preco
@@ -217,7 +222,7 @@
         btnAdicionar.textContent = 'Atualizar Pizza';
         btnAdicionar.onclick = async () => {
           try {
-            await db.collection('cardapio').doc(id).update({
+            await window.firebaseApp.updateDoc(window.firebaseApp.doc(db, 'cardapio', id), {
               nome: document.getElementById('nomePizza').value,
               descricao: document.getElementById('descricaoPizza').value,
               preco: parseFloat(document.getElementById('precoPizza').value)
@@ -239,7 +244,7 @@
       window.excluirPizza = async function(id) {
         if (confirm('Tem certeza que deseja excluir esta pizza?')) {
           try {
-            await db.collection('cardapio').doc(id).delete();
+            await window.firebaseApp.deleteDoc(window.firebaseApp.doc(db, 'cardapio', id));
             carregarCardapioAdmin();
           } catch (error) {
             console.error('Erro ao excluir pizza:', error);
@@ -256,7 +261,7 @@
         let total = 0;
         let contador = 0;
         try {
-          const snapshot = await db.collection('pedidos').get();
+          const snapshot = await window.firebaseApp.getDocs(window.firebaseApp.collection(db, 'pedidos'));
           if (snapshot.empty) {
             listaPedidos.innerHTML = '<p class="text-center text-gray-600">Nenhum pedido registrado.</p>';
           } else {
