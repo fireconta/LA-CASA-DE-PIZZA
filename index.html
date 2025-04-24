@@ -47,6 +47,8 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+  <!-- Carregar config.js primeiro com defer -->
+  <script src="config.js" defer></script>
 </head>
 <body class="bg-gray-100 font-sans">
   <!-- Cabeçalho -->
@@ -88,89 +90,118 @@
     <p>Contato: (11) 99999-9999</p>
   </footer>
 
-  <script type="module">
-    // Importar configurações
-    import { config } from './config.html';
-
-    // Configurar a logo
-    document.getElementById('logo').src = config.logoUrl;
-
-    // Inicializar Firebase
-    firebase.initializeApp(config.firebaseConfig);
-    const db = firebase.firestore();
-
-    // Carregar cardápio
-    async function carregarCardapio() {
-      const cardapioLista = document.getElementById('cardapio-lista');
-      cardapioLista.innerHTML = '';
-      const snapshot = await db.collection('cardapio').get();
-      snapshot.forEach(doc => {
-        const pizza = doc.data();
-        const div = document.createElement('div');
-        div.className = 'bg-white p-4 rounded-lg shadow';
-        div.innerHTML = `
-          <h3 class="text-xl font-bold">${pizza.nome}</h3>
-          <p class="text-gray-600">${pizza.descricao}</p>
-          <p class="text-lg font-semibold mt-2">R$ ${pizza.preco.toFixed(2)}</p>
-          <input type="number" min="0" value="0" class="quantidade w-16 p-1 border rounded mt-2" data-id="${doc.id}" data-preco="${pizza.preco}">
-        `;
-        cardapioLista.appendChild(div);
-      });
-      document.querySelectorAll('.quantidade').forEach(input => {
-        input.addEventListener('change', atualizarTotal);
-      });
-    }
-
-    // Atualizar total do pedido
-    function atualizarTotal() {
-      let total = 0;
-      document.querySelectorAll('.quantidade').forEach(input => {
-        const quantidade = parseInt(input.value) || 0;
-        const preco = parseFloat(input.dataset.preco);
-        total += quantidade * preco;
-      });
-      document.getElementById('total').value = `R$ ${total.toFixed(2)}`;
-    }
-
-    // Enviar pedido
-    async function enviarPedido() {
-      const nome = document.getElementById('nome').value;
-      const endereco = document.getElementById('endereco').value;
-      const total = document.getElementById('total').value;
-
-      if (!nome || !endereco) {
-        alert('Por favor, preencha nome e endereço.');
+  <script>
+    // Aguarda o carregamento do DOM para garantir que config.js esteja disponível
+    document.addEventListener('DOMContentLoaded', () => {
+      // Verifica se config foi carregado
+      if (typeof config === 'undefined') {
+        console.error('Erro: config.js não foi carregado corretamente.');
+        alert('Erro ao carregar configurações. Verifique o arquivo config.js.');
         return;
       }
 
-      let mensagem = `Novo Pedido - La Casa de Pizza's\nNome: ${nome}\nEndereço: ${endereco}\nItens:\n`;
-      const itens = [];
-      document.querySelectorAll('.quantidade').forEach(input => {
-        const quantidade = parseInt(input.value) || 0;
-        if (quantidade > 0) {
-          const pizzaNome = input.parentElement.querySelector('h3').textContent;
-          itens.push({ id: input.dataset.id, quantidade, nome: pizzaNome, preco: parseFloat(input.dataset.preco) });
-          mensagem += `${quantidade}x ${pizzaNome} - R$ ${(quantidade * input.dataset.preco).toFixed(2)}\n`;
+      // Configurar a logo
+      document.getElementById('logo').src = config.logoUrl;
+
+      // Inicializar Firebase
+      let db;
+      try {
+        firebase.initializeApp(config.firebaseConfig);
+        db = firebase.firestore();
+      } catch (error) {
+        console.error('Erro ao inicializar Firebase:', error);
+        alert('Erro ao conectar com o Firebase. Verifique as credenciais.');
+        return;
+      }
+
+      // Carregar cardápio
+      async function carregarCardapio() {
+        const cardapioLista = document.getElementById('cardapio-lista');
+        cardapioLista.innerHTML = '';
+        try {
+          const snapshot = await db.collection('cardapio').get();
+          if (snapshot.empty) {
+            cardapioLista.innerHTML = '<p class="text-center text-gray-600">Nenhuma pizza cadastrada.</p>';
+            return;
+          }
+          snapshot.forEach(doc => {
+            const pizza = doc.data();
+            const div = document.createElement('div');
+            div.className = 'bg-white p-4 rounded-lg shadow';
+            div.innerHTML = `
+              <h3 class="text-xl font-bold">${pizza.nome}</h3>
+              <p class="text-gray-600">${pizza.descricao}</p>
+              <p class="text-lg font-semibold mt-2">R$ ${pizza.preco.toFixed(2)}</p>
+              <input type="number" min="0" value="0" class="quantidade w-16 p-1 border rounded mt-2" data-id="${doc.id}" data-preco="${pizza.preco}">
+            `;
+            cardapioLista.appendChild(div);
+          });
+          document.querySelectorAll('.quantidade').forEach(input => {
+            input.addEventListener('change', atualizarTotal);
+          });
+        } catch (error) {
+          console.error('Erro ao carregar cardápio:', error);
+          alert('Erro ao carregar o cardápio. Verifique o Firebase.');
         }
-      });
-      mensagem += `Total: ${total}`;
+      }
 
-      // Salvar pedido no Firebase
-      await db.collection('pedidos').add({
-        nome,
-        endereco,
-        itens,
-        total: parseFloat(total.replace('R$ ', '')),
-        data: new Date().toISOString()
-      });
+      // Atualizar total do pedido
+      function atualizarTotal() {
+        let total = 0;
+        document.querySelectorAll('.quantidade').forEach(input => {
+          const quantidade = parseInt(input.value) || 0;
+          const preco = parseFloat(input.dataset.preco);
+          total += quantidade * preco;
+        });
+        document.getElementById('total').value = `R$ ${total.toFixed(2)}`;
+      }
 
-      // Enviar para WhatsApp
-      const url = `https://wa.me/${config.numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
-      window.open(url, '_blank');
-    }
+      // Enviar pedido
+      window.enviarPedido = async function() {
+        const nome = document.getElementById('nome').value;
+        const endereco = document.getElementById('endereco').value;
+        const total = document.getElementById('total').value;
 
-    // Inicializar
-    carregarCardapio();
+        if (!nome || !endereco) {
+          alert('Por favor, preencha nome e endereço.');
+          return;
+        }
+
+        let mensagem = `Novo Pedido - La Casa de Pizza's\nNome: ${nome}\nEndereço: ${endereco}\nItens:\n`;
+        const itens = [];
+        document.querySelectorAll('.quantidade').forEach(input => {
+          const quantidade = parseInt(input.value) || 0;
+          if (quantidade > 0) {
+            const pizzaNome = input.parentElement.querySelector('h3').textContent;
+            itens.push({ id: input.dataset.id, quantidade, nome: pizzaNome, preco: parseFloat(input.dataset.preco) });
+            mensagem += `${quantidade}x ${pizzaNome} - R$ ${(quantidade * input.dataset.preco).toFixed(2)}\n`;
+          }
+        });
+        if (itens.length === 0) {
+          alert('Selecione pelo menos uma pizza para fazer o pedido.');
+          return;
+        }
+        mensagem += `Total: ${total}`;
+
+        try {
+          await db.collection('pedidos').add({
+            nome,
+            endereco,
+            itens,
+            total: parseFloat(total.replace('R$ ', '')),
+            data: new Date().toISOString()
+          });
+          const url = `https://wa.me/${config.numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
+          window.open(url, '_blank');
+        } catch (error) {
+          console.error('Erro ao enviar pedido:', error);
+          alert('Erro ao enviar o pedido. Verifique o Firebase.');
+        }
+      };
+
+      // Inicializar
+      carregarCardapio();
+    });
   </script>
 </body>
 </html>

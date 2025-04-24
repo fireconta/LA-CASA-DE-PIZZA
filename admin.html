@@ -47,6 +47,8 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+  <!-- Carregar config.js primeiro com defer -->
+  <script src="config.js" defer></script>
 </head>
 <body class="bg-gray-100 font-sans">
   <!-- Autenticação -->
@@ -81,134 +83,191 @@
     </div>
   </section>
 
-  <script type="module">
-    // Importar configurações
-    import { config } from './config.html';
-
-    // Configurar a logo
-    document.getElementById('logo').src = config.logoUrl;
-
-    // Inicializar Firebase
-    firebase.initializeApp(config.firebaseConfig);
-    const db = firebase.firestore();
-
-    // Autenticação simples
-    function logar() {
-      const senha = document.getElementById('senha').value;
-      if (senha === config.senhaAdmin) {
-        document.getElementById('login').classList.add('hidden');
-        document.getElementById('painel').classList.remove('hidden');
-        carregarCardapioAdmin();
-        carregarVendas();
-      } else {
-        alert('Senha incorreta!');
-      }
-    }
-
-    // Carregar cardápio no painel
-    async function carregarCardapioAdmin() {
-      const cardapioAdmin = document.getElementById('cardapio-admin');
-      cardapioAdmin.innerHTML = '';
-      const snapshot = await db.collection('cardapio').get();
-      snapshot.forEach(doc => {
-        const pizza = doc.data();
-        const div = document.createElement('div');
-        div.className = 'flex justify-between items-center bg-gray-50 p-2 rounded';
-        div.innerHTML = `
-          <div>
-            <h4 class="font-bold">${pizza.nome}</h4>
-            <p>${pizza.descricao} - R$ ${pizza.preco.toFixed(2)}</p>
-          </div>
-          <div>
-            <button onclick="editarPizza('${doc.id}', '${pizza.nome}', '${pizza.descricao}', ${pizza.preco})" class="bg-yellow-500 text-white p-1 rounded mr-2">Editar</button>
-            <button onclick="excluirPizza('${doc.id}')" class="bg-red-500 text-white p-1 rounded">Excluir</button>
-          </div>
-        `;
-        cardapioAdmin.appendChild(div);
-      });
-    }
-
-    // Adicionar pizza
-    async function adicionarPizza() {
-      const nome = document.getElementById('nomePizza').value;
-      const descricao = document.getElementById('descricaoPizza').value;
-      const preco = parseFloat(document.getElementById('precoPizza').value);
-
-      if (!nome || !descricao || !preco) {
-        alert('Preencha todos os campos!');
+  <script>
+    // Aguarda o carregamento do DOM para garantir que config.js esteja disponível
+    document.addEventListener('DOMContentLoaded', () => {
+      // Verifica se config foi carregado
+      if (typeof config === 'undefined') {
+        console.error('Erro: config.js não foi carregado corretamente.');
+        alert('Erro ao carregar configurações. Verifique o arquivo config.js.');
         return;
       }
 
-      await db.collection('cardapio').add({
-        nome,
-        descricao,
-        preco
-      });
-      carregarCardapioAdmin();
-      document.getElementById('nomePizza').value = '';
-      document.getElementById('descricaoPizza').value = '';
-      document.getElementById('precoPizza').value = '';
-    }
+      // Configurar a logo
+      document.getElementById('logo').src = config.logoUrl;
 
-    // Editar pizza
-    function editarPizza(id, nome, descricao, preco) {
-      document.getElementById('nomePizza').value = nome;
-      document.getElementById('descricaoPizza').value = descricao;
-      document.getElementById('precoPizza').value = preco;
-      const btnAdicionar = document.querySelector('button[onclick="adicionarPizza()"]');
-      btnAdicionar.textContent = 'Atualizar Pizza';
-      btnAdicionar.onclick = async () => {
-        await db.collection('cardapio').doc(id).update({
-          nome: document.getElementById('nomePizza').value,
-          descricao: document.getElementById('descricaoPizza').value,
-          preco: parseFloat(document.getElementById('precoPizza').value)
-        });
-        carregarCardapioAdmin();
-        document.getElementById('nomePizza').value = '';
-        document.getElementById('descricaoPizza').value = '';
-        document.getElementById('precoPizza').value = '';
-        btnAdicionar.textContent = 'Adicionar Pizza';
-        btnAdicionar.onclick = adicionarPizza;
-      };
-    }
-
-    // Excluir pizza
-    async function excluirPizza(id) {
-      if (confirm('Tem certeza que deseja excluir esta pizza?')) {
-        await db.collection('cardapio').doc(id).delete();
-        carregarCardapioAdmin();
+      // Inicializar Firebase
+      let db;
+      try {
+        firebase.initializeApp(config.firebaseConfig);
+        db = firebase.firestore();
+      } catch (error) {
+        console.error('Erro ao inicializar Firebase:', error);
+        alert('Erro ao conectar com o Firebase. Verifique as credenciais.');
+        return;
       }
-    }
 
-    // Carregar vendas
-    async function carregarVendas() {
-      const listaPedidos = document.getElementById('lista-pedidos');
-      const totalVendas = document.getElementById('total-vendas');
-      listaPedidos.innerHTML = '';
-      let total = 0;
-      let contador = 0;
-      const snapshot = await db.collection('pedidos').get();
-      snapshot.forEach(doc => {
-        const pedido = doc.data();
-        total += pedido.total;
-        contador++;
-        const div = document.createElement('div');
-        div.className = 'bg-gray-50 p-2 rounded';
-        let itens = '';
-        pedido.itens.forEach(item => {
-          itens += `${item.quantidade}x ${item.nome} - R$ ${(item.quantidade * item.preco).toFixed(2)}<br>`;
-        });
-        div.innerHTML = `
-          <p><strong>Cliente:</strong> ${pedido.nome}</p>
-          <p><strong>Endereço:</strong> ${pedido.endereço}</p>
-          <p><strong>Itens:</strong><br>${itens}</p>
-          <p><strong>Total:</strong> R$ ${pedido.total.toFixed(2)}</p>
-          <p><strong>Data:</strong> ${new Date(pedido.data).toLocaleString('pt-BR')}</p>
-        `;
-        listaPedidos.appendChild(div);
-      });
-      totalVendas.textContent = `Total de Vendas: ${contador} pedidos - R$ ${total.toFixed(2)}`;
-    }
+      // Autenticação simples
+      window.logar = function() {
+        const senha = document.getElementById('senha').value;
+        console.log('Senha digitada:', senha);
+        console.log('Senha esperada:', config.senhaAdmin);
+
+        if (!senha) {
+          alert('Por favor, digite a senha.');
+          return;
+        }
+
+        if (senha === config.senhaAdmin) {
+          console.log('Login bem-sucedido!');
+          document.getElementById('login').classList.add('hidden');
+          document.getElementById('painel').classList.remove('hidden');
+          carregarCardapioAdmin();
+          carregarVendas();
+        } else {
+          console.log('Senha incorreta.');
+          alert('Senha incorreta!');
+        }
+      };
+
+      // Carregar cardápio no painel
+      async function carregarCardapioAdmin() {
+        const cardapioAdmin = document.getElementById('cardapio-admin');
+        cardapioAdmin.innerHTML = '';
+        try {
+          const snapshot = await db.collection('cardapio').get();
+          if (snapshot.empty) {
+            cardapioAdmin.innerHTML = '<p class="text-center text-gray-600">Nenhuma pizza cadastrada.</p>';
+            return;
+          }
+          snapshot.forEach(doc => {
+            const pizza = doc.data();
+            const div = document.createElement('div');
+            div.className = 'flex justify-between items-center bg-gray-50 p-2 rounded';
+            div.innerHTML = `
+              <div>
+                <h4 class="font-bold">${pizza.nome}</h4>
+                <p>${pizza.descricao} - R$ ${pizza.preco.toFixed(2)}</p>
+              </div>
+              <div>
+                <button onclick="editarPizza('${doc.id}', '${pizza.nome}', '${pizza.descricao}', ${pizza.preco})" class="bg-yellow-500 text-white p-1 rounded mr-2">Editar</button>
+                <button onclick="excluirPizza('${doc.id}')" class="bg-red-500 text-white p-1 rounded">Excluir</button>
+              </div>
+            `;
+            cardapioAdmin.appendChild(div);
+          });
+        } catch (error) {
+          console.error('Erro ao carregar cardápio:', error);
+          alert('Erro ao carregar o cardápio. Verifique o Firebase.');
+        }
+      }
+
+      // Adicionar pizza
+      window.adicionarPizza = async function() {
+        const nome = document.getElementById('nomePizza').value;
+        const descricao = document.getElementById('descricaoPizza').value;
+        const preco = parseFloat(document.getElementById('precoPizza').value);
+
+        if (!nome || !descricao || !preco) {
+          alert('Preencha todos os campos!');
+          return;
+        }
+
+        try {
+          await db.collection('cardapio').add({
+            nome,
+            descricao,
+            preco
+          });
+          carregarCardapioAdmin();
+          document.getElementById('nomePizza').value = '';
+          document.getElementById('descricaoPizza').value = '';
+          document.getElementById('precoPizza').value = '';
+        } catch (error) {
+          console.error('Erro ao adicionar pizza:', error);
+          alert('Erro ao adicionar pizza. Verifique o Firebase.');
+        }
+      };
+
+      // Editar pizza
+      window.editarPizza = function(id, nome, descricao, preco) {
+        document.getElementById('nomePizza').value = nome;
+        document.getElementById('descricaoPizza').value = descricao;
+        document.getElementById('precoPizza').value = preco;
+        const btnAdicionar = document.querySelector('button[onclick="adicionarPizza()"]');
+        btnAdicionar.textContent = 'Atualizar Pizza';
+        btnAdicionar.onclick = async () => {
+          try {
+            await db.collection('cardapio').doc(id).update({
+              nome: document.getElementById('nomePizza').value,
+              descricao: document.getElementById('descricaoPizza').value,
+              preco: parseFloat(document.getElementById('precoPizza').value)
+            });
+            carregarCardapioAdmin();
+            document.getElementById('nomePizza').value = '';
+            document.getElementById('descricaoPizza').value = '';
+            document.getElementById('precoPizza').value = '';
+            btnAdicionar.textContent = 'Adicionar Pizza';
+            btnAdicionar.onclick = adicionarPizza;
+          } catch (error) {
+            console.error('Erro ao atualizar pizza:', error);
+            alert('Erro ao atualizar pizza. Verifique o Firebase.');
+          }
+        };
+      };
+
+      // Excluir pizza
+      window.excluirPizza = async function(id) {
+        if (confirm('Tem certeza que deseja excluir esta pizza?')) {
+          try {
+            await db.collection('cardapio').doc(id).delete();
+            carregarCardapioAdmin();
+          } catch (error) {
+            console.error('Erro ao excluir pizza:', error);
+            alert('Erro ao excluir pizza. Verifique o Firebase.');
+          }
+        }
+      };
+
+      // Carregar vendas
+      async function carregarVendas() {
+        const listaPedidos = document.getElementById('lista-pedidos');
+        const totalVendas = document.getElementById('total-vendas');
+        listaPedidos.innerHTML = '';
+        let total = 0;
+        let contador = 0;
+        try {
+          const snapshot = await db.collection('pedidos').get();
+          if (snapshot.empty) {
+            listaPedidos.innerHTML = '<p class="text-center text-gray-600">Nenhum pedido registrado.</p>';
+          } else {
+            snapshot.forEach(doc => {
+              const pedido = doc.data();
+              total += pedido.total;
+              contador++;
+              const div = document.createElement('div');
+              div.className = 'bg-gray-50 p-2 rounded';
+              let itens = '';
+              pedido.itens.forEach(item => {
+                itens += `${item.quantidade}x ${item.nome} - R$ ${(item.quantidade * item.preco).toFixed(2)}<br>`;
+              });
+              div.innerHTML = `
+                <p><strong>Cliente:</strong> ${pedido.nome}</p>
+                <p><strong>Endereço:</strong> ${pedido.endereco}</p>
+                <p><strong>Itens:</strong><br>${itens}</p>
+                <p><strong>Total:</strong> R$ ${pedido.total.toFixed(2)}</p>
+                <p><strong>Data:</strong> ${new Date(pedido.data).toLocaleString('pt-BR')}</p>
+              `;
+              listaPedidos.appendChild(div);
+            });
+          }
+          totalVendas.textContent = `Total de Vendas: ${contador} pedidos - R$ ${total.toFixed(2)}`;
+        } catch (error) {
+          console.error('Erro ao carregar vendas:', error);
+          alert('Erro ao carregar vendas. Verifique o Firebase.');
+        }
+      }
+    });
   </script>
 </body>
 </html>
