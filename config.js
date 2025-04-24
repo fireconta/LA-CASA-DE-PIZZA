@@ -1,12 +1,13 @@
 const config = {
   firebaseConfig: {
-    apiKey: "SUA_API_KEY",
-    authDomain: "SEU_PROJETO.firebaseapp.com",
-    projectId: "SEU_PROJETO",
-    storageBucket: "SEU_PROJETO.appspot.com",
-    messagingSenderId: "SEU_SENDER_ID",
-    appId: "SEU_APP_ID"
-  },
+  apiKey: "AIzaSyDHRWs_TrSD7e3FAEDl6cIqUP48MecP_MM",
+  authDomain: "lacasadepizzas.firebaseapp.com",
+  projectId: "lacasadepizzas",
+  storageBucket: "lacasadepizzas.firebasestorage.app",
+  messagingSenderId: "400653207191",
+  appId: "1:400653207191:web:968ca0613b699b7056cbd2",
+  measurementId: "G-8L13Y1PZ7C"
+},
   numeroWhatsApp: "5511999999999",
   senhaAdmin: "admin123",
   logoUrl: "https://i.imgur.com/ANag4EQ.png"
