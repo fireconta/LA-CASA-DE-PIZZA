@@ -10,5 +10,5 @@ const config = {
   },
   numeroWhatsApp: "5511999999999",
   senhaAdmin: "admin",
-  logoUrl: "https://imgur.com/a/ANag4EQ"
+  logoUrl: "https://imgur.com/a/ANag4EQ.jpeg"
 };
