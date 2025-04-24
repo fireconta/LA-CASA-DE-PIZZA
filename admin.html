@@ -1,0 +1,214 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrador - La Casa de Pizza's</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+  <!-- Autenticação -->
+  <section id="login" class="max-w-md mx-auto my-8 p-4 bg-white rounded-lg shadow">
+    <img id="logo" src="" alt="Logo La Casa de Pizza's" class="mx-auto h-24 mb-4">
+    <h2 class="text-2xl font-semibold text-center mb-4">Acesso Administrador - La Casa de Pizza's</h2>
+    <input type="password" id="senha" class="w-full p-2 border rounded mb-4" placeholder="Digite a senha">
+    <button onclick="logar()" class="w-full bg-red-600 text-white p-2 rounded hover:bg-red-700">Entrar</button>
+  </section>
+
+  <!-- Painel (oculto até login) -->
+  <section id="painel" class="max-w-4xl mx-auto my-8 p-4 bg-white rounded-lg shadow hidden">
+    <h2 class="text-3xl font-semibold text-center mb-6">Painel Administrador - La Casa de Pizza's</h2>
+    
+    <!-- Editar Cardápio -->
+    <div class="mb-8">
+      <h3 class="text-2xl font-medium mb-4">Gerenciar Cardápio</h3>
+      <div class="space-y-4">
+        <input type="text" id="nomePizza" class="w-full p-2 border rounded" placeholder="Nome da pizza">
+        <input type="text" id="descricaoPizza" class="w-full p-2 border rounded" placeholder="Descrição">
+        <input type="number" id="precoPizza" class="w-full p-2 border rounded" placeholder="Preço (R$)" step="0.01">
+        <button onclick="adicionarPizza()" class="bg-green-600 text-white p-2 rounded hover:bg-green-700">Adicionar Pizza</button>
+      </div>
+      <div id="cardapio-admin" class="mt-4 space-y-4"></div>
+    </div>
+
+    <!-- Vendas -->
+    <div>
+      <h3 class="text-2xl font-medium mb-4">Vendas</h3>
+      <p id="total-vendas" class="text-lg font-semibold"></p>
+      <div id="lista-pedidos" class="mt-4 space-y-4"></div>
+    </div>
+  </section>
+
+  <script type="module">
+    // Importar configurações
+    import { config } from './config.html';
+
+    // Configurar a logo
+    document.getElementById('logo').src = config.logoUrl;
+
+    // Inicializar Firebase
+    firebase.initializeApp(config.firebaseConfig);
+    const db = firebase.firestore();
+
+    // Autenticação simples
+    function logar() {
+      const senha = document.getElementById('senha').value;
+      if (senha === config.senhaAdmin) {
+        document.getElementById('login').classList.add('hidden');
+        document.getElementById('painel').classList.remove('hidden');
+        carregarCardapioAdmin();
+        carregarVendas();
+      } else {
+        alert('Senha incorreta!');
+      }
+    }
+
+    // Carregar cardápio no painel
+    async function carregarCardapioAdmin() {
+      const cardapioAdmin = document.getElementById('cardapio-admin');
+      cardapioAdmin.innerHTML = '';
+      const snapshot = await db.collection('cardapio').get();
+      snapshot.forEach(doc => {
+        const pizza = doc.data();
+        const div = document.createElement('div');
+        div.className = 'flex justify-between items-center bg-gray-50 p-2 rounded';
+        div.innerHTML = `
+          <div>
+            <h4 class="font-bold">${pizza.nome}</h4>
+            <p>${pizza.descricao} - R$ ${pizza.preco.toFixed(2)}</p>
+          </div>
+          <div>
+            <button onclick="editarPizza('${doc.id}', '${pizza.nome}', '${pizza.descricao}', ${pizza.preco})" class="bg-yellow-500 text-white p-1 rounded mr-2">Editar</button>
+            <button onclick="excluirPizza('${doc.id}')" class="bg-red-500 text-white p-1 rounded">Excluir</button>
+          </div>
+        `;
+        cardapioAdmin.appendChild(div);
+      });
+    }
+
+    // Adicionar pizza
+    async function adicionarPizza() {
+      const nome = document.getElementById('nomePizza').value;
+      const descricao = document.getElementById('descricaoPizza').value;
+      const preco = parseFloat(document.getElementById('precoPizza').value);
+
+      if (!nome || !descricao || !preco) {
+        alert('Preencha todos os campos!');
+        return;
+      }
+
+      await db.collection('cardapio').add({
+        nome,
+        descricao,
+        preco
+      });
+      carregarCardapioAdmin();
+      document.getElementById('nomePizza').value = '';
+      document.getElementById('descricaoPizza').value = '';
+      document.getElementById('precoPizza').value = '';
+    }
+
+    // Editar pizza
+    function editarPizza(id, nome, descricao, preco) {
+      document.getElementById('nomePizza').value = nome;
+      document.getElementById('descricaoPizza').value = descricao;
+      document.getElementById('precoPizza').value = preco;
+      const btnAdicionar = document.querySelector('button[onclick="adicionarPizza()"]');
+      btnAdicionar.textContent = 'Atualizar Pizza';
+      btnAdicionar.onclick = async () => {
+        await db.collection('cardapio').doc(id).update({
+          nome: document.getElementById('nomePizza').value,
+          descricao: document.getElementById('descricaoPizza').value,
+          preco: parseFloat(document.getElementById('precoPizza').value)
+        });
+        carregarCardapioAdmin();
+        document.getElementById('nomePizza').value = '';
+        document.getElementById('descricaoPizza').value = '';
+        document.getElementById('precoPizza').value = '';
+        btnAdicionar.textContent = 'Adicionar Pizza';
+        btnAdicionar.onclick = adicionarPizza;
+      };
+    }
+
+    // Excluir pizza
+    async function excluirPizza(id) {
+      if (confirm('Tem certeza que deseja excluir esta pizza?')) {
+        await db.collection('cardapio').doc(id).delete();
+        carregarCardapioAdmin();
+      }
+    }
+
+    // Carregar vendas
+    async function carregarVendas() {
+      const listaPedidos = document.getElementById('lista-pedidos');
+      const totalVendas = document.getElementById('total-vendas');
+      listaPedidos.innerHTML = '';
+      let total = 0;
+      let contador = 0;
+      const snapshot = await db.collection('pedidos').get();
+      snapshot.forEach(doc => {
+        const pedido = doc.data();
+        total += pedido.total;
+        contador++;
+        const div = document.createElement('div');
+        div.className = 'bg-gray-50 p-2 rounded';
+        let itens = '';
+        pedido.itens.forEach(item => {
+          itens += `${item.quantidade}x ${item.nome} - R$ ${(item.quantidade * item.preco).toFixed(2)}<br>`;
+        });
+        div.innerHTML = `
+          <p><strong>Cliente:</strong> ${pedido.nome}</p>
+          <p><strong>Endereço:</strong> ${pedido.endereço}</p>
+          <p><strong>Itens:</strong><br>${itens}</p>
+          <p><strong>Total:</strong> R$ ${pedido.total.toFixed(2)}</p>
+          <p><strong>Data:</strong> ${new Date(pedido.data).toLocaleString('pt-BR')}</p>
+        `;
+        listaPedidos.appendChild(div);
+      });
+      totalVendas.textContent = `Total de Vendas: ${contador} pedidos - R$ ${total.toFixed(2)}`;
+    }
+  </script>
+</body>
+</html>
