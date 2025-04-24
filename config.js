@@ -1,14 +1,11 @@
 const config = {
-  firebaseConfig: {
-    apiKey: "AIzaSyDHRWs_TrSD7e3FAEDl6cIqUP48MecP_MM",
-    authDomain: "lacasadepizzas.firebaseapp.com",
-    projectId: "lacasadepizzas",
-    storageBucket: "lacasadepizzas.firebasestorage.app",
-    messagingSenderId: "400653207191",
-    appId: "1:400653207191:web:968ca0613b699b7056cbd2",
-    measurementId: "G-8L13Y1PZ7C"
-  },
+  googleSheetsApiUrl: "https://script.google.com/macros/s/<SEU_ID>/exec", // Substitua pelo URL do seu Google Apps Script
   numeroWhatsApp: "5511999999999",
   senhaAdmin: "admin123",
-  logoUrl: "https://i.imgur.com/ANag4EQ"
+  logoUrl: "https://i.imgur.com/ANag4EQ.png",
+  nomePizzaria: "La Casa de Pizza's",
+  contatoFooter: "(11) 99999-9999",
+  corPrimaria: "#DC2626", // Vermelho para botões e destaques
+  corSecundaria: "#FBBF24", // Amarelo para botões de edição
+  corFundo: "#F3F4F6" // Cinza claro para o fundo
 };

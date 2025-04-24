@@ -42,121 +42,149 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>La Casa de Pizza's</title>
+  <title id="page-title"></title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-    import { getFirestore, collection, getDocs, addDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-
-    // Exportar funções para uso no script principal
-    window.firebaseApp = { initializeApp, getFirestore, collection, getDocs, addDoc };
-  </script>
-  <!-- Carregar config.js primeiro -->
   <script src="config.js" defer onload="onConfigLoaded()"></script>
+  <style>
+    body {
+      background-color: var(--cor-fundo);
+    }
+    .pizza-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .custom-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    .custom-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .card {
+      background-color: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+    }
+    input:focus {
+      outline: none;
+      ring: 2px solid var(--cor-primaria);
+    }
+  </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="font-sans">
   <!-- Cabeçalho -->
-  <header class="bg-red-600 text-white text-center py-6">
+  <header class="text-white text-center py-6" style="background-color: var(--cor-primaria);">
     <img id="logo" src="" alt="Logo La Casa de Pizza's" class="mx-auto h-32 mb-4">
-    <h1 class="text-4xl font-bold">La Casa de Pizza's</h1>
+    <h1 class="text-4xl font-bold" id="nome-pizzaria"></h1>
     <p class="mt-2 text-lg">As melhores pizzas da cidade!</p>
   </header>
 
   <!-- Cardápio -->
-  <section id="cardapio" class="max-w-4xl mx-auto my-8 p-4">
+  <section id="cardapio" class="max-w-5xl mx-auto my-8 p-4">
     <h2 class="text-3xl font-semibold text-center mb-6">Nosso Cardápio</h2>
-    <div id="cardapio-lista" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+    <div id="cardapio-lista" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
   </section>
 
   <!-- Formulário de Pedido -->
-  <section id="pedido" class="max-w-4xl mx-auto my-8 p-4 bg-white rounded-lg shadow">
+  <section id="pedido" class="max-w-4xl mx-auto my-8 p-6 bg-white rounded-lg shadow-lg">
     <h2 class="text-3xl font-semibold text-center mb-6">Faça Seu Pedido</h2>
     <div class="space-y-4">
       <div>
         <label class="block text-lg font-medium">Nome</label>
-        <input type="text" id="nome" class="w-full p-2 border rounded" required>
+        <input type="text" id="nome" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria);" required>
       </div>
       <div>
         <label class="block text-lg font-medium">Endereço</label>
-        <input type="text" id="endereco" class="w-full p-2 border rounded" required>
+        <input type="text" id="endereco" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria);" required>
       </div>
       <div>
         <label class="block text-lg font-medium">Total</label>
-        <input type="text" id="total" class="w-full p-2 border rounded" readonly value="R$ 0,00">
+        <input type="text" id="total" class="w-full p-3 border rounded-lg bg-gray-100" readonly value="R$ 0,00">
       </div>
-      <button onclick="enviarPedido()" class="w-full bg-red-600 text-white p-3 rounded hover:bg-red-700">Enviar Pedido via WhatsApp</button>
+      <button onclick="enviarPedido()" class="w-full custom-btn text-white font-semibold" style="background-color: var(--cor-primaria);">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+          <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+        </svg>
+        Enviar Pedido via WhatsApp
+      </button>
     </div>
   </section>
 
   <!-- Rodapé -->
   <footer class="bg-gray-800 text-white text-center py-4">
-    <p>© 2025 La Casa de Pizza's. Todos os direitos reservados.</p>
-    <p>Contato: (11) 99999-9999</p>
+    <p>© 2025 <span id="nome-pizzaria-footer"></span>. Todos os direitos reservados.</p>
+    <p>Contato: <span id="contato-footer"></span></p>
   </footer>
 
   <script>
-    // Variável para verificar se o config foi carregado
-    let configLoaded = false;
+    // Variáveis CSS
+    document.documentElement.style.setProperty('--cor-primaria', config.corPrimaria);
+    document.documentElement.style.setProperty('--cor-secundaria', config.corSecundaria);
+    document.documentElement.style.setProperty('--cor-fundo', config.corFundo);
 
-    // Função chamada quando config.js é carregado
+    // Configurações dinâmicas
+    let configLoaded = false;
     function onConfigLoaded() {
       configLoaded = true;
+      document.getElementById('page-title').textContent = config.nomePizzaria;
+      document.getElementById('logo').src = config.logoUrl;
+      document.getElementById('nome-pizzaria').textContent = config.nomePizzaria;
+      document.getElementById('nome-pizzaria-footer').textContent = config.nomePizzaria;
+      document.getElementById('contato-footer').textContent = config.contatoFooter;
       initializeApp();
     }
 
-    // Aguarda o DOM carregar e verifica se config.js foi carregado
+    // Aguarda o DOM carregar
     document.addEventListener('DOMContentLoaded', () => {
       if (configLoaded) {
         initializeApp();
       } else {
-        // Se o config.js ainda não carregou, aguarda um pouco e tenta novamente
         setTimeout(() => {
           if (typeof config === 'undefined') {
             console.error('Erro: config.js não foi carregado corretamente.');
             alert('Erro ao carregar configurações. Verifique o arquivo config.js.');
           } else {
-            initializeApp();
+            onConfigLoaded();
           }
-        }, 1000); // Aguarda 1 segundo
+        }, 1000);
       }
     });
 
     // Função principal para inicializar o app
     function initializeApp() {
-      // Configurar a logo
-      document.getElementById('logo').src = config.logoUrl;
-
-      // Inicializar Firebase com sintaxe modular
-      let db;
-      try {
-        const app = window.firebaseApp.initializeApp(config.firebaseConfig);
-        db = window.firebaseApp.getFirestore(app);
-      } catch (error) {
-        console.error('Erro ao inicializar Firebase:', error);
-        alert('Erro ao conectar com o Firebase. Verifique as credenciais.');
-        return;
-      }
-
-      // Carregar cardápio
+      // Carregar cardápio do Google Sheets
       async function carregarCardapio() {
         const cardapioLista = document.getElementById('cardapio-lista');
         cardapioLista.innerHTML = '';
         try {
-          const snapshot = await window.firebaseApp.getDocs(window.firebaseApp.collection(db, 'cardapio'));
-          if (snapshot.empty) {
-            cardapioLista.innerHTML = '<p class="text-center text-gray-600">Nenhuma pizza cadastrada.</p>';
+          const response = await fetch(`${config.googleSheetsApiUrl}?method=get&sheet=Cardapio`);
+          const pizzas = await response.json();
+          if (!pizzas || pizzas.length === 0) {
+            cardapioLista.innerHTML = '<p class="text-center text-gray-600 col-span-full">Nenhuma pizza cadastrada.</p>';
             return;
           }
-          snapshot.forEach(doc => {
-            const pizza = doc.data();
+          pizzas.forEach(pizza => {
             const div = document.createElement('div');
-            div.className = 'bg-white p-4 rounded-lg shadow';
+            div.className = 'card';
             div.innerHTML = `
-              <h3 class="text-xl font-bold">${pizza.nome}</h3>
-              <p class="text-gray-600">${pizza.descricao}</p>
-              <p class="text-lg font-semibold mt-2">R$ ${pizza.preco.toFixed(2)}</p>
-              <input type="number" min="0" value="0" class="quantidade w-16 p-1 border rounded mt-2" data-id="${doc.id}" data-preco="${pizza.preco}">
+              ${pizza.Imagem ? `<img src="${pizza.Imagem}" alt="${pizza.Nome}" class="pizza-img mb-4">` : ''}
+              <h3 class="text-xl font-bold">${pizza.Nome}</h3>
+              <p class="text-gray-600">${pizza.Descricao}</p>
+              <p class="text-lg font-semibold mt-2">R$ ${parseFloat(pizza.Preco).toFixed(2)}</p>
+              <input type="number" min="0" value="0" class="quantidade w-16 p-2 border rounded-lg mt-2 focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria);" data-id="${pizza.ID}" data-preco="${pizza.Preco}">
             `;
             cardapioLista.appendChild(div);
           });
@@ -165,7 +193,7 @@
           });
         } catch (error) {
           console.error('Erro ao carregar cardápio:', error);
-          alert('Erro ao carregar o cardápio. Verifique o Firebase.');
+          alert('Erro ao carregar o cardápio. Verifique a conexão com o Google Sheets.');
         }
       }
 
@@ -191,7 +219,7 @@
           return;
         }
 
-        let mensagem = `Novo Pedido - La Casa de Pizza's\nNome: ${nome}\nEndereço: ${endereco}\nItens:\n`;
+        let mensagem = `Novo Pedido - ${config.nomePizzaria}\nNome: ${nome}\nEndereço: ${endereco}\nItens:\n`;
         const itens = [];
         document.querySelectorAll('.quantidade').forEach(input => {
           const quantidade = parseInt(input.value) || 0;
@@ -208,18 +236,24 @@
         mensagem += `Total: ${total}`;
 
         try {
-          await window.firebaseApp.addDoc(window.firebaseApp.collection(db, 'pedidos'), {
-            nome,
-            endereco,
-            itens,
-            total: parseFloat(total.replace('R$ ', '')),
-            data: new Date().toISOString()
+          const pedido = {
+            ID: `pedido_${Date.now()}`,
+            Nome: nome,
+            Endereco: endereco,
+            Itens: JSON.stringify(itens),
+            Total: parseFloat(total.replace('R$ ', '')),
+            Data: new Date().toISOString()
+          };
+          await fetch(`${config.googleSheetsApiUrl}?method=add&sheet=Pedidos`, {
+            method: 'POST',
+            body: JSON.stringify(pedido),
+            headers: { 'Content-Type': 'application/json' }
           });
           const url = `https://wa.me/${config.numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
           window.open(url, '_blank');
         } catch (error) {
           console.error('Erro ao enviar pedido:', error);
-          alert('Erro ao enviar o pedido. Verifique o Firebase.');
+          alert('Erro ao enviar o pedido. Verifique a conexão com o Google Sheets.');
         }
       };
 

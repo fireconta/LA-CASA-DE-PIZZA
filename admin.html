@@ -42,95 +42,135 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel Administrador - La Casa de Pizza's</title>
+  <title id="page-title"></title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-    import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-
-    // Exportar funções para uso no script principal
-    window.firebaseApp = { initializeApp, getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc };
-  </script>
-  <!-- Carregar config.js primeiro -->
   <script src="config.js" defer onload="onConfigLoaded()"></script>
+  <style>
+    body {
+      background-color: var(--cor-fundo);
+    }
+    .custom-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    .custom-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .pizza-img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .preview-img {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    .card {
+      background-color: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+    }
+  </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="font-sans">
   <!-- Autenticação -->
-  <section id="login" class="max-w-md mx-auto my-8 p-4 bg-white rounded-lg shadow">
+  <section id="login" class="max-w-md mx-auto my-8 p-6 bg-white rounded-lg shadow-lg">
     <img id="logo" src="" alt="Logo La Casa de Pizza's" class="mx-auto h-24 mb-4">
-    <h2 class="text-2xl font-semibold text-center mb-4">Acesso Administrador - La Casa de Pizza's</h2>
-    <input type="password" id="senha" class="w-full p-2 border rounded mb-4" placeholder="Digite a senha">
-    <button onclick="logar()" class="w-full bg-red-600 text-white p-2 rounded hover:bg-red-700">Entrar</button>
+    <h2 class="text-2xl font-semibold text-center mb-4">Acesso Administrador - <span id="nome-pizzaria"></span></h2>
+    <input type="password" id="senha" class="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria);" placeholder="Digite a senha">
+    <button onclick="logar()" class="w-full custom-btn text-white font-semibold" style="background-color: var(--cor-primaria);">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+      </svg>
+      Entrar
+    </button>
   </section>
 
   <!-- Painel (oculto até login) -->
-  <section id="painel" class="max-w-4xl mx-auto my-8 p-4 bg-white rounded-lg shadow hidden">
-    <h2 class="text-3xl font-semibold text-center mb-6">Painel Administrador - La Casa de Pizza's</h2>
+  <section id="painel" class="max-w-5xl mx-auto my-8 p-6 hidden">
+    <h2 class="text-3xl font-semibold text-center mb-8">Painel Administrador - <span id="nome-pizzaria-painel"></span></h2>
     
     <!-- Editar Cardápio -->
-    <div class="mb-8">
-      <h3 class="text-2xl font-medium mb-4">Gerenciar Cardápio</h3>
-      <div class="space-y-4">
-        <input type="text" id="nomePizza" class="w-full p-2 border rounded" placeholder="Nome da pizza">
-        <input type="text" id="descricaoPizza" class="w-full p-2 border rounded" placeholder="Descrição">
-        <input type="number" id="precoPizza" class="w-full p-2 border rounded" placeholder="Preço (R$)" step="0.01">
-        <button onclick="adicionarPizza()" class="bg-green-600 text-white p-2 rounded hover:bg-green-700">Adicionar Pizza</button>
+    <div class="mb-12">
+      <h3 class="text-2xl font-medium mb-6 text-center">Gerenciar Cardápio</h3>
+      <div class="card mb-6">
+        <div class="space-y-4">
+          <input type="text" id="nomePizza" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria);" placeholder="Nome da pizza">
+          <textarea id="descricaoPizza" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria);" placeholder="Descrição"></textarea>
+          <input type="number" id="precoPizza" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria);" placeholder="Preço (R$)" step="0.01">
+          <div>
+            <label class="block text-lg font-medium mb-2">Imagem da Pizza</label>
+            <input type="file" id="imagemPizza" accept="image/*" class="w-full p-2 border rounded-lg">
+            <img id="previewImagem" class="preview-img hidden" alt="Pré-visualização">
+          </div>
+          <button onclick="adicionarPizza()" class="w-full custom-btn text-white font-semibold" style="background-color: var(--cor-primaria);">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            Adicionar Pizza
+          </button>
+        </div>
       </div>
-      <div id="cardapio-admin" class="mt-4 space-y-4"></div>
+      <div id="cardapio-admin" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </div>
 
     <!-- Vendas -->
     <div>
-      <h3 class="text-2xl font-medium mb-4">Vendas</h3>
-      <p id="total-vendas" class="text-lg font-semibold"></p>
-      <div id="lista-pedidos" class="mt-4 space-y-4"></div>
+      <h3 class="text-2xl font-medium mb-6 text-center">Vendas</h3>
+      <p id="total-vendas" class="text-lg font-semibold text-center mb-6"></p>
+      <div id="lista-pedidos" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
     </div>
   </section>
 
   <script>
-    // Variável para verificar se o config foi carregado
-    let configLoaded = false;
+    // Variáveis CSS
+    document.documentElement.style.setProperty('--cor-primaria', config.corPrimaria);
+    document.documentElement.style.setProperty('--cor-secundaria', config.corSecundaria);
+    document.documentElement.style.setProperty('--cor-fundo', config.corFundo);
 
-    // Função chamada quando config.js é carregado
+    // Configurações dinâmicas
+    let configLoaded = false;
     function onConfigLoaded() {
       configLoaded = true;
+      document.getElementById('page-title').textContent = `Painel Administrador - ${config.nomePizzaria}`;
+      document.getElementById('logo').src = config.logoUrl;
+      document.getElementById('nome-pizzaria').textContent = config.nomePizzaria;
+      document.getElementById('nome-pizzaria-painel').textContent = config.nomePizzaria;
       initializeApp();
     }
 
-    // Aguarda o DOM carregar e verifica se config.js foi carregado
+    // Aguarda o DOM carregar
     document.addEventListener('DOMContentLoaded', () => {
       if (configLoaded) {
         initializeApp();
       } else {
-        // Se o config.js ainda não carregou, aguarda um pouco e tenta novamente
         setTimeout(() => {
           if (typeof config === 'undefined') {
             console.error('Erro: config.js não foi carregado corretamente.');
             alert('Erro ao carregar configurações. Verifique o arquivo config.js.');
           } else {
-            initializeApp();
+            onConfigLoaded();
           }
-        }, 1000); // Aguarda 1 segundo
+        }, 1000);
       }
     });
 
     // Função principal para inicializar o app
     function initializeApp() {
-      // Configurar a logo
-      document.getElementById('logo').src = config.logoUrl;
-
-      // Inicializar Firebase com sintaxe modular
-      let db;
-      try {
-        const app = window.firebaseApp.initializeApp(config.firebaseConfig);
-        db = window.firebaseApp.getFirestore(app);
-      } catch (error) {
-        console.error('Erro ao inicializar Firebase:', error);
-        alert('Erro ao conectar com o Firebase. Verifique as credenciais.');
-        return;
-      }
-
       // Autenticação simples
       window.logar = function() {
         const senha = document.getElementById('senha').value;
@@ -154,43 +194,72 @@
         }
       };
 
+      // Pré-visualizar imagem
+      document.getElementById('imagemPizza').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const preview = document.getElementById('previewImagem');
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
       // Carregar cardápio no painel
       async function carregarCardapioAdmin() {
         const cardapioAdmin = document.getElementById('cardapio-admin');
         cardapioAdmin.innerHTML = '';
         try {
-          const snapshot = await window.firebaseApp.getDocs(window.firebaseApp.collection(db, 'cardapio'));
-          if (snapshot.empty) {
-            cardapioAdmin.innerHTML = '<p class="text-center text-gray-600">Nenhuma pizza cadastrada.</p>';
+          const response = await fetch(`${config.googleSheetsApiUrl}?method=get&sheet=Cardapio`);
+          const pizzas = await response.json();
+          if (!pizzas || pizzas.length === 0) {
+            cardapioAdmin.innerHTML = '<p class="text-center text-gray-600 col-span-full">Nenhuma pizza cadastrada.</p>';
             return;
           }
-          snapshot.forEach(doc => {
-            const pizza = doc.data();
+          pizzas.forEach(pizza => {
             const div = document.createElement('div');
-            div.className = 'flex justify-between items-center bg-gray-50 p-2 rounded';
+            div.className = 'card';
             div.innerHTML = `
+              ${pizza.Imagem ? `<img src="${pizza.Imagem}" alt="${pizza.Nome}" class="pizza-img mb-4">` : ''}
               <div>
-                <h4 class="font-bold">${pizza.nome}</h4>
-                <p>${pizza.descricao} - R$ ${pizza.preco.toFixed(2)}</p>
+                <h4 class="text-lg font-bold">${pizza.Nome}</h4>
+                <p class="text-gray-600">${pizza.Descricao}</p>
+                <p class="text-md font-semibold mt-2">R$ ${parseFloat(pizza.Preco).toFixed(2)}</p>
               </div>
-              <div>
-                <button onclick="editarPizza('${doc.id}', '${pizza.nome}', '${pizza.descricao}', ${pizza.preco})" class="bg-yellow-500 text-white p-1 rounded mr-2">Editar</button>
-                <button onclick="excluirPizza('${doc.id}')" class="bg-red-500 text-white p-1 rounded">Excluir</button>
+              <div class="flex justify-end gap-2 mt-4">
+                <button onclick="editarPizza('${pizza.ID}', '${pizza.Nome}', '${pizza.Descricao}', ${pizza.Preco}, '${pizza.Imagem || ''}')" class="custom-btn text-white" style="background-color: var(--cor-secundaria);">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                  </svg>
+                  Editar
+                </button>
+                <button onclick="excluirPizza('${pizza.ID}')" class="custom-btn bg-red-500 text-white">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                  Excluir
+                </button>
               </div>
             `;
             cardapioAdmin.appendChild(div);
           });
         } catch (error) {
           console.error('Erro ao carregar cardápio:', error);
-          alert('Erro ao carregar o cardápio. Verifique o Firebase.');
+          alert('Erro ao carregar o cardápio. Verifique a conexão com o Google Sheets.');
         }
       }
 
-      // Adicionar pizza
+      // Adicionar ou atualizar pizza
       window.adicionarPizza = async function() {
         const nome = document.getElementById('nomePizza').value;
         const descricao = document.getElementById('descricaoPizza').value;
         const preco = parseFloat(document.getElementById('precoPizza').value);
+        const imagemInput = document.getElementById('imagemPizza');
+        const file = imagemInput.files[0];
+        let imagemUrl = document.getElementById('previewImagem').src;
 
         if (!nome || !descricao || !preco) {
           alert('Preencha todos os campos!');
@@ -198,44 +267,123 @@
         }
 
         try {
-          await window.firebaseApp.addDoc(window.firebaseApp.collection(db, 'cardapio'), {
-            nome,
-            descricao,
-            preco
+          // Fazer upload da imagem, se houver
+          if (file) {
+            const reader = new FileReader();
+            const imageData = await new Promise((resolve) => {
+              reader.onload = () => resolve(reader.result);
+              reader.readAsDataURL(file);
+            });
+            const response = await fetch(`${config.googleSheetsApiUrl}?method=uploadImage`, {
+              method: 'POST',
+              body: JSON.stringify({ image: imageData }),
+              headers: { 'Content-Type': 'application/json' }
+            });
+            const result = await response.json();
+            if (result.imageUrl) {
+              imagemUrl = result.imageUrl;
+            } else {
+              throw new Error('Erro ao fazer upload da imagem.');
+            }
+          }
+
+          const pizza = {
+            ID: `pizza_${Date.now()}`,
+            Nome: nome,
+            Descricao: descricao,
+            Preco: preco,
+            Imagem: imagemUrl || ''
+          };
+          await fetch(`${config.googleSheetsApiUrl}?method=add&sheet=Cardapio`, {
+            method: 'POST',
+            body: JSON.stringify(pizza),
+            headers: { 'Content-Type': 'application/json' }
           });
           carregarCardapioAdmin();
-          document.getElementById('nomePizza').value = '';
-          document.getElementById('descricaoPizza').value = '';
-          document.getElementById('precoPizza').value = '';
+          resetForm();
         } catch (error) {
           console.error('Erro ao adicionar pizza:', error);
-          alert('Erro ao adicionar pizza. Verifique o Firebase.');
+          alert('Erro ao adicionar pizza. Verifique a conexão com o Google Sheets.');
         }
       };
 
       // Editar pizza
-      window.editarPizza = function(id, nome, descricao, preco) {
+      window.editarPizza = function(id, nome, descricao, preco, imagem) {
         document.getElementById('nomePizza').value = nome;
         document.getElementById('descricaoPizza').value = descricao;
         document.getElementById('precoPizza').value = preco;
+        const preview = document.getElementById('previewImagem');
+        if (imagem) {
+          preview.src = imagem;
+          preview.classList.remove('hidden');
+        } else {
+          preview.classList.add('hidden');
+        }
         const btnAdicionar = document.querySelector('button[onclick="adicionarPizza()"]');
-        btnAdicionar.textContent = 'Atualizar Pizza';
+        btnAdicionar.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" />
+          </svg>
+          Atualizar Pizza
+        `;
         btnAdicionar.onclick = async () => {
+          const nome = document.getElementById('nomePizza').value;
+          const descricao = document.getElementById('descricaoPizza').value;
+          const preco = parseFloat(document.getElementById('precoPizza').value);
+          const imagemInput = document.getElementById('imagemPizza');
+          const file = imagemInput.files[0];
+          let imagemUrl = document.getElementById('previewImagem').src;
+
+          if (!nome || !descricao || !preco) {
+            alert('Preencha todos os campos!');
+            return;
+          }
+
           try {
-            await window.firebaseApp.updateDoc(window.firebaseApp.doc(db, 'cardapio', id), {
-              nome: document.getElementById('nomePizza').value,
-              descricao: document.getElementById('descricaoPizza').value,
-              preco: parseFloat(document.getElementById('precoPizza').value)
+            // Fazer upload da nova imagem, se houver
+            if (file) {
+              const reader = new FileReader();
+              const imageData = await new Promise((resolve) => {
+                reader.onload = () => resolve(reader.result);
+                reader.readAsDataURL(file);
+              });
+              const response = await fetch(`${config.googleSheetsApiUrl}?method=uploadImage`, {
+                method: 'POST',
+                body: JSON.stringify({ image: imageData }),
+                headers: { 'Content-Type': 'application/json' }
+              });
+              const result = await response.json();
+              if (result.imageUrl) {
+                imagemUrl = result.imageUrl;
+              } else {
+                throw new Error('Erro ao fazer upload da imagem.');
+              }
+            }
+
+            const pizza = {
+              ID: id,
+              Nome: nome,
+              Descricao: descricao,
+              Preco: preco,
+              Imagem: imagemUrl || ''
+            };
+            await fetch(`${config.googleSheetsApiUrl}?method=update&sheet=Cardapio`, {
+              method: 'POST',
+              body: JSON.stringify(pizza),
+              headers: { 'Content-Type': 'application/json' }
             });
             carregarCardapioAdmin();
-            document.getElementById('nomePizza').value = '';
-            document.getElementById('descricaoPizza').value = '';
-            document.getElementById('precoPizza').value = '';
-            btnAdicionar.textContent = 'Adicionar Pizza';
+            resetForm();
+            btnAdicionar.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+              </svg>
+              Adicionar Pizza
+            `;
             btnAdicionar.onclick = adicionarPizza;
           } catch (error) {
             console.error('Erro ao atualizar pizza:', error);
-            alert('Erro ao atualizar pizza. Verifique o Firebase.');
+            alert('Erro ao atualizar pizza. Verifique a conexão com o Google Sheets.');
           }
         };
       };
@@ -244,11 +392,11 @@
       window.excluirPizza = async function(id) {
         if (confirm('Tem certeza que deseja excluir esta pizza?')) {
           try {
-            await window.firebaseApp.deleteDoc(window.firebaseApp.doc(db, 'cardapio', id));
+            await fetch(`${config.googleSheetsApiUrl}?method=delete&sheet=Cardapio&id=${id}`);
             carregarCardapioAdmin();
           } catch (error) {
             console.error('Erro ao excluir pizza:', error);
-            alert('Erro ao excluir pizza. Verifique o Firebase.');
+            alert('Erro ao excluir pizza. Verifique a conexão com o Google Sheets.');
           }
         }
       };
@@ -261,26 +409,27 @@
         let total = 0;
         let contador = 0;
         try {
-          const snapshot = await window.firebaseApp.getDocs(window.firebaseApp.collection(db, 'pedidos'));
-          if (snapshot.empty) {
-            listaPedidos.innerHTML = '<p class="text-center text-gray-600">Nenhum pedido registrado.</p>';
+          const response = await fetch(`${config.googleSheetsApiUrl}?method=get&sheet=Pedidos`);
+          const pedidos = await response.json();
+          if (!pedidos || pedidos.length === 0) {
+            listaPedidos.innerHTML = '<p class="text-center text-gray-600 col-span-full">Nenhum pedido registrado.</p>';
           } else {
-            snapshot.forEach(doc => {
-              const pedido = doc.data();
-              total += pedido.total;
+            pedidos.forEach(pedido => {
+              total += pedido.Total;
               contador++;
               const div = document.createElement('div');
-              div.className = 'bg-gray-50 p-2 rounded';
-              let itens = '';
-              pedido.itens.forEach(item => {
-                itens += `${item.quantidade}x ${item.nome} - R$ ${(item.quantidade * item.preco).toFixed(2)}<br>`;
+              div.className = 'card';
+              const itens = JSON.parse(pedido.Itens);
+              let itensHtml = '';
+              itens.forEach(item => {
+                itensHtml += `${item.quantidade}x ${item.nome} - R$ ${(item.quantidade * item.preco).toFixed(2)}<br>`;
               });
               div.innerHTML = `
-                <p><strong>Cliente:</strong> ${pedido.nome}</p>
-                <p><strong>Endereço:</strong> ${pedido.endereco}</p>
-                <p><strong>Itens:</strong><br>${itens}</p>
-                <p><strong>Total:</strong> R$ ${pedido.total.toFixed(2)}</p>
-                <p><strong>Data:</strong> ${new Date(pedido.data).toLocaleString('pt-BR')}</p>
+                <p><strong>Cliente:</strong> ${pedido.Nome}</p>
+                <p><strong>Endereço:</strong> ${pedido.Endereco}</p>
+                <p><strong>Itens:</strong><br>${itensHtml}</p>
+                <p><strong>Total:</strong> R$ ${pedido.Total.toFixed(2)}</p>
+                <p><strong>Data:</strong> ${new Date(pedido.Data).toLocaleString('pt-BR')}</p>
               `;
               listaPedidos.appendChild(div);
             });
@@ -288,8 +437,19 @@
           totalVendas.textContent = `Total de Vendas: ${contador} pedidos - R$ ${total.toFixed(2)}`;
         } catch (error) {
           console.error('Erro ao carregar vendas:', error);
-          alert('Erro ao carregar vendas. Verifique o Firebase.');
+          alert('Erro ao carregar vendas. Verifique a conexão com o Google Sheets.');
         }
+      }
+
+      // Resetar formulário
+      function resetForm() {
+        document.getElementById('nomePizza').value = '';
+        document.getElementById('descricaoPizza').value = '';
+        document.getElementById('precoPizza').value = '';
+        document.getElementById('imagemPizza').value = '';
+        const preview = document.getElementById('previewImagem');
+        preview.src = '';
+        preview.classList.add('hidden');
       }
     }
   </script>
