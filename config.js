@@ -4,7 +4,7 @@ const config = {
   adminPassword: "senha123",
 
   // URL da API (simulada, substitua pela URL real do Google Sheets ou outra API)
-  googleSheetsApiUrl: "https://api.exemplo.com/sheets",
+  googleSheetsApiUrl: "https://docs.google.com/spreadsheets/d/1i99w6-PZ0Q9uwI0zL_DhsI_SUX0tUQuuQ2e5KsNtU_g/edit?usp=drivesdk",
 
   // Informações da pizzaria
   nomePizzaria: "La Casa de Pizzas",
