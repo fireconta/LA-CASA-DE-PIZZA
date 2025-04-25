@@ -126,27 +126,115 @@
       max-width: 600px;
       width: 90%;
     }
+    /* Estilos para a nova interface de login */
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--cor-primaria, #FF4500) 0%, var(--cor-secundaria, #FFA500) 100%);
+      padding: 1rem;
+      animation: fadeIn 1s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .login-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .login-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+    .input-wrapper {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    .input-wrapper input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 50px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    .input-wrapper input:focus {
+      border-color: var(--cor-primaria, #FF4500);
+      box-shadow: 0 0 0 3px rgba(255, 69, 0, 0.1);
+      outline: none;
+    }
+    .input-wrapper svg {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      transition: color 0.3s ease;
+    }
+    .input-wrapper input:focus + svg {
+      color: var(--cor-primaria, #FF4500);
+    }
+    .error-message {
+      background: #fee2e2;
+      color: #dc2626;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      display: none;
+      animation: slideDown 0.3s ease;
+    }
+    @keyframes slideDown {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .login-btn:hover svg {
+      transform: translateX(5px);
+    }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Autenticação -->
-  <section id="login" class="max-w-md mx-auto my-16 p-8 bg-white rounded-2xl shadow-xl">
-    <img id="logo" src="" alt="Logo La Casa de Pizzas" class="mx-auto h-24 mb-6">
-    <h2 class="text-3xl font-bold text-center mb-6">Acesso Administrador - <span id="nome-pizzaria"></span></h2>
-    <div class="space-y-4">
-      <input type="text" id="username" class="w-full p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" placeholder="Usuário" aria-label="Nome de usuário">
-      <input type="password" id="password" class="w-full p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" placeholder="Senha" aria-label="Senha">
-      <button onclick="logar()" class="w-full custom-btn bg-[var(--cor-primaria)] text-white font-semibold" aria-label="Entrar no painel de administração">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-        </svg>
-        Entrar
-      </button>
+  <!-- Autenticação (Nova Interface) -->
+  <section id="login" class="login-container">
+    <div class="login-card">
+      <img id="logo" src="" alt="Logo La Casa de Pizzas" class="mx-auto h-20 mb-6">
+      <h2 class="text-2xl font-bold text-center mb-4 text-[var(--cor-texto)]">
+        Painel Administrador - <span id="nome-pizzaria"></span>
+      </h2>
+      <p class="text-center text-gray-600 mb-6">Faça login para gerenciar sua pizzaria</p>
+      <div id="error-message" class="error-message"></div>
+      <div class="space-y-4">
+        <div class="input-wrapper">
+          <input type="text" id="username" placeholder="Usuário" aria-label="Nome de usuário">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="input-wrapper">
+          <input type="password" id="password" placeholder="Senha" aria-label="Senha">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <button onclick="logar()" class="w-full custom-btn login-btn bg-[var(--cor-primaria)] text-white font-semibold" aria-label="Entrar no painel de administração">
+          Entrar
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
     </div>
   </section>
 
-  <!-- Painel -->
+  <!-- Painel (Mantido Inalterado) -->
   <section id="painel" class="max-w-7xl mx-auto my-8 p-6 hidden">
     <div class="flex justify-between items-center mb-8">
       <h2 class="text-3xl font-bold">Painel Administrador - <span id="nome-pizzaria-painel"></span></h2>
@@ -447,12 +535,19 @@
     window.logar = async function() {
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value.trim();
+      const errorMessage = document.getElementById('error-message');
+
+      errorMessage.style.display = 'none';
+      errorMessage.textContent = '';
+
       if (!username || !password) {
-        mostrarNotificacao('Erro', 'Preencha usuário e senha (logar).');
+        errorMessage.textContent = 'Preencha usuário e senha.';
+        errorMessage.style.display = 'block';
         return;
       }
       if (typeof config === 'undefined') {
-        mostrarNotificacao('Erro', 'Configurações não carregadas. Verifique o arquivo config.js (logar).');
+        errorMessage.textContent = 'Configurações não carregadas. Verifique o arquivo config.js.';
+        errorMessage.style.display = 'block';
         return;
       }
       if (username === config.adminUsername && password === config.adminPassword) {
@@ -462,7 +557,8 @@
         iniciarSessao();
         await carregarDadosIniciais();
       } else {
-        mostrarNotificacao('Erro', 'Usuário ou senha incorretos (logar).');
+        errorMessage.textContent = 'Usuário ou senha incorretos.';
+        errorMessage.style.display = 'block';
       }
     };
 
