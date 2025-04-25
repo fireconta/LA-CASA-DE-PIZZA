@@ -41,7 +41,14 @@ googleSheetsApiUrl: "https://script.google.com/macros/s/<SEU_ID>/exec", // Subst
   },
   categoriasPizzas: ["Salgadas", "Doces"], // Para filtro no cardápio
   ultimaAtualizacao: "2025-04-24T00:00:00Z" // Para controle de cache
-  
-
+  },
+// Outras configurações
+  categoriasPizzas: [
+    "Salgadas",
+    "Doces",
+    "Vegetarianas",
+    "Especiais"
+  ],
+  imagemPadraoPizza: "https://via.placeholder.com/300x150.png?text=Pizza+Padrão"
 
 };
