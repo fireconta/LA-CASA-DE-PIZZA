@@ -48,50 +48,51 @@
   <script src="config.js" defer onload="onConfigLoaded()"></script>
   <style>
     body {
-      background-color: var(--cor-fundo, #FFF5EE);
-      color: var(--cor-texto, #333333);
+      background-color: var(--cor-fundo, #FFF8E7);
+      color: var(--cor-texto, #2D2D2D);
+      font-family: 'Poppins', sans-serif;
     }
     .custom-btn {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 16px;
-      border-radius: 8px;
+      padding: 10px 20px;
+      border-radius: 25px;
       transition: all 0.3s ease;
     }
     .custom-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .card {
+      background-color: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
     }
     .pizza-img {
       width: 100%;
       height: 150px;
       object-fit: cover;
-      border-radius: 8px;
+      border-radius: 10px;
     }
     .preview-img {
       width: 100%;
       max-height: 200px;
       object-fit: cover;
-      border-radius: 8px;
+      border-radius: 10px;
       margin-top: 10px;
-    }
-    .card {
-      background-color: white;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s;
-    }
-    .card:hover {
-      transform: translateY(-3px);
     }
     .spinner {
       border: 4px solid rgba(0, 0, 0, 0.1);
-      border-left: 4px solid var(--cor-primaria, #FF6347);
+      border-left: 4px solid var(--cor-primaria, #FF4500);
       border-radius: 50%;
-      width: 30px;
-      height: 30px;
+      width: 40px;
+      height: 40px;
       animation: spin 1s linear infinite;
       margin: 0 auto;
     }
@@ -99,19 +100,20 @@
       to { transform: rotate(360deg); }
     }
     .tab {
-      padding: 10px 20px;
-      border-bottom: 2px solid transparent;
+      padding: 12px 24px;
+      border-bottom: 3px solid transparent;
       cursor: pointer;
       transition: all 0.3s ease;
     }
     .tab.active {
-      border-bottom: 2px solid var(--cor-primaria, #FF6347);
+      border-bottom: 3px solid var(--cor-primaria, #FF4500);
       font-weight: bold;
+      color: var(--cor-primaria, #FF4500);
     }
     .modal {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.7);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -120,21 +122,22 @@
     .modal-content {
       background: white;
       padding: 20px;
-      border-radius: 8px;
-      max-width: 500px;
+      border-radius: 15px;
+      max-width: 600px;
       width: 90%;
     }
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="font-sans">
+<body>
   <!-- Autenticação -->
-  <section id="login" class="max-w-md mx-auto my-8 p-6 bg-white rounded-lg shadow-lg">
-    <img id="logo" src="" alt="Logo LOVEzz" class="mx-auto h-24 mb-4">
-    <h2 class="text-2xl font-semibold text-center mb-4">Acesso Administrador - <span id="nome-pizzaria"></span></h2>
+  <section id="login" class="max-w-md mx-auto my-16 p-8 bg-white rounded-2xl shadow-xl">
+    <img id="logo" src="" alt="Logo La Casa de Pizzas" class="mx-auto h-24 mb-6">
+    <h2 class="text-3xl font-bold text-center mb-6">Acesso Administrador - <span id="nome-pizzaria"></span></h2>
     <div class="space-y-4">
-      <input type="text" id="username" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" placeholder="Usuário" aria-label="Nome de usuário">
-      <input type="password" id="password" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" placeholder="Senha" aria-label="Senha">
-      <button onclick="logar()" class="w-full custom-btn text-white font-semibold" style="background-color: var(--cor-primaria, #FF6347);" aria-label="Entrar no painel de administração">
+      <input type="text" id="username" class="w-full p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" placeholder="Usuário" aria-label="Nome de usuário">
+      <input type="password" id="password" class="w-full p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" placeholder="Senha" aria-label="Senha">
+      <button onclick="logar()" class="w-full custom-btn bg-[var(--cor-primaria)] text-white font-semibold" aria-label="Entrar no painel de administração">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
         </svg>
@@ -143,10 +146,10 @@
     </div>
   </section>
 
-  <!-- Painel (oculto até login) -->
-  <section id="painel" class="max-w-6xl mx-auto my-8 p-6 hidden">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-3xl font-semibold">Painel Administrador - <span id="nome-pizzaria-painel"></span></h2>
+  <!-- Painel -->
+  <section id="painel" class="max-w-7xl mx-auto my-8 p-6 hidden">
+    <div class="flex justify-between items-center mb-8">
+      <h2 class="text-3xl font-bold">Painel Administrador - <span id="nome-pizzaria-painel"></span></h2>
       <button onclick="deslogar()" class="custom-btn bg-red-500 text-white" aria-label="Sair do painel de administração">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
@@ -154,24 +157,19 @@
         Sair
       </button>
     </div>
-    
+
     <!-- Abas -->
-    <div class="flex flex-wrap border-b mb-6">
+    <div class="flex flex-wrap border-b mb-8">
       <div class="tab active" onclick="mostrarTab('dashboard')" aria-label="Aba Dashboard">Dashboard</div>
       <div class="tab" onclick="mostrarTab('cardapio')" aria-label="Aba Cardápio">Cardápio</div>
       <div class="tab" onclick="mostrarTab('vendas')" aria-label="Aba Vendas">Vendas</div>
-      <div class="tab" onclick="mostrarTab('usuarios')" aria-label="Aba Usuários">Usuários</div>
-      <div class="tab" onclick="mostrarTab('cupons')" aria-label="Aba Cupons">Cupons</div>
-      <div class="tab" onclick="mostrarTab('personalizacoes')" aria-label="Aba Personalizações">Personalizações</div>
-      <div class="tab" onclick="mostrarTab('feedback')" aria-label="Aba Feedback">Feedback</div>
-      <div class="tab" onclick="mostrarTab('newsletter')" aria-label="Aba Newsletter">Newsletter</div>
-      <div class="tab" onclick="mostrarTab('logs')" aria-label="Aba Logs">Logs</div>
+      <div class="tab" onclick="mostrarTab('relatorios')" aria-label="Aba Relatórios">Relatórios</div>
     </div>
 
     <!-- Dashboard -->
     <div id="dashboard" class="tab-content">
-      <h3 class="text-2xl font-medium mb-6 text-center">Visão Geral</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <h3 class="text-3xl font-bold mb-8 text-center">Visão Geral</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="card">
           <p class="text-lg font-semibold">Total de Vendas</p>
           <p id="total-vendas-dash" class="text-2xl font-bold text-green-600"></p>
@@ -185,32 +183,32 @@
           <p id="pizza-mais-vendida" class="text-2xl font-bold text-purple-600"></p>
         </div>
       </div>
-      <canvas id="vendas-chart" class="max-w-full h-64" aria-label="Gráfico de vendas por dia"></canvas>
+      <canvas id="vendas-chart" class="max-w-full h-96" aria-label="Gráfico de vendas por dia"></canvas>
     </div>
 
-    <!-- Editar Cardápio -->
+    <!-- Cardápio -->
     <div id="cardapio" class="tab-content hidden">
-      <h3 class="text-2xl font-medium mb-6 text-center">Gerenciar Cardápio</h3>
-      <div class="flex flex-wrap gap-4 mb-6">
-        <input type="text" id="pesquisa-cardapio" class="p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" placeholder="Pesquisar pizzas..." aria-label="Pesquisar pizzas no cardápio">
-        <select id="filtro-categoria-cardapio" class="p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" aria-label="Filtrar pizzas por categoria">
+      <h3 class="text-3xl font-bold mb-8 text-center">Gerenciar Cardápio</h3>
+      <div class="flex flex-wrap gap-4 mb-8 justify-center">
+        <input type="text" id="pesquisa-cardapio" class="p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" placeholder="Pesquisar pizzas..." aria-label="Pesquisar pizzas no cardápio">
+        <select id="filtro-categoria-cardapio" class="p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" aria-label="Filtrar pizzas por categoria">
           <option value="">Todas as Categorias</option>
         </select>
-        <button onclick="exportarDados('Cardapio')" class="custom-btn text-white" style="background-color: var(--cor-primaria, #FF6347);" aria-label="Exportar cardápio como CSV">
+        <button onclick="exportarDados('Cardapio')" class="custom-btn bg-[var(--cor-primaria)] text-white" aria-label="Exportar cardápio como CSV">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
           </svg>
           Exportar Cardápio
         </button>
       </div>
-      <div class="card mb-6">
-        <h4 class="text-lg font-semibold mb-4">Adicionar/Editar Pizza</h4>
+      <div class="card mb-8">
+        <h4 class="text-xl font-semibold mb-4">Adicionar/Editar Pizza</h4>
         <div class="space-y-4">
           <input type="hidden" id="pizzaId">
-          <input type="text" id="nomePizza" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" placeholder="Nome da pizza" aria-label="Nome da pizza">
-          <textarea id="descricaoPizza" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" placeholder="Descrição" aria-label="Descrição da pizza"></textarea>
-          <input type="number" id="precoPizza" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" placeholder="Preço (R$)" step="0.01" aria-label="Preço da pizza">
-          <select id="categoriaPizza" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" aria-label="Categoria da pizza">
+          <input type="text" id="nomePizza" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" placeholder="Nome da pizza" aria-label="Nome da pizza">
+          <textarea id="descricaoPizza" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" placeholder="Descrição" aria-label="Descrição da pizza"></textarea>
+          <input type="number" id="precoPizza" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" placeholder="Preço (R$)" step="0.01" aria-label="Preço da pizza">
+          <select id="categoriaPizza" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" aria-label="Categoria da pizza">
             <option value="">Selecione a Categoria</option>
           </select>
           <div class="flex items-center">
@@ -228,7 +226,7 @@
               Remover Imagem
             </button>
           </div>
-          <button onclick="salvarPizza()" class="w-full custom-btn text-white font-semibold" style="background-color: var(--cor-primaria, #FF6347);" aria-label="Salvar pizza">
+          <button onclick="salvarPizza()" class="w-full custom-btn bg-[var(--cor-primaria)] text-white font-semibold" aria-label="Salvar pizza">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h-1v5.586l-1.293-1.293zM3 3a1 1 0 011-1h12a1 1 0 011 1v14a1 1 0 01-1 1H4a1 1 0 01-1-1V3zm2 2v10h10V5H5z" />
             </svg>
@@ -242,11 +240,11 @@
 
     <!-- Vendas -->
     <div id="vendas" class="tab-content hidden">
-      <h3 class="text-2xl font-medium mb-6 text-center">Gerenciar Vendas</h3>
-      <div class="flex flex-wrap gap-4 mb-6">
-        <input type="text" id="pesquisa-vendas" class="p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" placeholder="Pesquisar por cliente..." aria-label="Pesquisar vendas por cliente">
-        <input type="date" id="filtro-data-vendas" class="p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" aria-label="Filtrar vendas por data">
-        <button onclick="exportarDados('Pedidos')" class="custom-btn text-white" style="background-color: var(--cor-primaria, #FF6347);" aria-label="Exportar vendas como CSV">
+      <h3 class="text-3xl font-bold mb-8 text-center">Gerenciar Vendas</h3>
+      <div class="flex flex-wrap gap-4 mb-8 justify-center">
+        <input type="text" id="pesquisa-vendas" class="p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" placeholder="Pesquisar por cliente..." aria-label="Pesquisar vendas por cliente">
+        <input type="date" id="filtro-data-vendas" class="p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" aria-label="Filtrar vendas por data">
+        <button onclick="exportarDados('Pedidos')" class="custom-btn bg-[var(--cor-primaria)] text-white" aria-label="Exportar vendas como CSV">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
           </svg>
@@ -257,111 +255,31 @@
       <div id="spinner-vendas" class="spinner hidden"></div>
     </div>
 
-    <!-- Usuários -->
-    <div id="usuarios" class="tab-content hidden">
-      <h3 class="text-2xl font-medium mb-6 text-center">Gerenciar Usuários</h3>
-      <div class="card mb-6">
-        <h4 class="text-lg font-semibold mb-4">Adicionar/Editar Usuário</h4>
+    <!-- Relatórios -->
+    <div id="relatorios" class="tab-content hidden">
+      <h3 class="text-3xl font-bold mb-8 text-center">Relatórios</h3>
+      <div class="card mb-8">
+        <h4 class="text-xl font-semibold mb-4">Gerar Relatório</h4>
         <div class="space-y-4">
-          <input type="hidden" id="usuarioId">
-          <input type="text" id="usernameUsuario" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" placeholder="Usuário" aria-label="Nome de usuário">
-          <input type="password" id="passwordUsuario" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" placeholder="Senha" aria-label="Senha do usuário">
-          <button onclick="salvarUsuario()" class="w-full custom-btn text-white font-semibold" style="background-color: var(--cor-primaria, #FF6347);" aria-label="Salvar usuário">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h-1v5.586l-1.293-1.293zM3 3a1 1 0 011-1h12a1 1 0 011 1v14a1 1 0 01-1 1H4a1 1 0 01-1-1V3zm2 2v10h10V5H5z" />
-            </svg>
-            Salvar Usuário
-          </button>
-        </div>
-      </div>
-      <div id="usuarios-lista" class="space-y-4"></div>
-      <div id="spinner-usuarios" class="spinner hidden"></div>
-    </div>
-
-    <!-- Cupons -->
-    <div id="cupons" class="tab-content hidden">
-      <h3 class="text-2xl font-medium mb-6 text-center">Gerenciar Cupons</h3>
-      <div class="card mb-6">
-        <h4 class="text-lg font-semibold mb-4">Adicionar/Editar Cupom</h4>
-        <div class="space-y-4">
-          <input type="hidden" id="cupomId">
-          <input type="text" id="codigoCupom" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" placeholder="Código (ex.: PROMO10)" aria-label="Código do cupom">
-          <input type="number" id="descontoCupom" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" placeholder="Desconto (%)" step="1" aria-label="Percentual de desconto">
-          <input type="date" id="validadeCupom" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" aria-label="Validade do cupom">
-          <button onclick="salvarCupom()" class="w-full custom-btn text-white font-semibold" style="background-color: var(--cor-primaria, #FF6347);" aria-label="Salvar cupom">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h-1v5.586l-1.293-1.293zM3 3a1 1 0 011-1h12a1 1 0 011 1v14a1 1 0 01-1 1H4a1 1 0 01-1-1V3zm2 2v10h10V5H5z" />
-            </svg>
-            Salvar Cupom
-          </button>
-        </div>
-      </div>
-      <div id="cupons-lista" class="space-y-4"></div>
-      <div id="spinner-cupons" class="spinner hidden"></div>
-    </div>
-
-    <!-- Personalizações -->
-    <div id="personalizacoes" class="tab-content hidden">
-      <h3 class="text-2xl font-medium mb-6 text-center">Gerenciar Personalizações</h3>
-      <div class="card mb-6">
-        <h4 class="text-lg font-semibold mb-4">Adicionar/Editar Personalização</h4>
-        <div class="space-y-4">
-          <input type="hidden" id="personalizacaoId">
-          <select id="tipoPersonalizacao" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" aria-label="Tipo de personalização">
-            <option value="Borda">Borda</option>
-            <option value="Extra">Extra</option>
+          <select id="tipo-relatorio" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" aria-label="Tipo de relatório">
+            <option value="vendas">Vendas por Período</option>
+            <option value="pizzas">Pizzas Mais Vendidas</option>
+            <option value="clientes">Atividade de Clientes</option>
           </select>
-          <input type="text" id="nomePersonalizacao" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" placeholder="Nome (ex.: Borda de Catupiry)" aria-label="Nome da personalização">
-          <input type="number" id="precoPersonalizacao" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" placeholder="Preço (R$)" step="0.01" aria-label="Preço da personalização">
-          <button onclick="salvarPersonalizacao()" class="w-full custom-btn text-white font-semibold" style="background-color: var(--cor-primaria, #FF6347);" aria-label="Salvar personalização">
+          <input type="date" id="data-inicio" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" aria-label="Data de início">
+          <input type="date" id="data-fim" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" aria-label="Data de fim">
+          <button onclick="gerarRelatorio()" class="w-full custom-btn bg-[var(--cor-primaria)] text-white font-semibold" aria-label="Gerar relatório">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h-1v5.586l-1.293-1.293zM3 3a1 1 0 011-1h12a1 1 0 011 1v14a1 1 0 01-1 1H4a1 1 0 01-1-1V3zm2 2v10h10V5H5z" />
+              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
             </svg>
-            Salvar Personalização
+            Gerar e Exportar
           </button>
         </div>
       </div>
-      <div id="personalizacoes-lista" class="space-y-4"></div>
-      <div id="spinner-personalizacoes" class="spinner hidden"></div>
-    </div>
-
-    <!-- Feedback -->
-    <div id="feedback" class="tab-content hidden">
-      <h3 class="text-2xl font-medium mb-6 text-center">Feedback dos Clientes</h3>
-      <div class="flex flex-wrap gap-4 mb-6">
-        <input type="text" id="pesquisa-feedback" class="p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" placeholder="Pesquisar por e-mail..." aria-label="Pesquisar feedback por e-mail">
-        <button onclick="exportarDados('Feedback')" class="custom-btn text-white" style="background-color: var(--cor-primaria, #FF6347);" aria-label="Exportar feedback como CSV">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-          </svg>
-          Exportar Feedback
-        </button>
+      <div id="relatorios-resultado" class="card hidden">
+        <h4 class="text-xl font-semibold mb-4">Resultado do Relatório</h4>
+        <div id="relatorio-conteudo"></div>
       </div>
-      <div id="feedback-lista" class="space-y-4"></div>
-      <div id="spinner-feedback" class="spinner hidden"></div>
-    </div>
-
-    <!-- Newsletter -->
-    <div id="newsletter" class="tab-content hidden">
-      <h3 class="text-2xl font-medium mb-6 text-center">Inscritos na Newsletter</h3>
-      <div class="flex flex-wrap gap-4 mb-6">
-        <input type="text" id="pesquisa-newsletter" class="p-3 border rounded-lg focus:outline-none focus:ring-2" style="focus:ring-color: var(--cor-primaria, #FF6347);" placeholder="Pesquisar por e-mail..." aria-label="Pesquisar inscritos na newsletter por e-mail">
-        <button onclick="exportarDados('Newsletter')" class="custom-btn text-white" style="background-color: var(--cor-primaria, #FF6347);" aria-label="Exportar inscritos na newsletter como CSV">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-          </svg>
-          Exportar Newsletter
-        </button>
-      </div>
-      <div id="newsletter-lista" class="space-y-4"></div>
-      <div id="spinner-newsletter" class="spinner hidden"></div>
-    </div>
-
-    <!-- Logs -->
-    <div id="logs" class="tab-content hidden">
-      <h3 class="text-2xl font-medium mb-6 text-center">Logs de Ações</h3>
-      <div id="logs-lista" class="space-y-4"></div>
-      <div id="spinner-logs" class="spinner hidden"></div>
     </div>
 
     <!-- Modal de Confirmação -->
@@ -370,7 +288,7 @@
         <h3 class="text-xl font-semibold mb-4" id="modal-titulo"></h3>
         <p id="modal-mensagem"></p>
         <div class="flex gap-4 mt-4">
-          <button id="modal-confirmar" class="custom-btn text-white" style="background-color: var(--cor-primaria, #FF6347);" aria-label="Confirmar ação">Confirmar</button>
+          <button id="modal-confirmar" class="custom-btn bg-[var(--cor-primaria)] text-white" aria-label="Confirmar ação">Confirmar</button>
           <button onclick="fecharModal()" class="custom-btn bg-gray-500 text-white" aria-label="Cancelar ação">Cancelar</button>
         </div>
       </div>
@@ -381,27 +299,19 @@
       <div class="modal-content">
         <h3 class="text-xl font-semibold mb-4" id="notificacao-titulo"></h3>
         <p id="notificacao-mensagem"></p>
-        <button onclick="fecharNotificacao()" class="mt-4 custom-btn text-white" style="background-color: var(--cor-primaria, #FF6347);" aria-label="Fechar notificação">Ok</button>
+        <button onclick="fecharNotificacao()" class="mt-4 custom-btn bg-[var(--cor-primaria)] text-white w-full" aria-label="Fechar notificação">Ok</button>
       </div>
     </div>
   </section>
 
   <script>
-    // Variáveis globais
     let configLoaded = false;
     let pizzasCache = [];
     let vendasCache = [];
-    let usuariosCache = [];
-    let cuponsCache = [];
-    let personalizacoesCache = [];
-    let feedbackCache = [];
-    let newsletterCache = [];
-    let logsCache = [];
     let sessionTimeout;
     let sessionActive = false;
-    const SESSION_DURATION = 30 * 60 * 1000; // 30 minutos
+    const SESSION_DURATION = 30 * 60 * 1000;
 
-    // Aplicar configurações
     function aplicarConfiguracoes() {
       if (typeof config !== 'undefined') {
         document.documentElement.style.setProperty('--cor-primaria', config.corPrimaria);
@@ -422,8 +332,7 @@
         initializeApp();
       } else {
         console.error('Erro: config.js não foi carregado corretamente.');
-        mostrarNotificacao('Erro', 'Não foi possível carregar as configurações. Verifique o arquivo config.js.');
-        // Garantir que a seção de login esteja visível mesmo com erro
+        mostrarNotificacao('Erro', 'Não foi possível carregar as configurações. Verifique o arquivo config.js (onConfigLoaded).');
         document.getElementById('login').classList.remove('hidden');
       }
     }
@@ -434,8 +343,6 @@
       } else {
         setTimeout(() => {
           if (typeof config === 'undefined') {
-            onConfigLoaded(); // Chama mesmo se config.js falhar para garantir visibilidade do login
-          } else {
             onConfigLoaded();
           }
         }, 1000);
@@ -443,7 +350,6 @@
     });
 
     async function initializeApp() {
-      // Verificar se já está logado
       if (localStorage.getItem('adminLoggedIn') === 'true') {
         document.getElementById('login').classList.add('hidden');
         document.getElementById('painel').classList.remove('hidden');
@@ -451,7 +357,6 @@
         await carregarDadosIniciais();
       }
 
-      // Preencher categorias
       const categoriaPizza = document.getElementById('categoriaPizza');
       const filtroCategoria = document.getElementById('filtro-categoria-cardapio');
       if (typeof config !== 'undefined' && config.categoriasPizzas) {
@@ -467,21 +372,17 @@
         });
       }
 
-      // Filtros e pesquisas
       document.getElementById('pesquisa-cardapio').addEventListener('input', filtrarCardapio);
       document.getElementById('filtro-categoria-cardapio').addEventListener('change', filtrarCardapio);
       document.getElementById('pesquisa-vendas').addEventListener('input', filtrarVendas);
       document.getElementById('filtro-data-vendas').addEventListener('change', filtrarVendas);
-      document.getElementById('pesquisa-feedback').addEventListener('input', filtrarFeedback);
-      document.getElementById('pesquisa-newsletter').addEventListener('input', filtrarNewsletter);
 
-      // Pré-visualização de imagem com validação
       document.getElementById('imagemPizza').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
           if (!file.type.startsWith('image/')) {
-            mostrarNotificacao('Erro', 'Por favor, selecione um arquivo de imagem válido.');
-            e.target.value = ''; // Limpa o input
+            mostrarNotificacao('Erro', 'Por favor, selecione um arquivo de imagem válido (imagemPizza change event).');
+            e.target.value = '';
             return;
           }
           const reader = new FileReader();
@@ -492,14 +393,13 @@
             document.getElementById('removerImagem').classList.remove('hidden');
           };
           reader.onerror = () => {
-            mostrarNotificacao('Erro', 'Erro ao carregar a imagem para pré-visualização.');
+            mostrarNotificacao('Erro', 'Erro ao carregar a imagem para pré-visualização (imagemPizza change event).');
           };
           reader.readAsDataURL(file);
         }
       });
     }
 
-    // Gerenciamento de sessão
     function iniciarSessao() {
       sessionActive = true;
       sessionTimeout = setTimeout(() => {
@@ -529,26 +429,24 @@
       document.removeEventListener('keypress', resetarSessao);
     };
 
-    // Verificar sessão ativa
     function verificarSessao() {
       if (!sessionActive || localStorage.getItem('adminLoggedIn') !== 'true') {
-        mostrarNotificacao('Erro', 'Sessão não ativa. Por favor, faça login novamente.');
+        mostrarNotificacao('Erro', 'Sessão não ativa. Por favor, faça login novamente (verificarSessao).');
         deslogar();
         return false;
       }
       return true;
     }
 
-    // Login (usando config.js)
     window.logar = async function() {
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value.trim();
       if (!username || !password) {
-        mostrarNotificacao('Erro', 'Preencha usuário e senha.');
+        mostrarNotificacao('Erro', 'Preencha usuário e senha (logar).');
         return;
       }
       if (typeof config === 'undefined') {
-        mostrarNotificacao('Erro', 'Configurações não carregadas. Verifique o arquivo config.js.');
+        mostrarNotificacao('Erro', 'Configurações não carregadas. Verifique o arquivo config.js (logar).');
         return;
       }
       if (username === config.adminUsername && password === config.adminPassword) {
@@ -558,32 +456,24 @@
         iniciarSessao();
         await carregarDadosIniciais();
       } else {
-        mostrarNotificacao('Erro', 'Usuário ou senha incorretos.');
+        mostrarNotificacao('Erro', 'Usuário ou senha incorretos (logar).');
       }
     };
 
-    // Carregar dados iniciais
     async function carregarDadosIniciais() {
       if (!verificarSessao()) return;
       try {
         await Promise.all([
           carregarCardapio(),
-          carregarVendas(),
-          carregarUsuarios(),
-          carregarCupons(),
-          carregarPersonalizacoes(),
-          carregarFeedback(),
-          carregarNewsletter(),
-          carregarLogs()
+          carregarVendas()
         ]);
         atualizarDashboard();
       } catch (error) {
         console.error('Erro ao carregar dados iniciais:', error);
-        mostrarNotificacao('Erro', 'Falha ao carregar os dados. Verifique sua conexão e tente novamente.');
+        mostrarNotificacao('Erro', 'Falha ao carregar os dados. Verifique sua conexão (carregarDadosIniciais).');
       }
     }
 
-    // Mostrar abas
     window.mostrarTab = function(tabId) {
       if (!verificarSessao()) return;
       document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
@@ -592,7 +482,6 @@
       document.getElementById(tabId).classList.remove('hidden');
     };
 
-    // Atualizar Dashboard
     async function atualizarDashboard() {
       if (!verificarSessao()) return;
       const totalVendas = vendasCache.reduce((sum, venda) => sum + parseFloat(venda.Total || 0), 0);
@@ -621,12 +510,11 @@
         }
       });
       if (erroParsing > 0) {
-        mostrarNotificacao('Aviso', `${erroParsing} vendas não puderam ser processadas corretamente. Verifique os dados.`);
+        mostrarNotificacao('Aviso', `${erroParsing} vendas não puderam ser processadas corretamente. Verifique os dados (atualizarDashboard).`);
       }
       const pizzaMaisVendida = Object.keys(pizzasVendidas).reduce((a, b) => pizzasVendidas[a] > pizzasVendidas[b] ? a : b, '');
       document.getElementById('pizza-mais-vendida').textContent = pizzaMaisVendida || 'Nenhuma';
 
-      // Gráfico de vendas
       const vendasPorDia = {};
       vendasCache.forEach(venda => {
         const data = venda.Data ? venda.Data.split('T')[0] : '';
@@ -644,8 +532,8 @@
           datasets: [{
             label: 'Vendas por Dia (R$)',
             data: dados,
-            borderColor: '#FF6347',
-            backgroundColor: 'rgba(255, 99, 71, 0.2)',
+            borderColor: config.corPrimaria,
+            backgroundColor: 'rgba(255, 69, 0, 0.2)',
             fill: true,
             tension: 0.4
           }]
@@ -671,7 +559,6 @@
       });
     }
 
-    // Funções de carregamento com tratamento de erro
     async function carregarCardapio() {
       const lista = document.getElementById('cardapio-lista');
       const spinner = document.getElementById('spinner-cardapio');
@@ -688,33 +575,30 @@
         pizzasCache.forEach(pizza => {
           const div = document.createElement('div');
           div.className = 'card';
-          div.dataset.categoria = pizza.Categoria || 'Salgadas';
           div.innerHTML = `
-            <img src="${pizza.Imagem || config.imagemPadraoPizza}" alt="${pizza.Nome}" class="pizza-img mb-4">
-            <h3 class="text-xl font-bold">${pizza.Nome}</h3>
-            <p class="text-gray-600">${pizza.Descricao}</p>
-            <p class="text-lg font-semibold mt-2">R$ ${parseFloat(pizza.Preco || 0).toFixed(2)}</p>
-            <p class="text-sm mt-1">${pizza.EmPromocao === 'true' || pizza.EmPromocao === true ? 'Em Promoção!' : ''}</p>
-            <div class="flex gap-2 mt-4">
-              <button onclick="editarPizza('${pizza.ID}')" class="custom-btn bg-yellow-500 text-white" aria-label="Editar ${pizza.Nome}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.379-8.379-2.828-2.828z" />
-                </svg>
-                Editar
-              </button>
-              <button onclick="confirmarDelecao('Cardapio', '${pizza.ID}', 'Pizza ${pizza.Nome}')" class="custom-btn bg-red-500 text-white" aria-label="Deletar ${pizza.Nome}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
-                Deletar
-              </button>
+            <img src="${pizza.Imagem || config.imagemPadraoPizza}" alt="${pizza.Nome}" class="pizza-img">
+            <div class="p-4">
+              <h3 class="text-xl font-semibold">${pizza.Nome}</h3>
+              <p class="text-gray-600">${pizza.Descricao}</p>
+              <p class="text-lg font-bold mt-2">R$ ${parseFloat(pizza.Preco || 0).toFixed(2)}</p>
+              <p class="mt-1">Categoria: ${pizza.Categoria || 'Salgadas'}</p>
+              <p class="text-[var(--cor-destaque)] font-medium">${pizza.EmPromocao === 'true' || pizza.EmPromocao === true ? 'Em Promoção!' : ''}</p>
+              <div class="flex gap-2 mt-4">
+                <button onclick="editarPizza('${pizza.ID}')" class="custom-btn bg-[var(--cor-primaria)] text-white" aria-label="Editar pizza">
+                  Editar
+                </button>
+                <button onclick="confirmarExclusao('${pizza.ID}', 'Cardapio')" class="custom-btn bg-red-500 text-white" aria-label="Excluir pizza">
+                  Excluir
+                </button>
+              </div>
             </div>
           `;
           lista.appendChild(div);
         });
       } catch (error) {
         console.error('Erro ao carregar cardápio:', error);
-        lista.innerHTML = '<p class="text-center text-gray-600 col-span-full">Erro ao carregar o cardápio. Tente novamente mais tarde.</p>';
+        lista.innerHTML = '<p class="text-center text-gray-600 col-span-full">Erro ao carregar o cardápio. Tente novamente mais tarde (carregarCardapio).</p>';
+        mostrarNotificacao('Erro', 'Falha ao carregar o cardápio. Verifique sua conexão (carregarCardapio).');
       } finally {
         spinner.classList.add('hidden');
       }
@@ -734,275 +618,48 @@
           return;
         }
         vendasCache.forEach(venda => {
+          let itens = [];
+          try {
+            itens = typeof venda.Itens === 'string' ? JSON.parse(venda.Itens || '[]') : venda.Itens || [];
+          } catch (error) {
+            console.error('Erro ao parsear itens da venda:', venda, error);
+            mostrarNotificacao('Aviso', `Erro ao processar os itens da venda ID ${venda.ID}. Verifique os dados (carregarVendas).`);
+            itens = [];
+          }
           const div = document.createElement('div');
           div.className = 'card';
           div.innerHTML = `
-            <p class="font-semibold">${venda.Nome} (${venda.Email})</p>
-            <p>Data: ${new Date(venda.Data).toLocaleString()}</p>
-            <p>Total: R$ ${parseFloat(venda.Total || 0).toFixed(2)}</p>
-            <p>Itens: ${venda.Itens ? JSON.parse(venda.Itens).map(item => `${item.quantidade}x ${item.nome}`).join(', ') : 'N/A'}</p>
-            <button onclick="confirmarDelecao('Pedidos', '${venda.ID}', 'Venda de ${venda.Nome}')" class="custom-btn bg-red-500 text-white mt-2" aria-label="Deletar venda de ${venda.Nome}">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-              </svg>
-              Deletar
-            </button>
+            <div class="p-4">
+              <p class="text-lg font-semibold">Cliente: ${venda.Cliente || 'Desconhecido'}</p>
+              <p>Data: ${new Date(venda.Data).toLocaleString()}</p>
+              <p>Total: R$ ${parseFloat(venda.Total || 0).toFixed(2)}</p>
+              <p>Itens:</p>
+              <ul class="list-disc pl-5">
+                ${itens.map(item => `<li>${item.nome} (x${item.quantidade})</li>`).join('')}
+              </ul>
+              <button onclick="confirmarExclusao('${venda.ID}', 'Pedidos')" class="mt-4 custom-btn bg-red-500 text-white" aria-label="Excluir venda">
+                Excluir
+              </button>
+            </div>
           `;
           lista.appendChild(div);
         });
       } catch (error) {
         console.error('Erro ao carregar vendas:', error);
-        lista.innerHTML = '<p class="text-center text-gray-600">Erro ao carregar as vendas. Tente novamente mais tarde.</p>';
+        lista.innerHTML = '<p class="text-center text-gray-600">Erro ao carregar as vendas. Tente novamente mais tarde (carregarVendas).</p>';
+        mostrarNotificacao('Erro', 'Falha ao carregar as vendas. Verifique sua conexão (carregarVendas).');
       } finally {
         spinner.classList.add('hidden');
       }
     }
 
-    async function carregarUsuarios() {
-      const lista = document.getElementById('usuarios-lista');
-      const spinner = document.getElementById('spinner-usuarios');
-      spinner.classList.remove('hidden');
-      lista.innerHTML = '';
-      try {
-        const response = await fetch(`${config.googleSheetsApiUrl}?method=get&sheet=Usuarios`);
-        if (!response.ok) throw new Error('Erro na resposta da API');
-        usuariosCache = await response.json();
-        if (!usuariosCache || usuariosCache.length === 0) {
-          lista.innerHTML = '<p class="text-center text-gray-600">Nenhum usuário registrado.</p>';
-          return;
-        }
-        usuariosCache.forEach(usuario => {
-          const div = document.createElement('div');
-          div.className = 'card';
-          div.innerHTML = `
-            <p class="font-semibold">${usuario.Username}</p>
-            <div class="flex gap-2 mt-2">
-              <button onclick="editarUsuario('${usuario.ID}')" class="custom-btn bg-yellow-500 text-white" aria-label="Editar usuário ${usuario.Username}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.379-8.379-2.828-2.828z" />
-                </svg>
-                Editar
-              </button>
-              <button onclick="confirmarDelecao('Usuarios', '${usuario.ID}', 'Usuário ${usuario.Username}')" class="custom-btn bg-red-500 text-white" aria-label="Deletar usuário ${usuario.Username}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
-                Deletar
-              </button>
-            </div>
-          `;
-          lista.appendChild(div);
-        });
-      } catch (error) {
-        console.error('Erro ao carregar usuários:', error);
-        lista.innerHTML = '<p class="text-center text-gray-600">Erro ao carregar os usuários. Tente novamente mais tarde.</p>';
-      } finally {
-        spinner.classList.add('hidden');
-      }
-    }
-
-    async function carregarCupons() {
-      const lista = document.getElementById('cupons-lista');
-      const spinner = document.getElementById('spinner-cupons');
-      spinner.classList.remove('hidden');
-      lista.innerHTML = '';
-      try {
-        const response = await fetch(`${config.googleSheetsApiUrl}?method=get&sheet=Cupons`);
-        if (!response.ok) throw new Error('Erro na resposta da API');
-        cuponsCache = await response.json();
-        if (!cuponsCache || cuponsCache.length === 0) {
-          lista.innerHTML = '<p class="text-center text-gray-600">Nenhum cupom registrado.</p>';
-          return;
-        }
-        cuponsCache.forEach(cupom => {
-          const div = document.createElement('div');
-          div.className = 'card';
-          div.innerHTML = `
-            <p class="font-semibold">${cupom.Codigo}</p>
-            <p>Desconto: ${cupom.DescontoPercentual}%</p>
-            <p>Validade: ${new Date(cupom.Validade).toLocaleDateString()}</p>
-            <div class="flex gap-2 mt-2">
-              <button onclick="editarCupom('${cupom.ID}')" class="custom-btn bg-yellow-500 text-white" aria-label="Editar cupom ${cupom.Codigo}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.379-8.379-2.828-2.828z" />
-                </svg>
-                Editar
-              </button>
-              <button onclick="confirmarDelecao('Cupons', '${cupom.ID}', 'Cupom ${cupom.Codigo}')" class="custom-btn bg-red-500 text-white" aria-label="Deletar cupom ${cupom.Codigo}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
-                Deletar
-              </button>
-            </div>
-          `;
-          lista.appendChild(div);
-        });
-      } catch (error) {
-        console.error('Erro ao carregar cupons:', error);
-        lista.innerHTML = '<p class="text-center text-gray-600">Erro ao carregar os cupons. Tente novamente mais tarde.</p>';
-      } finally {
-        spinner.classList.add('hidden');
-      }
-    }
-
-    async function carregarPersonalizacoes() {
-      const lista = document.getElementById('personalizacoes-lista');
-      const spinner = document.getElementById('spinner-personalizacoes');
-      spinner.classList.remove('hidden');
-      lista.innerHTML = '';
-      try {
-        const response = await fetch(`${config.googleSheetsApiUrl}?method=get&sheet=Personalizacoes`);
-        if (!response.ok) throw new Error('Erro na resposta da API');
-        personalizacoesCache = await response.json();
-        if (!personalizacoesCache || personalizacoesCache.length === 0) {
-          lista.innerHTML = '<p class="text-center text-gray-600">Nenhuma personalização registrada.</p>';
-          return;
-        }
-        personalizacoesCache.forEach(personalizacao => {
-          const div = document.createElement('div');
-          div.className = 'card';
-          div.innerHTML = `
-            <p class="font-semibold">${personalizacao.Nome}</p>
-            <p>Tipo: ${personalizacao.Tipo}</p>
-            <p>Preço: R$ ${parseFloat(personalizacao.Preco || 0).toFixed(2)}</p>
-            <div class="flex gap-2 mt-2">
-              <button onclick="editarPersonalizacao('${personalizacao.ID}')" class="custom-btn bg-yellow-500 text-white" aria-label="Editar personalização ${personalizacao.Nome}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.379-8.379-2.828-2.828z" />
-                </svg>
-                Editar
-              </button>
-              <button onclick="confirmarDelecao('Personalizacoes', '${personalizacao.ID}', 'Personalização ${personalizacao.Nome}')" class="custom-btn bg-red-500 text-white" aria-label="Deletar personalização ${personalizacao.Nome}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
-                Deletar
-              </button>
-            </div>
-          `;
-          lista.appendChild(div);
-        });
-      } catch (error) {
-        console.error('Erro ao carregar personalizações:', error);
-        lista.innerHTML = '<p class="text-center text-gray-600">Erro ao carregar as personalizações. Tente novamente mais tarde.</p>';
-      } finally {
-        spinner.classList.add('hidden');
-      }
-    }
-
-    async function carregarFeedback() {
-      const lista = document.getElementById('feedback-lista');
-      const spinner = document.getElementById('spinner-feedback');
-      spinner.classList.remove('hidden');
-      lista.innerHTML = '';
-      try {
-        const response = await fetch(`${config.googleSheetsApiUrl}?method=get&sheet=Feedback`);
-        if (!response.ok) throw new Error('Erro na resposta da API');
-        feedbackCache = await response.json();
-        if (!feedbackCache || feedbackCache.length === 0) {
-          lista.innerHTML = '<p class="text-center text-gray-600">Nenhum feedback registrado.</p>';
-          return;
-        }
-        feedbackCache.forEach(feedback => {
-          const div = document.createElement('div');
-          div.className = 'card';
-          div.innerHTML = `
-            <p class="font-semibold">${feedback.Email}</p>
-            <p>Feedback: ${feedback.Feedback}</p>
-            <p>Data: ${new Date(feedback.Data).toLocaleString()}</p>
-            <button onclick="confirmarDelecao('Feedback', '${feedback.ID}', 'Feedback de ${feedback.Email}')" class="custom-btn bg-red-500 text-white mt-2" aria-label="Deletar feedback de ${feedback.Email}">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-              </svg>
-              Deletar
-            </button>
-          `;
-          lista.appendChild(div);
-        });
-      } catch (error) {
-        console.error('Erro ao carregar feedback:', error);
-        lista.innerHTML = '<p class="text-center text-gray-600">Erro ao carregar o feedback. Tente novamente mais tarde.</p>';
-      } finally {
-        spinner.classList.add('hidden');
-      }
-    }
-
-    async function carregarNewsletter() {
-      const lista = document.getElementById('newsletter-lista');
-      const spinner = document.getElementById('spinner-newsletter');
-      spinner.classList.remove('hidden');
-      lista.innerHTML = '';
-      try {
-        const response = await fetch(`${config.googleSheetsApiUrl}?method=get&sheet=Newsletter`);
-        if (!response.ok) throw new Error('Erro na resposta da API');
-        newsletterCache = await response.json();
-        if (!newsletterCache || newsletterCache.length === 0) {
-          lista.innerHTML = '<p class="text-center text-gray-600">Nenhum inscrito na newsletter.</p>';
-          return;
-        }
-        newsletterCache.forEach(inscricao => {
-          const div = document.createElement('div');
-          div.className = 'card';
-          div.innerHTML = `
-            <p class="font-semibold">${inscricao.Email}</p>
-            <p>Data: ${new Date(inscricao.Data).toLocaleString()}</p>
-            <button onclick="confirmarDelecao('Newsletter', '${inscricao.ID}', 'Inscrição de ${inscricao.Email}')" class="custom-btn bg-red-500 text-white mt-2" aria-label="Deletar inscrição de ${inscricao.Email}">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-              </svg>
-              Deletar
-            </button>
-          `;
-          lista.appendChild(div);
-        });
-      } catch (error) {
-        console.error('Erro ao carregar newsletter:', error);
-        lista.innerHTML = '<p class="text-center text-gray-600">Erro ao carregar a newsletter. Tente novamente mais tarde.</p>';
-      } finally {
-        spinner.classList.add('hidden');
-      }
-    }
-
-    async function carregarLogs() {
-      const lista = document.getElementById('logs-lista');
-      const spinner = document.getElementById('spinner-logs');
-      spinner.classList.remove('hidden');
-      lista.innerHTML = '';
-      try {
-        const response = await fetch(`${config.googleSheetsApiUrl}?method=get&sheet=Logs`);
-        if (!response.ok) throw new Error('Erro na resposta da API');
-        logsCache = await response.json();
-        if (!logsCache || logsCache.length === 0) {
-          lista.innerHTML = '<p class="text-center text-gray-600">Nenhum log registrado.</p>';
-          return;
-        }
-        logsCache.forEach(log => {
-          const div = document.createElement('div');
-          div.className = 'card';
-          div.innerHTML = `
-            <p class="font-semibold">${log.Acao}</p>
-            <p>Usuário: ${log.Usuario}</p>
-            <p>Data: ${new Date(log.Data).toLocaleString()}</p>
-          `;
-          lista.appendChild(div);
-        });
-      } catch (error) {
-        console.error('Erro ao carregar logs:', error);
-        lista.innerHTML = '<p class="text-center text-gray-600">Erro ao carregar os logs. Tente novamente mais tarde.</p>';
-      } finally {
-        spinner.classList.add('hidden');
-      }
-    }
-
-    // Funções de filtro
     function filtrarCardapio() {
       const pesquisa = document.getElementById('pesquisa-cardapio').value.toLowerCase();
       const categoria = document.getElementById('filtro-categoria-cardapio').value;
       const cards = document.querySelectorAll('#cardapio-lista .card');
       cards.forEach(card => {
         const nome = card.querySelector('h3').textContent.toLowerCase();
-        const cardCategoria = card.dataset.categoria;
+        const cardCategoria = card.querySelector('p:nth-child(4)').textContent.split(': ')[1];
         const matchesPesquisa = nome.includes(pesquisa);
         const matchesCategoria = !categoria || cardCategoria === categoria;
         card.style.display = matchesPesquisa && matchesCategoria ? 'block' : 'none';
@@ -1014,9 +671,233 @@
       const dataFiltro = document.getElementById('filtro-data-vendas').value;
       const cards = document.querySelectorAll('#vendas-lista .card');
       cards.forEach(card => {
-        const nome = card.querySelector('.font-semibold').textContent.toLowerCase();
-        const dataVenda = card.querySelector('p:nth-child(2)').textContent.split('Data: ')[1];
-        const dataFormatada = new Date(dataVenda).toISOString().split('T')[0];
-        const matchesPesquisa = nome.includes(pesquisa);
-        const matchesData = !dataFiltro || dataFormatada === dataFiltro;
-        card.style.display = matchesPes
+        const cliente = card.querySelector('p:nth-child(1)').textContent.toLowerCase();
+        const dataVenda = card.querySelector('p:nth-child(2)').textContent.split(': ')[1].split(',')[0];
+        const matchesPesquisa = cliente.includes(pesquisa);
+        const matchesData = !dataFiltro || new Date(dataVenda).toISOString().split('T')[0] === dataFiltro;
+        card.style.display = matchesPesquisa && matchesData ? 'block' : 'none';
+      });
+    }
+
+    window.editarPizza = function(id) {
+      if (!verificarSessao()) return;
+      const pizza = pizzasCache.find(p => p.ID === id);
+      if (!pizza) {
+        mostrarNotificacao('Erro', 'Pizza não encontrada (editarPizza).');
+        return;
+      }
+      document.getElementById('pizzaId').value = pizza.ID;
+      document.getElementById('nomePizza').value = pizza.Nome;
+      document.getElementById('descricaoPizza').value = pizza.Descricao;
+      document.getElementById('precoPizza').value = pizza.Preco;
+      document.getElementById('categoriaPizza').value = pizza.Categoria || '';
+      document.getElementById('emPromocao').checked = pizza.EmPromocao === 'true' || pizza.EmPromocao === true;
+      const preview = document.getElementById('previewImagem');
+      if (pizza.Imagem) {
+        preview.src = pizza.Imagem;
+        preview.classList.remove('hidden');
+        document.getElementById('removerImagem').classList.remove('hidden');
+      } else {
+        preview.classList.add('hidden');
+        document.getElementById('removerImagem').classList.add('hidden');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.removerImagemSelecionada = function() {
+      document.getElementById('imagemPizza').value = '';
+      document.getElementById('previewImagem').classList.add('hidden');
+      document.getElementById('removerImagem').classList.add('hidden');
+    };
+
+    window.salvarPizza = async function() {
+      if (!verificarSessao()) return;
+      const id = document.getElementById('pizzaId').value;
+      const nome = document.getElementById('nomePizza').value.trim();
+      const descricao = document.getElementById('descricaoPizza').value.trim();
+      const preco = document.getElementById('precoPizza').value;
+      const categoria = document.getElementById('categoriaPizza').value;
+      const emPromocao = document.getElementById('emPromocao').checked;
+      const imagemFile = document.getElementById('imagemPizza').files[0];
+      let imagem = document.getElementById('previewImagem').src;
+
+      if (!nome || !descricao || !preco || !categoria) {
+        mostrarNotificacao('Erro', 'Preencha todos os campos obrigatórios (salvarPizza).');
+        return;
+      }
+
+      if (imagemFile) {
+        const reader = new FileReader();
+        imagem = await new Promise((resolve) => {
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => {
+            mostrarNotificacao('Erro', 'Erro ao processar a imagem (salvarPizza).');
+            resolve(null);
+          };
+          reader.readAsDataURL(imagemFile);
+        });
+      } else if (!id && !imagem) {
+        imagem = config.imagemPadraoPizza;
+      }
+
+      const pizza = {
+        ID: id || Date.now().toString(),
+        Nome: nome,
+        Descricao: descricao,
+        Preco: parseFloat(preco).toFixed(2),
+        Categoria: categoria,
+        EmPromocao: emPromocao,
+        Imagem: imagem
+      };
+
+      try {
+        const method = id ? 'update' : 'add';
+        const response = await fetch(`${config.googleSheetsApiUrl}?method=${method}&sheet=Cardapio`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(pizza)
+        });
+        if (!response.ok) throw new Error('Erro na resposta da API');
+        mostrarNotificacao('Sucesso', 'Pizza salva com sucesso!');
+        document.getElementById('pizzaId').value = '';
+        document.getElementById('nomePizza').value = '';
+        document.getElementById('descricaoPizza').value = '';
+        document.getElementById('precoPizza').value = '';
+        document.getElementById('categoriaPizza').value = '';
+        document.getElementById('emPromocao').checked = false;
+        document.getElementById('imagemPizza').value = '';
+        document.getElementById('previewImagem').classList.add('hidden');
+        document.getElementById('removerImagem').classList.add('hidden');
+        await carregarCardapio();
+      } catch (error) {
+        console.error('Erro ao salvar pizza:', error);
+        mostrarNotificacao('Erro', 'Falha ao salvar a pizza. Verifique sua conexão (salvarPizza).');
+      }
+    };
+
+    window.confirmarExclusao = function(id, sheet) {
+      if (!verificarSessao()) return;
+      document.getElementById('modal-titulo').textContent = 'Confirmar Exclusão';
+      document.getElementById('modal-mensagem').textContent = `Tem certeza que deseja excluir este item da aba ${sheet}?`;
+      document.getElementById('modal-confirmacao').classList.remove('hidden');
+      document.getElementById('modal-confirmar').onclick = async () => {
+        try {
+          const response = await fetch(`${config.googleSheetsApiUrl}?method=delete&sheet=${sheet}&id=${id}`, {
+            method: 'POST'
+          });
+          if (!response.ok) throw new Error('Erro na resposta da API');
+          mostrarNotificacao('Sucesso', 'Item excluído com sucesso!');
+          if (sheet === 'Cardapio') await carregarCardapio();
+          else if (sheet === 'Pedidos') await carregarVendas();
+        } catch (error) {
+          console.error('Erro ao excluir item:', error);
+          mostrarNotificacao('Erro', `Falha ao excluir o item da aba ${sheet}. Verifique sua conexão (confirmarExclusao).`);
+        }
+        fecharModal();
+      };
+    };
+
+    window.fecharModal = function() {
+      document.getElementById('modal-confirmacao').classList.add('hidden');
+    };
+
+    window.fecharNotificacao = function() {
+      document.getElementById('modal-notificacao').classList.add('hidden');
+    };
+
+    function mostrarNotificacao(titulo, mensagem) {
+      document.getElementById('notificacao-titulo').textContent = titulo;
+      document.getElementById('notificacao-mensagem').textContent = mensagem;
+      document.getElementById('modal-notificacao').classList.remove('hidden');
+    }
+
+    window.exportarDados = function(sheet) {
+      if (!verificarSessao()) return;
+      let data = [];
+      if (sheet === 'Cardapio') data = pizzasCache;
+      else if (sheet === 'Pedidos') data = vendasCache;
+
+      if (!data.length) {
+        mostrarNotificacao('Erro', `Nenhum dado disponível para exportar na aba ${sheet} (exportarDados).`);
+        return;
+      }
+
+      const csv = [
+        Object.keys(data[0]).join(','),
+        ...data.map(row => Object.values(row).map(val => `"${val}"`).join(','))
+      ].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${sheet}.csv`;
+      link.click();
+    };
+
+    window.gerarRelatorio = function() {
+      if (!verificarSessao()) return;
+      const tipo = document.getElementById('tipo-relatorio').value;
+      const dataInicio = document.getElementById('data-inicio').value;
+      const dataFim = document.getElementById('data-fim').value;
+
+      if (!dataInicio || !dataFim) {
+        mostrarNotificacao('Erro', 'Por favor, selecione as datas de início e fim (gerarRelatorio).');
+        return;
+      }
+
+      const inicio = new Date(dataInicio);
+      const fim = new Date(dataFim);
+      if (inicio > fim) {
+        mostrarNotificacao('Erro', 'A data de início não pode ser maior que a data de fim (gerarRelatorio).');
+        return;
+      }
+
+      let dados = [];
+      let cabecalho = [];
+      let nomeArquivo = '';
+
+      if (tipo === 'vendas') {
+        dados = vendasCache.filter(venda => {
+          const dataVenda = new Date(venda.Data);
+          return dataVenda >= inicio && dataVenda <= fim;
+        });
+        cabecalho = ['ID', 'Cliente', 'Data', 'Total', 'Itens'];
+        nomeArquivo = 'relatorio_vendas.csv';
+      } else if (tipo === 'pizzas') {
+        const pizzasVendidas = {};
+        vendasCache.forEach(venda => {
+          const dataVenda = new Date(venda.Data);
+          if (dataVenda >= inicio && dataVenda <= fim) {
+            let itens = [];
+            try {
+              itens = typeof venda.Itens === 'string' ? JSON.parse(venda.Itens || '[]') : venda.Itens || [];
+              itens.forEach(item => {
+                if (item && item.nome) {
+                  pizzasVendidas[item.nome] = (pizzasVendidas[item.nome] || 0) + (item.quantidade || 0);
+                }
+              });
+            } catch (error) {
+              console.error('Erro ao parsear itens para relatório:', venda, error);
+              mostrarNotificacao('Aviso', `Erro ao processar itens da venda ID ${venda.ID} para o relatório (gerarRelatorio).`);
+            }
+          }
+        });
+        dados = Object.entries(pizzasVendidas).map(([nome, quantidade]) => ({ Nome: nome, Quantidade: quantidade }));
+        cabecalho = ['Nome', 'Quantidade'];
+        nomeArquivo = 'relatorio_pizzas_mais_vendidas.csv';
+      } else if (tipo === 'clientes') {
+        const clientesAtividade = {};
+        vendasCache.forEach(venda => {
+          const dataVenda = new Date(venda.Data);
+          if (dataVenda >= inicio && dataVenda <= fim) {
+            const cliente = venda.Cliente || 'Desconhecido';
+            clientesAtividade[cliente] = (clientesAtividade[cliente] || 0) + 1;
+          }
+        });
+        dados = Object.entries(clientesAtividade).map(([cliente, pedidos]) => ({ Cliente: cliente, Pedidos: pedidos }));
+        cabecalho = ['Cliente', 'Pedidos'];
+        nomeArquivo = 'relatorio_atividade_clientes.csv';
+      }
+
+      if (!dados.length) {
+        mostrarNotificacao('Aviso', 'Nenhum dado encontrado para o período selecionado (gerarRelatorio).');
+        return
