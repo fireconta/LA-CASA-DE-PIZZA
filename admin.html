@@ -46,6 +46,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="config.js"></script>
+  <script src="cardapio.js"></script>
   <style>
     body {
       background-color: var(--cor-fundo, #FFF8E7);
@@ -472,14 +473,14 @@
       let attempts = 0;
 
       const interval = setInterval(() => {
-        if (typeof config !== 'undefined') {
+        if (typeof config !== 'undefined' && typeof cardapio !== 'undefined') {
           clearInterval(interval);
           aplicarConfiguracoes();
           initializeApp();
         } else if (attempts >= maxAttempts) {
           clearInterval(interval);
-          console.error('Erro: Não foi possível carregar config.js após várias tentativas.');
-          mostrarNotificacao('Erro', 'Não foi possível carregar as configurações. Verifique se o arquivo config.js está no mesmo diretório e se você está executando o projeto em um servidor local.');
+          console.error('Erro: Não foi possível carregar config.js ou cardapio.js após várias tentativas.');
+          mostrarNotificacao('Erro', 'Não foi possível carregar as configurações ou o cardápio. Verifique se os arquivos config.js e cardapio.js estão no mesmo diretório e se você está executando o projeto em um servidor local.');
           document.getElementById('login').classList.remove('hidden');
         }
         attempts++;
@@ -568,7 +569,7 @@
         atualizarDashboard();
       } catch (error) {
         console.error('Erro ao carregar dados iniciais:', error);
-        mostrarNotificacao('Erro', 'Falha ao carregar os dados. Verifique sua conexão.');
+        mostrarNotificacao('Erro', 'Falha ao carregar os dados.');
       }
     }
 
@@ -593,7 +594,6 @@
       document.getElementById('pedidos-hoje').textContent = pedidosHoje;
 
       const pizzasVendidas = {};
-      let erroParsing = 0;
       vendasCache.forEach(venda => {
         try {
           const itens = typeof venda.itens === 'string' ? JSON.parse(venda.itens || '[]') : venda.itens || [];
@@ -604,12 +604,8 @@
           });
         } catch (error) {
           console.error('Erro ao parsear itens da venda:', venda, error);
-          erroParsing++;
         }
       });
-      if (erroParsing > 0) {
-        mostrarNotificacao('Aviso', `${erroParsing} vendas não puderam ser processadas corretamente. Verifique os dados.`);
-      }
       const pizzaMaisVendida = Object.keys(pizzasVendidas).reduce((a, b) => pizzasVendidas[a] > pizzasVendidas[b] ? a : b, '');
       document.getElementById('pizza-mais-vendida').textContent = pizzaMaisVendida || 'Nenhuma';
 
@@ -657,9 +653,7 @@
       spinner.classList.remove('hidden');
       lista.innerHTML = '';
       try {
-        const response = await fetch(`${config.sheetyBaseUrl}/cardapio`);
-        if (!response.ok) throw new Error('Erro na resposta da API');
-        pizzasCache = await response.json();
+        pizzasCache = JSON.parse(localStorage.getItem('cardapio')) || cardapio;
         if (!pizzasCache || pizzasCache.length === 0) {
           lista.innerHTML = '<p class="text-center text-gray-600 col-span-full">Nenhuma pizza disponível.</p>';
           return;
@@ -685,8 +679,8 @@
         });
       } catch (error) {
         console.error('Erro ao carregar cardápio:', error);
-        lista.innerHTML = '<p class="text-center text-gray-600 col-span-full">Erro ao carregar o cardápio. Tente novamente mais tarde.</p>';
-        mostrarNotificacao('Erro', 'Falha ao carregar o cardápio. Verifique sua conexão ou a URL da API.');
+        lista.innerHTML = '<p class="text-center text-gray-600 col-span-full">Erro ao carregar o cardápio.</p>';
+        mostrarNotificacao('Erro', 'Falha ao carregar o cardápio.');
       } finally {
         spinner.classList.add('hidden');
       }
@@ -698,9 +692,7 @@
       spinner.classList.remove('hidden');
       lista.innerHTML = '';
       try {
-        const response = await fetch(`${config.sheetyBaseUrl}/pedidos`);
-        if (!response.ok) throw new Error('Erro na resposta da API');
-        vendasCache = await response.json();
+        vendasCache = JSON.parse(localStorage.getItem('vendas')) || [];
         if (!vendasCache || vendasCache.length === 0) {
           lista.innerHTML = '<p class="text-center text-gray-600">Nenhuma venda registrada.</p>';
           return;
@@ -732,8 +724,8 @@
         });
       } catch (error) {
         console.error('Erro ao carregar vendas:', error);
-        lista.innerHTML = '<p class="text-center text-gray-600">Erro ao carregar as vendas. Tente novamente mais tarde.</p>';
-        mostrarNotificacao('Erro', 'Falha ao carregar as vendas. Verifique sua conexão ou a URL da API.');
+        lista.innerHTML = '<p class="text-center text-gray-600">Erro ao carregar as vendas.</p>';
+        mostrarNotificacao('Erro', 'Falha ao carregar as vendas.');
       } finally {
         spinner.classList.add('hidden');
       }
@@ -842,14 +834,15 @@
       };
 
       try {
-        const method = id ? 'PUT' : 'POST';
-        const url = id ? `${config.sheetyBaseUrl}/cardapio/${id}` : `${config.sheetyBaseUrl}/cardapio`;
-        const response = await fetch(url, {
-          method: method,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ cardapio: pizza })
-        });
-        if (!response.ok) throw new Error('Erro na resposta da API');
+        if (id) {
+          const index = pizzasCache.findIndex(p => p.id === id);
+          if (index !== -1) {
+            pizzasCache[index] = pizza;
+          }
+        } else {
+          pizzasCache.push(pizza);
+        }
+        salvarCardapio(pizzasCache);
         mostrarNotificacao('Sucesso', 'Pizza salva com sucesso!');
         document.getElementById('pizzaId').value = '';
         document.getElementById('nomePizza').value = '';
@@ -863,7 +856,7 @@
         await carregarCardapio();
       } catch (error) {
         console.error('Erro ao salvar pizza:', error);
-        mostrarNotificacao('Erro', 'Falha ao salvar a pizza. Verifique sua conexão ou a URL da API.');
+        mostrarNotificacao('Erro', 'Falha ao salvar a pizza.');
       }
     };
 
@@ -874,17 +867,20 @@
       document.getElementById('modal-confirmacao').classList.remove('hidden');
       document.getElementById('modal-confirmar').onclick = async () => {
         try {
-          const response = await fetch(`${config.sheetyBaseUrl}/${sheet.toLowerCase()}/${id}`, {
-            method: 'DELETE'
-          });
-          if (!response.ok) throw new Error('Erro na resposta da API');
+          if (sheet === 'Cardápio') {
+            pizzasCache = pizzasCache.filter(p => p.id !== id);
+            salvarCardapio(pizzasCache);
+            await carregarCardapio();
+          } else if (sheet === 'Pedidos') {
+            vendasCache = vendasCache.filter(v => v.id !== id);
+            localStorage.setItem('vendas', JSON.stringify(vendasCache));
+            await carregarVendas();
+          }
           mostrarNotificacao('Sucesso', 'Item excluído com sucesso!');
-          if (sheet === 'Cardápio') await carregarCardapio();
-          else if (sheet === 'Pedidos') await carregarVendas();
           await atualizarDashboard();
         } catch (error) {
           console.error('Erro ao excluir item:', error);
-          mostrarNotificacao('Erro', `Falha ao excluir o item da aba ${sheet}. Verifique sua conexão ou a URL da API.`);
+          mostrarNotificacao('Erro', `Falha ao excluir o item da aba ${sheet}.`);
         }
         fecharModal();
       };
