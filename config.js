@@ -4,7 +4,7 @@ const config = {
   adminPassword: "senha123",
 
   // URL da API (simulada, substitua pela URL real do Google Sheets ou outra API)
-  googleSheetsApiUrl: "https://docs.google.com/spreadsheets/d/1i99w6-PZ0Q9uwI0zL_DhsI_SUX0tUQuuQ2e5KsNtU_g/edit?usp=drivesdk",
+  googleSheetsApiUrl: "https://api.sheety.co/48c651da8438926cad73dd17491b4695/laCasaDePizzasDb/cardapio",
 
   // Informações da pizzaria
   nomePizzaria: "La Casa de Pizzas",
