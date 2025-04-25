@@ -42,10 +42,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="page-title"></title>
+  <title id="page-title">Admin - La Casa de Pizzas</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="config.js" defer onload="onConfigLoaded()"></script>
+  <script src="config.js"></script>
   <style>
     body {
       background-color: var(--cor-fundo, #FFF8E7);
@@ -131,7 +131,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, var(--cor-primaria, #FF4500) 0%, var(--cor-secundaria, #FFA500) 100%);
+      background: linear-gradient(135deg, var(--cor-primaria, #FF4500) 0%, var(--cor-secundaria, #FFD700) 100%);
       padding: 1rem;
       animation: fadeIn 1s ease-in-out;
     }
@@ -204,9 +204,9 @@
   <!-- Autenticação -->
   <section id="login" class="login-container">
     <div class="login-card">
-      <img id="logo" src="" alt="Logo La Casa de Pizzas" class="mx-auto h-20 mb-6">
+      <img id="logo" src="https://i.imgur.com/3wbh5W3.jpeg" alt="Logo La Casa de Pizzas" class="mx-auto h-20 mb-6">
       <h2 class="text-2xl font-bold text-center mb-4 text-[var(--cor-texto)]">
-        Painel Administrador - <span id="nome-pizzaria"></span>
+        Painel Administrador - <span id="nome-pizzaria">La Casa de Pizzas</span>
       </h2>
       <p class="text-center text-gray-600 mb-6">Faça login para gerenciar sua pizzaria</p>
       <div id="error-message" class="error-message"></div>
@@ -392,7 +392,6 @@
   </section>
 
   <script>
-    let configLoaded = false;
     let pizzasCache = [];
     let vendasCache = [];
     let sessionTimeout;
@@ -405,37 +404,12 @@
         document.documentElement.style.setProperty('--cor-secundaria', config.corSecundaria);
         document.documentElement.style.setProperty('--cor-fundo', config.corFundo);
         document.documentElement.style.setProperty('--cor-texto', config.corTexto);
-      }
-    }
-
-    function onConfigLoaded() {
-      configLoaded = true;
-      if (typeof config !== 'undefined') {
         document.getElementById('page-title').textContent = `Admin - ${config.nomePizzaria}`;
         document.getElementById('logo').src = config.logoUrl;
         document.getElementById('nome-pizzaria').textContent = config.nomePizzaria;
         document.getElementById('nome-pizzaria-painel').textContent = config.nomePizzaria;
-        aplicarConfiguracoes();
-        initializeApp();
-      } else {
-        console.error('Erro: config.js não foi carregado corretamente.');
-        mostrarNotificacao('Erro', 'Não foi possível carregar as configurações. Verifique o arquivo config.js.');
-        document.getElementById('login').classList.remove('hidden');
       }
     }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      if (configLoaded) {
-        initializeApp();
-      } else {
-        const script = document.querySelector('script[src="config.js"]');
-        if (!script) {
-          console.error('Erro: Arquivo config.js não encontrado.');
-          mostrarNotificacao('Erro', 'Arquivo config.js não encontrado. Certifique-se de que ele está no mesmo diretório.');
-          document.getElementById('login').classList.remove('hidden');
-        }
-      }
-    });
 
     async function initializeApp() {
       if (localStorage.getItem('adminLoggedIn') === 'true') {
@@ -492,6 +466,29 @@
         }
       });
     }
+
+    function checkConfigAndInitialize() {
+      const maxAttempts = 10;
+      let attempts = 0;
+
+      const interval = setInterval(() => {
+        if (typeof config !== 'undefined') {
+          clearInterval(interval);
+          aplicarConfiguracoes();
+          initializeApp();
+        } else if (attempts >= maxAttempts) {
+          clearInterval(interval);
+          console.error('Erro: Não foi possível carregar config.js após várias tentativas.');
+          mostrarNotificacao('Erro', 'Não foi possível carregar as configurações. Verifique se o arquivo config.js está no mesmo diretório e se você está executando o projeto em um servidor local.');
+          document.getElementById('login').classList.remove('hidden');
+        }
+        attempts++;
+      }, 500);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkConfigAndInitialize();
+    });
 
     function iniciarSessao() {
       sessionActive = true;

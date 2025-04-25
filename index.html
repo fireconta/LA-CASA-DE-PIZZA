@@ -42,9 +42,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="page-title"></title>
+  <title id="page-title">La Casa de Pizzas</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="config.js" defer onload="onConfigLoaded()"></script>
+  <script src="config.js"></script>
   <style>
     body {
       background-color: var(--cor-fundo, #FFF8E7);
@@ -98,8 +98,8 @@
   <header class="bg-[var(--cor-primaria)] text-white p-4">
     <div class="max-w-7xl mx-auto flex justify-between items-center">
       <div class="flex items-center gap-4">
-        <img id="logo" src="" alt="Logo" class="h-12">
-        <h1 class="text-2xl font-bold" id="nome-pizzaria"></h1>
+        <img id="logo" src="https://i.imgur.com/3wbh5W3.jpeg" alt="Logo" class="h-12">
+        <h1 class="text-2xl font-bold" id="nome-pizzaria">La Casa de Pizzas</h1>
       </div>
       <div class="flex gap-4">
         <button onclick="window.location.href='admin.html'" class="custom-btn bg-white text-[var(--cor-primaria)]" aria-label="Acessar painel de administração">
@@ -127,8 +127,15 @@
     <div id="spinner-cardapio" class="spinner hidden"></div>
   </section>
 
+  <footer class="bg-[var(--cor-primaria)] text-white p-4 text-center">
+    <p>&copy; 2025 <span id="nome-pizzaria-footer">La Casa de Pizzas</span>. Todos os direitos reservados.</p>
+    <div class="flex justify-center gap-4 mt-2">
+      <a id="whatsapp-link" href="https://api.whatsapp.com/send?phone=5562995771104&text=Olá,%20gostaria%20de%20fazer%20um%20pedido!" target="_blank" class="text-white hover:underline" aria-label="Contato via WhatsApp">WhatsApp: <span id="whatsapp-numero">(62) 99577-1104</span></a>
+      <a id="instagram-link" href="https://instagram.com/lacasadepizza2025" target="_blank" class="text-white hover:underline" aria-label="Instagram da pizzaria">Instagram: <span id="instagram-nome">@lacasadepizza2025</span></a>
+    </div>
+  </footer>
+
   <script>
-    let configLoaded = false;
     let pizzasCache = [];
     let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
 
@@ -138,20 +145,14 @@
         document.documentElement.style.setProperty('--cor-secundaria', config.corSecundaria);
         document.documentElement.style.setProperty('--cor-fundo', config.corFundo);
         document.documentElement.style.setProperty('--cor-texto', config.corTexto);
-      }
-    }
-
-    function onConfigLoaded() {
-      configLoaded = true;
-      if (typeof config !== 'undefined') {
         document.getElementById('page-title').textContent = config.nomePizzaria;
         document.getElementById('logo').src = config.logoUrl;
         document.getElementById('nome-pizzaria').textContent = config.nomePizzaria;
-        aplicarConfiguracoes();
-        initializeApp();
-      } else {
-        console.error('Erro: config.js não foi carregado corretamente.');
-        alert('Não foi possível carregar as configurações. Verifique o arquivo config.js.');
+        document.getElementById('nome-pizzaria-footer').textContent = config.nomePizzaria;
+        document.getElementById('whatsapp-link').href = config.whatsappLink;
+        document.getElementById('whatsapp-numero').textContent = config.whatsapp;
+        document.getElementById('instagram-link').href = `https://instagram.com/${config.instagram.replace('@', '')}`;
+        document.getElementById('instagram-nome').textContent = config.instagram;
       }
     }
 
@@ -172,6 +173,28 @@
       document.getElementById('pesquisa-cardapio').addEventListener('input', filtrarCardapio);
       document.getElementById('filtro-categoria').addEventListener('change', filtrarCardapio);
     }
+
+    function checkConfigAndInitialize() {
+      const maxAttempts = 10;
+      let attempts = 0;
+
+      const interval = setInterval(() => {
+        if (typeof config !== 'undefined') {
+          clearInterval(interval);
+          aplicarConfiguracoes();
+          initializeApp();
+        } else if (attempts >= maxAttempts) {
+          clearInterval(interval);
+          console.error('Erro: Não foi possível carregar config.js após várias tentativas.');
+          alert('Não foi possível carregar as configurações. Verifique se o arquivo config.js está no mesmo diretório e se você está executando o projeto em um servidor local.');
+        }
+        attempts++;
+      }, 500);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkConfigAndInitialize();
+    });
 
     async function carregarCardapio() {
       const lista = document.getElementById('cardapio-lista');
@@ -196,8 +219,8 @@
               <p class="text-gray-600">${pizza.descrição}</p>
               <p class="text-lg font-bold mt-2">R$ ${parseFloat(pizza.preço || 0).toFixed(2)}</p>
               <p class="mt-1">Categoria: ${pizza.categoria || 'Salgadas'}</p>
-              <p class="text-[var(--cor-primaria)] font-medium">${pizza.emPromoção === 'true' || pizza.emPromoção === true ? 'Em Promoção!' : ''}</p>
-              <button onclick="adicionarAoCarrinho('${pizza.id}')" class="mt-4 custom-btn bg-[var(--cor-primaria)] text-white" aria-label="Adicionar ao carrinho">
+              <p class="text-[var(--cor-destaque)] font-medium">${pizza.emPromoção === 'true' || pizza.emPromoção === true ? 'Em Promoção!' : ''}</p>
+              <button onclick="adicionarAoCarrinho('${pizza.id}')" class="mt-4 custom-btn bg-[var(--cor-primaria)] text-white" aria-label="Adicionar ${pizza.nome} ao carrinho">
                 Adicionar ao Carrinho
               </button>
             </div>
@@ -207,6 +230,7 @@
       } catch (error) {
         console.error('Erro ao carregar cardápio:', error);
         lista.innerHTML = '<p class="text-center text-gray-600 col-span-full">Erro ao carregar o cardápio. Tente novamente mais tarde.</p>';
+        alert('Falha ao carregar o cardápio. Verifique sua conexão ou a URL da API.');
       } finally {
         spinner.classList.add('hidden');
       }
@@ -227,31 +251,38 @@
 
     window.adicionarAoCarrinho = function(id) {
       const pizza = pizzasCache.find(p => p.id === id);
-      if (!pizza) return;
+      if (!pizza) {
+        alert('Pizza não encontrada.');
+        return;
+      }
       const itemExistente = carrinho.find(item => item.id === id);
       if (itemExistente) {
         itemExistente.quantidade += 1;
       } else {
-        carrinho.push({ id: pizza.id, nome: pizza.nome, preço: parseFloat(pizza.preço), quantidade: 1 });
+        carrinho.push({
+          id: pizza.id,
+          nome: pizza.nome,
+          preço: parseFloat(pizza.preço),
+          quantidade: 1
+        });
       }
       localStorage.setItem('carrinho', JSON.stringify(carrinho));
       atualizarCarrinhoContador();
-      alert(`${pizza.nome} adicionado ao carrinho!`);
+      alert(`${pizza.nome} foi adicionado ao carrinho!`);
     };
-
-    function atualizarCarrinhoContador() {
-      const contador = document.getElementById('carrinho-contador');
-      const totalItens = carrinho.reduce((sum, item) => sum + item.quantidade, 0);
-      contador.textContent = totalItens;
-    }
 
     window.verCarrinho = function() {
       if (carrinho.length === 0) {
-        alert('Seu carrinho está vazio!');
+        alert('Seu carrinho está vazio.');
         return;
       }
       window.location.href = 'checkout.html';
     };
+
+    function atualizarCarrinhoContador() {
+      const totalItens = carrinho.reduce((sum, item) => sum + item.quantidade, 0);
+      document.getElementById('carrinho-contador').textContent = totalItens;
+    }
   </script>
 </body>
 </html>
