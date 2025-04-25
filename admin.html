@@ -126,7 +126,6 @@
       max-width: 600px;
       width: 90%;
     }
-    /* Estilos para a nova interface de login */
     .login-container {
       min-height: 100vh;
       display: flex;
@@ -202,7 +201,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Autenticação (Nova Interface) -->
+  <!-- Autenticação -->
   <section id="login" class="login-container">
     <div class="login-card">
       <img id="logo" src="" alt="Logo La Casa de Pizzas" class="mx-auto h-20 mb-6">
@@ -234,7 +233,7 @@
     </div>
   </section>
 
-  <!-- Painel (Mantido Inalterado) -->
+  <!-- Painel -->
   <section id="painel" class="max-w-7xl mx-auto my-8 p-6 hidden">
     <div class="flex justify-between items-center mb-8">
       <h2 class="text-3xl font-bold">Painel Administrador - <span id="nome-pizzaria-painel"></span></h2>
@@ -282,7 +281,7 @@
         <select id="filtro-categoria-cardapio" class="p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" aria-label="Filtrar pizzas por categoria">
           <option value="">Todas as Categorias</option>
         </select>
-        <button onclick="exportarDados('Cardapio')" class="custom-btn bg-[var(--cor-primaria)] text-white" aria-label="Exportar cardápio como CSV">
+        <button onclick="exportarDados('Cardápio')" class="custom-btn bg-[var(--cor-primaria)] text-white" aria-label="Exportar cardápio como CSV">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
           </svg>
@@ -420,7 +419,7 @@
         initializeApp();
       } else {
         console.error('Erro: config.js não foi carregado corretamente.');
-        mostrarNotificacao('Erro', 'Não foi possível carregar as configurações. Verifique o arquivo config.js (onConfigLoaded).');
+        mostrarNotificacao('Erro', 'Não foi possível carregar as configurações. Verifique o arquivo config.js.');
         document.getElementById('login').classList.remove('hidden');
       }
     }
@@ -432,7 +431,7 @@
         const script = document.querySelector('script[src="config.js"]');
         if (!script) {
           console.error('Erro: Arquivo config.js não encontrado.');
-          mostrarNotificacao('Erro', 'Arquivo config.js não encontrado. Certifique-se de que ele está no mesmo diretório (DOMContentLoaded).');
+          mostrarNotificacao('Erro', 'Arquivo config.js não encontrado. Certifique-se de que ele está no mesmo diretório.');
           document.getElementById('login').classList.remove('hidden');
         }
       }
@@ -463,7 +462,7 @@
         });
       } else {
         console.error('Erro: Categorias não encontradas no config.js.');
-        mostrarNotificacao('Erro', 'Categorias não encontradas. Verifique o arquivo config.js (initializeApp).');
+        mostrarNotificacao('Erro', 'Categorias não encontradas. Verifique o arquivo config.js.');
       }
 
       document.getElementById('pesquisa-cardapio').addEventListener('input', filtrarCardapio);
@@ -475,7 +474,7 @@
         const file = e.target.files[0];
         if (file) {
           if (!file.type.startsWith('image/')) {
-            mostrarNotificacao('Erro', 'Por favor, selecione um arquivo de imagem válido (imagemPizza change event).');
+            mostrarNotificacao('Erro', 'Por favor, selecione um arquivo de imagem válido.');
             e.target.value = '';
             return;
           }
@@ -487,7 +486,7 @@
             document.getElementById('removerImagem').classList.remove('hidden');
           };
           reader.onerror = () => {
-            mostrarNotificacao('Erro', 'Erro ao carregar a imagem para pré-visualização (imagemPizza change event).');
+            mostrarNotificacao('Erro', 'Erro ao carregar a imagem para pré-visualização.');
           };
           reader.readAsDataURL(file);
         }
@@ -516,7 +515,7 @@
     window.deslogar = function() {
       localStorage.removeItem('adminLoggedIn');
       sessionActive = false;
-      document.getElementById('login').classList.remove('hidden');
+      document.getElementById('login').classList.add('hidden');
       document.getElementById('painel').classList.add('hidden');
       clearTimeout(sessionTimeout);
       document.removeEventListener('mousemove', resetarSessao);
@@ -525,7 +524,7 @@
 
     function verificarSessao() {
       if (!sessionActive || localStorage.getItem('adminLoggedIn') !== 'true') {
-        mostrarNotificacao('Erro', 'Sessão não ativa. Por favor, faça login novamente (verificarSessao).');
+        mostrarNotificacao('Erro', 'Sessão não ativa. Por favor, faça login novamente.');
         deslogar();
         return false;
       }
@@ -572,7 +571,7 @@
         atualizarDashboard();
       } catch (error) {
         console.error('Erro ao carregar dados iniciais:', error);
-        mostrarNotificacao('Erro', 'Falha ao carregar os dados. Verifique sua conexão (carregarDadosIniciais).');
+        mostrarNotificacao('Erro', 'Falha ao carregar os dados. Verifique sua conexão.');
       }
     }
 
@@ -586,12 +585,12 @@
 
     async function atualizarDashboard() {
       if (!verificarSessao()) return;
-      const totalVendas = vendasCache.reduce((sum, venda) => sum + parseFloat(venda.Total || 0), 0);
+      const totalVendas = vendasCache.reduce((sum, venda) => sum + parseFloat(venda.total || 0), 0);
       document.getElementById('total-vendas-dash').textContent = `R$ ${totalVendas.toFixed(2)}`;
 
       const hoje = new Date().toISOString().split('T')[0];
       const pedidosHoje = vendasCache.filter(venda => {
-        const vendaData = venda.Data ? venda.Data.split('T')[0] : '';
+        const vendaData = venda.data ? venda.data.split('T')[0] : '';
         return vendaData === hoje;
       }).length;
       document.getElementById('pedidos-hoje').textContent = pedidosHoje;
@@ -600,7 +599,7 @@
       let erroParsing = 0;
       vendasCache.forEach(venda => {
         try {
-          const itens = typeof venda.Itens === 'string' ? JSON.parse(venda.Itens || '[]') : venda.Itens || [];
+          const itens = typeof venda.itens === 'string' ? JSON.parse(venda.itens || '[]') : venda.itens || [];
           itens.forEach(item => {
             if (item && item.nome) {
               pizzasVendidas[item.nome] = (pizzasVendidas[item.nome] || 0) + (item.quantidade || 0);
@@ -612,16 +611,16 @@
         }
       });
       if (erroParsing > 0) {
-        mostrarNotificacao('Aviso', `${erroParsing} vendas não puderam ser processadas corretamente. Verifique os dados (atualizarDashboard).`);
+        mostrarNotificacao('Aviso', `${erroParsing} vendas não puderam ser processadas corretamente. Verifique os dados.`);
       }
       const pizzaMaisVendida = Object.keys(pizzasVendidas).reduce((a, b) => pizzasVendidas[a] > pizzasVendidas[b] ? a : b, '');
       document.getElementById('pizza-mais-vendida').textContent = pizzaMaisVendida || 'Nenhuma';
 
       const vendasPorDia = {};
       vendasCache.forEach(venda => {
-        const data = venda.Data ? venda.Data.split('T')[0] : '';
+        const data = venda.data ? venda.data.split('T')[0] : '';
         if (data) {
-          vendasPorDia[data] = (vendasPorDia[data] || 0) + parseFloat(venda.Total || 0);
+          vendasPorDia[data] = (vendasPorDia[data] || 0) + parseFloat(venda.total || 0);
         }
       });
       const labels = Object.keys(vendasPorDia).sort();
@@ -645,16 +644,10 @@
           scales: {
             y: {
               beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Valor (R$)'
-              }
+              title: { display: true, text: 'Valor (R$)' }
             },
             x: {
-              title: {
-                display: true,
-                text: 'Data'
-              }
+              title: { display: true, text: 'Data' }
             }
           }
         }
@@ -667,7 +660,7 @@
       spinner.classList.remove('hidden');
       lista.innerHTML = '';
       try {
-        const response = await fetch(`${config.googleSheetsApiUrl}?method=get&sheet=Cardapio`);
+        const response = await fetch(`${config.sheetyBaseUrl}/cardapio`);
         if (!response.ok) throw new Error('Erro na resposta da API');
         pizzasCache = await response.json();
         if (!pizzasCache || pizzasCache.length === 0) {
@@ -678,20 +671,16 @@
           const div = document.createElement('div');
           div.className = 'card';
           div.innerHTML = `
-            <img src="${pizza.Imagem || config.imagemPadraoPizza}" alt="${pizza.Nome}" class="pizza-img">
+            <img src="${pizza.imagem || config.imagemPadraoPizza}" alt="${pizza.nome}" class="pizza-img">
             <div class="p-4">
-              <h3 class="text-xl font-semibold">${pizza.Nome}</h3>
-              <p class="text-gray-600">${pizza.Descricao}</p>
-              <p class="text-lg font-bold mt-2">R$ ${parseFloat(pizza.Preco || 0).toFixed(2)}</p>
-              <p class="mt-1">Categoria: ${pizza.Categoria || 'Salgadas'}</p>
-              <p class="text-[var(--cor-destaque)] font-medium">${pizza.EmPromocao === 'true' || pizza.EmPromocao === true ? 'Em Promoção!' : ''}</p>
+              <h3 class="text-xl font-semibold">${pizza.nome}</h3>
+              <p class="text-gray-600">${pizza.descrição}</p>
+              <p class="text-lg font-bold mt-2">R$ ${parseFloat(pizza.preço || 0).toFixed(2)}</p>
+              <p class="mt-1">Categoria: ${pizza.categoria || 'Salgadas'}</p>
+              <p class="text-[var(--cor-destaque)] font-medium">${pizza.emPromoção === 'true' || pizza.emPromoção === true ? 'Em Promoção!' : ''}</p>
               <div class="flex gap-2 mt-4">
-                <button onclick="editarPizza('${pizza.ID}')" class="custom-btn bg-[var(--cor-primaria)] text-white" aria-label="Editar pizza">
-                  Editar
-                </button>
-                <button onclick="confirmarExclusao('${pizza.ID}', 'Cardapio')" class="custom-btn bg-red-500 text-white" aria-label="Excluir pizza">
-                  Excluir
-                </button>
+                <button onclick="editarPizza('${pizza.id}')" class="custom-btn bg-[var(--cor-primaria)] text-white" aria-label="Editar pizza">Editar</button>
+                <button onclick="confirmarExclusao('${pizza.id}', 'cardapio')" class="custom-btn bg-red-500 text-white" aria-label="Excluir pizza">Excluir</button>
               </div>
             </div>
           `;
@@ -699,8 +688,8 @@
         });
       } catch (error) {
         console.error('Erro ao carregar cardápio:', error);
-        lista.innerHTML = '<p class="text-center text-gray-600 col-span-full">Erro ao carregar o cardápio. Tente novamente mais tarde (carregarCardapio).</p>';
-        mostrarNotificacao('Erro', 'Falha ao carregar o cardápio. Verifique sua conexão ou a URL da API (carregarCardapio).');
+        lista.innerHTML = '<p class="text-center text-gray-600 col-span-full">Erro ao carregar o cardápio. Tente novamente mais tarde.</p>';
+        mostrarNotificacao('Erro', 'Falha ao carregar o cardápio. Verifique sua conexão ou a URL da API.');
       } finally {
         spinner.classList.add('hidden');
       }
@@ -712,7 +701,7 @@
       spinner.classList.remove('hidden');
       lista.innerHTML = '';
       try {
-        const response = await fetch(`${config.googleSheetsApiUrl}?method=get&sheet=Pedidos`);
+        const response = await fetch(`${config.sheetyBaseUrl}/pedidos`);
         if (!response.ok) throw new Error('Erro na resposta da API');
         vendasCache = await response.json();
         if (!vendasCache || vendasCache.length === 0) {
@@ -722,34 +711,32 @@
         vendasCache.forEach(venda => {
           let itens = [];
           try {
-            itens = typeof venda.Itens === 'string' ? JSON.parse(venda.Itens || '[]') : venda.Itens || [];
+            itens = typeof venda.itens === 'string' ? JSON.parse(venda.itens || '[]') : venda.itens || [];
           } catch (error) {
             console.error('Erro ao parsear itens da venda:', venda, error);
-            mostrarNotificacao('Aviso', `Erro ao processar os itens da venda ID ${venda.ID}. Verifique os dados (carregarVendas).`);
+            mostrarNotificacao('Aviso', `Erro ao processar os itens da venda ID ${venda.id}. Verifique os dados.`);
             itens = [];
           }
           const div = document.createElement('div');
           div.className = 'card';
           div.innerHTML = `
             <div class="p-4">
-              <p class="text-lg font-semibold">Cliente: ${venda.Cliente || 'Desconhecido'}</p>
-              <p>Data: ${new Date(venda.Data).toLocaleString()}</p>
-              <p>Total: R$ ${parseFloat(venda.Total || 0).toFixed(2)}</p>
+              <p class="text-lg font-semibold">Cliente: ${venda.cliente || 'Desconhecido'}</p>
+              <p>Data: ${new Date(venda.data).toLocaleString()}</p>
+              <p>Total: R$ ${parseFloat(venda.total || 0).toFixed(2)}</p>
               <p>Itens:</p>
               <ul class="list-disc pl-5">
                 ${itens.map(item => `<li>${item.nome} (x${item.quantidade})</li>`).join('')}
               </ul>
-              <button onclick="confirmarExclusao('${venda.ID}', 'Pedidos')" class="mt-4 custom-btn bg-red-500 text-white" aria-label="Excluir venda">
-                Excluir
-              </button>
+              <button onclick="confirmarExclusao('${venda.id}', 'pedidos')" class="mt-4 custom-btn bg-red-500 text-white" aria-label="Excluir venda">Excluir</button>
             </div>
           `;
           lista.appendChild(div);
         });
       } catch (error) {
         console.error('Erro ao carregar vendas:', error);
-        lista.innerHTML = '<p class="text-center text-gray-600">Erro ao carregar as vendas. Tente novamente mais tarde (carregarVendas).</p>';
-        mostrarNotificacao('Erro', 'Falha ao carregar as vendas. Verifique sua conexão ou a URL da API (carregarVendas).');
+        lista.innerHTML = '<p class="text-center text-gray-600">Erro ao carregar as vendas. Tente novamente mais tarde.</p>';
+        mostrarNotificacao('Erro', 'Falha ao carregar as vendas. Verifique sua conexão ou a URL da API.');
       } finally {
         spinner.classList.add('hidden');
       }
@@ -783,20 +770,20 @@
 
     window.editarPizza = function(id) {
       if (!verificarSessao()) return;
-      const pizza = pizzasCache.find(p => p.ID === id);
+      const pizza = pizzasCache.find(p => p.id === id);
       if (!pizza) {
-        mostrarNotificacao('Erro', 'Pizza não encontrada (editarPizza).');
+        mostrarNotificacao('Erro', 'Pizza não encontrada.');
         return;
       }
-      document.getElementById('pizzaId').value = pizza.ID;
-      document.getElementById('nomePizza').value = pizza.Nome;
-      document.getElementById('descricaoPizza').value = pizza.Descricao;
-      document.getElementById('precoPizza').value = pizza.Preco;
-      document.getElementById('categoriaPizza').value = pizza.Categoria || '';
-      document.getElementById('emPromocao').checked = pizza.EmPromocao === 'true' || pizza.EmPromocao === true;
+      document.getElementById('pizzaId').value = pizza.id;
+      document.getElementById('nomePizza').value = pizza.nome;
+      document.getElementById('descricaoPizza').value = pizza.descrição;
+      document.getElementById('precoPizza').value = pizza.preço;
+      document.getElementById('categoriaPizza').value = pizza.categoria || '';
+      document.getElementById('emPromocao').checked = pizza.emPromoção === 'true' || pizza.emPromoção === true;
       const preview = document.getElementById('previewImagem');
-      if (pizza.Imagem) {
-        preview.src = pizza.Imagem;
+      if (pizza.imagem) {
+        preview.src = pizza.imagem;
         preview.classList.remove('hidden');
         document.getElementById('removerImagem').classList.remove('hidden');
       } else {
@@ -816,20 +803,20 @@
       if (!verificarSessao()) return;
       const id = document.getElementById('pizzaId').value;
       const nome = document.getElementById('nomePizza').value.trim();
-      const descricao = document.getElementById('descricaoPizza').value.trim();
-      const preco = document.getElementById('precoPizza').value;
+      const descrição = document.getElementById('descricaoPizza').value.trim();
+      const preço = document.getElementById('precoPizza').value;
       const categoria = document.getElementById('categoriaPizza').value;
-      const emPromocao = document.getElementById('emPromocao').checked;
+      const emPromoção = document.getElementById('emPromocao').checked;
       const imagemFile = document.getElementById('imagemPizza').files[0];
       let imagem = document.getElementById('previewImagem').src;
 
-      if (!nome || !descricao || !preco || !categoria) {
-        mostrarNotificacao('Erro', 'Preencha todos os campos obrigatórios (salvarPizza).');
+      if (!nome || !descrição || !preço || !categoria) {
+        mostrarNotificacao('Erro', 'Preencha todos os campos obrigatórios.');
         return;
       }
 
-      if (parseFloat(preco) <= 0) {
-        mostrarNotificacao('Erro', 'O preço deve ser maior que zero (salvarPizza).');
+      if (parseFloat(preço) <= 0) {
+        mostrarNotificacao('Erro', 'O preço deve ser maior que zero.');
         return;
       }
 
@@ -838,7 +825,7 @@
         imagem = await new Promise((resolve) => {
           reader.onload = () => resolve(reader.result);
           reader.onerror = () => {
-            mostrarNotificacao('Erro', 'Erro ao processar a imagem (salvarPizza).');
+            mostrarNotificacao('Erro', 'Erro ao processar a imagem.');
             resolve(null);
           };
           reader.readAsDataURL(imagemFile);
@@ -848,21 +835,22 @@
       }
 
       const pizza = {
-        ID: id || Date.now().toString(),
-        Nome: nome,
-        Descricao: descricao,
-        Preco: parseFloat(preco).toFixed(2),
-        Categoria: categoria,
-        EmPromocao: emPromocao,
-        Imagem: imagem
+        id: id || Date.now().toString(),
+        nome: nome,
+        descrição: descrição,
+        preço: parseFloat(preço).toFixed(2),
+        categoria: categoria,
+        emPromoção: emPromoção,
+        imagem: imagem
       };
 
       try {
-        const method = id ? 'update' : 'add';
-        const response = await fetch(`${config.googleSheetsApiUrl}?method=${method}&sheet=Cardapio`, {
-          method: 'POST',
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `${config.sheetyBaseUrl}/cardapio/${id}` : `${config.sheetyBaseUrl}/cardapio`;
+        const response = await fetch(url, {
+          method: method,
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(pizza)
+          body: JSON.stringify({ cardapio: pizza })
         });
         if (!response.ok) throw new Error('Erro na resposta da API');
         mostrarNotificacao('Sucesso', 'Pizza salva com sucesso!');
@@ -878,7 +866,7 @@
         await carregarCardapio();
       } catch (error) {
         console.error('Erro ao salvar pizza:', error);
-        mostrarNotificacao('Erro', 'Falha ao salvar a pizza. Verifique sua conexão ou a URL da API (salvarPizza).');
+        mostrarNotificacao('Erro', 'Falha ao salvar a pizza. Verifique sua conexão ou a URL da API.');
       }
     };
 
@@ -889,17 +877,17 @@
       document.getElementById('modal-confirmacao').classList.remove('hidden');
       document.getElementById('modal-confirmar').onclick = async () => {
         try {
-          const response = await fetch(`${config.googleSheetsApiUrl}?method=delete&sheet=${sheet}&id=${id}`, {
-            method: 'POST'
+          const response = await fetch(`${config.sheetyBaseUrl}/${sheet.toLowerCase()}/${id}`, {
+            method: 'DELETE'
           });
           if (!response.ok) throw new Error('Erro na resposta da API');
           mostrarNotificacao('Sucesso', 'Item excluído com sucesso!');
-          if (sheet === 'Cardapio') await carregarCardapio();
+          if (sheet === 'Cardápio') await carregarCardapio();
           else if (sheet === 'Pedidos') await carregarVendas();
           await atualizarDashboard();
         } catch (error) {
           console.error('Erro ao excluir item:', error);
-          mostrarNotificacao('Erro', `Falha ao excluir o item da aba ${sheet}. Verifique sua conexão ou a URL da API (confirmarExclusao).`);
+          mostrarNotificacao('Erro', `Falha ao excluir o item da aba ${sheet}. Verifique sua conexão ou a URL da API.`);
         }
         fecharModal();
       };
@@ -922,11 +910,11 @@
     window.exportarDados = function(sheet) {
       if (!verificarSessao()) return;
       let data = [];
-      if (sheet === 'Cardapio') data = pizzasCache;
+      if (sheet === 'Cardápio') data = pizzasCache;
       else if (sheet === 'Pedidos') data = vendasCache;
 
       if (!data.length) {
-        mostrarNotificacao('Erro', `Nenhum dado disponível para exportar na aba ${sheet} (exportarDados).`);
+        mostrarNotificacao('Erro', `Nenhum dado disponível para exportar na aba ${sheet}.`);
         return;
       }
 
@@ -951,14 +939,14 @@
       const dataFim = document.getElementById('data-fim').value;
 
       if (!dataInicio || !dataFim) {
-        mostrarNotificacao('Erro', 'Por favor, selecione as datas de início e fim (gerarRelatorio).');
+        mostrarNotificacao('Erro', 'Por favor, selecione as datas de início e fim.');
         return;
       }
 
       const inicio = new Date(dataInicio);
       const fim = new Date(dataFim);
       if (inicio > fim) {
-        mostrarNotificacao('Erro', 'A data de início não pode ser maior que a data de fim (gerarRelatorio).');
+        mostrarNotificacao('Erro', 'A data de início não pode ser maior que a data de fim.');
         return;
       }
 
@@ -968,19 +956,19 @@
 
       if (tipo === 'vendas') {
         dados = vendasCache.filter(venda => {
-          const dataVenda = new Date(venda.Data);
+          const dataVenda = new Date(venda.data);
           return dataVenda >= inicio && dataVenda <= fim;
         });
-        cabecalho = ['ID', 'Cliente', 'Data', 'Total', 'Itens'];
+        cabecalho = ['id', 'cliente', 'data', 'total', 'itens'];
         nomeArquivo = 'relatorio_vendas.csv';
       } else if (tipo === 'pizzas') {
         const pizzasVendidas = {};
         vendasCache.forEach(venda => {
-          const dataVenda = new Date(venda.Data);
+          const dataVenda = new Date(venda.data);
           if (dataVenda >= inicio && dataVenda <= fim) {
             let itens = [];
             try {
-              itens = typeof venda.Itens === 'string' ? JSON.parse(venda.Itens || '[]') : venda.Itens || [];
+              itens = typeof venda.itens === 'string' ? JSON.parse(venda.itens || '[]') : venda.itens || [];
               itens.forEach(item => {
                 if (item && item.nome) {
                   pizzasVendidas[item.nome] = (pizzasVendidas[item.nome] || 0) + (item.quantidade || 0);
@@ -988,7 +976,7 @@
               });
             } catch (error) {
               console.error('Erro ao parsear itens para relatório:', venda, error);
-              mostrarNotificacao('Aviso', `Erro ao processar itens da venda ID ${venda.ID} para o relatório (gerarRelatorio).`);
+              mostrarNotificacao('Aviso', `Erro ao processar itens da venda ID ${venda.id} para o relatório.`);
             }
           }
         });
@@ -998,9 +986,9 @@
       } else if (tipo === 'clientes') {
         const clientesAtividade = {};
         vendasCache.forEach(venda => {
-          const dataVenda = new Date(venda.Data);
+          const dataVenda = new Date(venda.data);
           if (dataVenda >= inicio && dataVenda <= fim) {
-            const cliente = venda.Cliente || 'Desconhecido';
+            const cliente = venda.cliente || 'Desconhecido';
             clientesAtividade[cliente] = (clientesAtividade[cliente] || 0) + 1;
           }
         });
@@ -1010,7 +998,7 @@
       }
 
       if (!dados.length) {
-        mostrarNotificacao('Aviso', 'Nenhum dado encontrado para o período selecionado (gerarRelatorio).');
+        mostrarNotificacao('Aviso', 'Nenhum dado encontrado para o período selecionado.');
         return;
       }
 
