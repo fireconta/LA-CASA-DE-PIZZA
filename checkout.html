@@ -62,6 +62,30 @@
       max-width: 600px;
       width: 90%;
     }
+    .payment-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border: 2px solid #e5e7eb;
+      border-radius: 15px;
+      background-color: white;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .payment-btn:hover {
+      border-color: var(--cor-primaria, #FF4500);
+      background-color: #f5f5f5;
+    }
+    .payment-btn.selected {
+      border-color: var(--cor-primaria, #FF4500);
+      background-color: rgba(255, 69, 0, 0.05);
+    }
+    .payment-img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -95,12 +119,20 @@
         <div class="space-y-4">
           <input type="text" id="nome-cliente" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" placeholder="Seu nome" aria-label="Nome do cliente">
           <input type="text" id="endereco" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" placeholder="Endereço de entrega" aria-label="Endereço de entrega">
-          <select id="metodo-pagamento" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" aria-label="Método de pagamento">
-            <option value="">Selecione o método de pagamento</option>
-            <option value="pix">PIX</option>
-            <option value="cartao">Cartão</option>
-            <option value="dinheiro">Dinheiro</option>
-          </select>
+          <div class="mt-4">
+            <p class="text-lg font-semibold mb-2">Método de Pagamento</p>
+            <input type="hidden" id="metodo-pagamento" value="">
+            <div class="flex gap-4">
+              <button class="payment-btn" onclick="selecionarMetodoPagamento('pix')" data-metodo="pix" aria-label="Pagar com PIX">
+                <img src="https://logospng.org/wp-content/uploads/pix.png" alt="PIX" class="payment-img">
+                PIX
+              </button>
+              <button class="payment-btn" onclick="selecionarMetodoPagamento('cartao')" data-metodo="cartao" aria-label="Pagar com Cartão">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyPBBZO_YQYBYPLcnwQHp7DcMOaOengxiPS7AhVCpA_maHQSg-QtdJF0k&s=10" alt="Cartão" class="payment-img">
+                Cartão
+              </button>
+            </div>
+          </div>
           <div id="info-pix" class="hidden p-4 bg-gray-100 rounded-lg">
             <p class="font-semibold">Chave PIX:</p>
             <p id="pix-chave"></p>
@@ -108,13 +140,6 @@
           </div>
           <div id="info-cartao" class="hidden p-4 bg-gray-100 rounded-lg">
             <p>Você será redirecionado para a página de pagamento com cartão.</p>
-          </div>
-          <div id="info-dinheiro" class="hidden p-4 bg-gray-100 rounded-lg">
-            <p>Por favor, prepare o valor em dinheiro para a entrega.</p>
-            <p class="font-semibold">Total: R$ <span id="total-dinheiro">0.00</span></p>
-            <label class="block mt-2">Precisa de troco?</label>
-            <input type="number" id="valor-troco" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" placeholder="Valor para troco (R$)" step="0.01" aria-label="Valor para troco">
-            <p class="mt-2">Troco: R$ <span id="troco-calculado">0.00</span></p>
           </div>
           <button onclick="finalizarPedido()" class="w-full custom-btn bg-[var(--cor-primaria)] text-white font-semibold" aria-label="Finalizar pedido">
             Finalizar Pedido
@@ -165,9 +190,6 @@
 
     function initializeApp() {
       carregarCarrinho();
-      const metodoPagamento = document.getElementById('metodo-pagamento');
-      metodoPagamento.addEventListener('change', atualizarMetodoPagamento);
-      document.getElementById('valor-troco').addEventListener('input', calcularTroco);
     }
 
     function checkConfigAndInitialize() {
@@ -220,8 +242,6 @@
         lista.appendChild(div);
       });
       document.getElementById('carrinho-total').textContent = totalCarrinho.toFixed(2);
-      document.getElementById('total-dinheiro').textContent = totalCarrinho.toFixed(2);
-      calcularTroco();
     }
 
     function alterarQuantidade(index, delta) {
@@ -240,33 +260,33 @@
       carregarCarrinho();
     }
 
-    function atualizarMetodoPagamento() {
-      const metodo = document.getElementById('metodo-pagamento').value;
+    window.selecionarMetodoPagamento = function(metodo) {
+      document.getElementById('metodo-pagamento').value = metodo;
+      document.querySelectorAll('.payment-btn').forEach(btn => {
+        btn.classList.remove('selected');
+      });
+      document.querySelector(`.payment-btn[data-metodo="${metodo}"]`).classList.add('selected');
       document.getElementById('info-pix').classList.add('hidden');
       document.getElementById('info-cartao').classList.add('hidden');
-      document.getElementById('info-dinheiro').classList.add('hidden');
       if (metodo === 'pix') {
         document.getElementById('info-pix').classList.remove('hidden');
       } else if (metodo === 'cartao') {
         document.getElementById('info-cartao').classList.remove('hidden');
-      } else if (metodo === 'dinheiro') {
-        document.getElementById('info-dinheiro').classList.remove('hidden');
       }
-    }
-
-    function calcularTroco() {
-      const valorTroco = parseFloat(document.getElementById('valor-troco').value) || 0;
-      const troco = valorTroco - totalCarrinho;
-      document.getElementById('troco-calculado').textContent = troco >= 0 ? troco.toFixed(2) : '0.00';
-    }
+    };
 
     async function finalizarPedido() {
       const nomeCliente = document.getElementById('nome-cliente').value.trim();
       const endereco = document.getElementById('endereco').value.trim();
       const metodoPagamento = document.getElementById('metodo-pagamento').value;
 
-      if (!nomeCliente || !endereco || !metodoPagamento) {
+      if (!nomeCliente || !endereco) {
         mostrarNotificacao('Erro', 'Por favor, preencha todos os campos.');
+        return;
+      }
+
+      if (!metodoPagamento) {
+        mostrarNotificacao('Erro', 'Por favor, selecione um método de pagamento.');
         return;
       }
 
@@ -275,20 +295,11 @@
         return;
       }
 
-      if (metodoPagamento === 'dinheiro') {
-        const valorTroco = parseFloat(document.getElementById('valor-troco').value) || 0;
-        if (valorTroco > 0 && valorTroco < totalCarrinho) {
-          mostrarNotificacao('Erro', 'O valor para troco deve ser maior ou igual ao total do pedido.');
-          return;
-        }
-      }
-
       const pedido = {
         id: Date.now().toString(),
         cliente: nomeCliente,
         endereco: endereco,
         metodoPagamento: metodoPagamento,
-        troco: metodoPagamento === 'dinheiro' ? (parseFloat(document.getElementById('valor-troco').value) || 0) : null,
         itens: carrinho,
         total: totalCarrinho,
         data: new Date().toISOString()
