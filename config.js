@@ -1,7 +1,7 @@
 const config = {
   // Credenciais de administrador
   adminUsername: "admin",
-  adminPassword: "senha123",
+  adminPassword: "123",
 
   // URL da API (substitua pelo seu Google Apps Script URL)
   googleSheetsApiUrl: "https://script.google.com/macros/s/<SEU_ID>/exec",
