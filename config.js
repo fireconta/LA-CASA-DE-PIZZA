@@ -4,7 +4,7 @@ const config = {
   adminPassword: "senha123",
 
   // URL da API do Sheety
-  sheetyBaseUrl: 'https://api.sheety.co/48c651da8438926cad73dd17491b4695/laCasaDePizzasDb',
+  sheetyBaseUrl: 'https://api.sheety.co/48c651da8438926cad73dd17491b4695/laCasaDePizzasDb/cardapio',
 
   // Informações da pizzaria
   nomePizzaria: "La Casa de Pizzas",
