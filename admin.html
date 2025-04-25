@@ -341,11 +341,12 @@
       if (configLoaded) {
         initializeApp();
       } else {
-        setTimeout(() => {
-          if (typeof config === 'undefined') {
-            onConfigLoaded();
-          }
-        }, 1000);
+        const script = document.querySelector('script[src="config.js"]');
+        if (!script) {
+          console.error('Erro: Arquivo config.js não encontrado.');
+          mostrarNotificacao('Erro', 'Arquivo config.js não encontrado. Certifique-se de que ele está no mesmo diretório (DOMContentLoaded).');
+          document.getElementById('login').classList.remove('hidden');
+        }
       }
     });
 
@@ -355,6 +356,8 @@
         document.getElementById('painel').classList.remove('hidden');
         iniciarSessao();
         await carregarDadosIniciais();
+      } else {
+        document.getElementById('login').classList.remove('hidden');
       }
 
       const categoriaPizza = document.getElementById('categoriaPizza');
@@ -370,6 +373,9 @@
           option2.textContent = categoria;
           filtroCategoria.appendChild(option2);
         });
+      } else {
+        console.error('Erro: Categorias não encontradas no config.js.');
+        mostrarNotificacao('Erro', 'Categorias não encontradas. Verifique o arquivo config.js (initializeApp).');
       }
 
       document.getElementById('pesquisa-cardapio').addEventListener('input', filtrarCardapio);
@@ -598,7 +604,7 @@
       } catch (error) {
         console.error('Erro ao carregar cardápio:', error);
         lista.innerHTML = '<p class="text-center text-gray-600 col-span-full">Erro ao carregar o cardápio. Tente novamente mais tarde (carregarCardapio).</p>';
-        mostrarNotificacao('Erro', 'Falha ao carregar o cardápio. Verifique sua conexão (carregarCardapio).');
+        mostrarNotificacao('Erro', 'Falha ao carregar o cardápio. Verifique sua conexão ou a URL da API (carregarCardapio).');
       } finally {
         spinner.classList.add('hidden');
       }
@@ -647,7 +653,7 @@
       } catch (error) {
         console.error('Erro ao carregar vendas:', error);
         lista.innerHTML = '<p class="text-center text-gray-600">Erro ao carregar as vendas. Tente novamente mais tarde (carregarVendas).</p>';
-        mostrarNotificacao('Erro', 'Falha ao carregar as vendas. Verifique sua conexão (carregarVendas).');
+        mostrarNotificacao('Erro', 'Falha ao carregar as vendas. Verifique sua conexão ou a URL da API (carregarVendas).');
       } finally {
         spinner.classList.add('hidden');
       }
@@ -726,6 +732,11 @@
         return;
       }
 
+      if (parseFloat(preco) <= 0) {
+        mostrarNotificacao('Erro', 'O preço deve ser maior que zero (salvarPizza).');
+        return;
+      }
+
       if (imagemFile) {
         const reader = new FileReader();
         imagem = await new Promise((resolve) => {
@@ -771,7 +782,7 @@
         await carregarCardapio();
       } catch (error) {
         console.error('Erro ao salvar pizza:', error);
-        mostrarNotificacao('Erro', 'Falha ao salvar a pizza. Verifique sua conexão (salvarPizza).');
+        mostrarNotificacao('Erro', 'Falha ao salvar a pizza. Verifique sua conexão ou a URL da API (salvarPizza).');
       }
     };
 
@@ -789,9 +800,10 @@
           mostrarNotificacao('Sucesso', 'Item excluído com sucesso!');
           if (sheet === 'Cardapio') await carregarCardapio();
           else if (sheet === 'Pedidos') await carregarVendas();
+          await atualizarDashboard();
         } catch (error) {
           console.error('Erro ao excluir item:', error);
-          mostrarNotificacao('Erro', `Falha ao excluir o item da aba ${sheet}. Verifique sua conexão (confirmarExclusao).`);
+          mostrarNotificacao('Erro', `Falha ao excluir o item da aba ${sheet}. Verifique sua conexão ou a URL da API (confirmarExclusao).`);
         }
         fecharModal();
       };
@@ -824,7 +836,10 @@
 
       const csv = [
         Object.keys(data[0]).join(','),
-        ...data.map(row => Object.values(row).map(val => `"${val}"`).join(','))
+        ...data.map(row => Object.values(row).map(val => {
+          if (typeof val === 'object') return `"${JSON.stringify(val).replace(/"/g, '""')}"`;
+          return `"${val}"`;
+        }).join(','))
       ].join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
@@ -900,4 +915,53 @@
 
       if (!dados.length) {
         mostrarNotificacao('Aviso', 'Nenhum dado encontrado para o período selecionado (gerarRelatorio).');
-        return
+        return;
+      }
+
+      const resultado = document.getElementById('relatorios-resultado');
+      const conteudo = document.getElementById('relatorio-conteudo');
+      conteudo.innerHTML = '';
+      const tabela = document.createElement('table');
+      tabela.className = 'w-full text-left';
+      const thead = document.createElement('thead');
+      const trHead = document.createElement('tr');
+      cabecalho.forEach(col => {
+        const th = document.createElement('th');
+        th.className = 'p-2 border-b';
+        th.textContent = col;
+        trHead.appendChild(th);
+      });
+      thead.appendChild(trHead);
+      tabela.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      dados.forEach(row => {
+        const tr = document.createElement('tr');
+        cabecalho.forEach(col => {
+          const td = document.createElement('td');
+          td.className = 'p-2 border-b';
+          td.textContent = row[col] || '';
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      tabela.appendChild(tbody);
+      conteudo.appendChild(tabela);
+      resultado.classList.remove('hidden');
+
+      const csv = [
+        cabecalho.join(','),
+        ...dados.map(row => cabecalho.map(col => {
+          let val = row[col] || '';
+          if (typeof val === 'object') val = JSON.stringify(val).replace(/"/g, '""');
+          return `"${val}"`;
+        }).join(','))
+      ].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = nomeArquivo;
+      link.click();
+    };
+  </script>
+</body>
+</html>
