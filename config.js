@@ -11,7 +11,7 @@ const config = {
 
   // Informações da pizzaria
   pizzariaName: validateString('La Casa de Pizzas', 'Nome da pizzaria'), // Nome da pizzaria
-  logoUrl: validateUrl('https://imgur.com/a/ANag4EQ.jpeg', 'URL do logo'), // URL do logo
+  logoUrl: validateUrl('https://i.imgur.com/ANag4EQ.png', 'URL do logo'), // URL do logo
 
   // Links de contato e redes sociais
   whatsappNumber: validatePhone('(62) 99577-1104'), // Número de WhatsApp
