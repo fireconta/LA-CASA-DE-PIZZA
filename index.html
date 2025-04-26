@@ -44,9 +44,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title id="page-title">Cardápio - La Casa de Pizzas</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="config.js"></script>
-  <script src="cardapio.js"></script>
-  <script src="login.js"></script>
+  <script src="config.js" defer></script>
+  <script src="cardapio.js" defer></script>
+  <script src="login.js" defer></script>
   <style>
     body {
       background-color: var(--cor-fundo, #FFF8E7);
@@ -723,13 +723,6 @@
         <span id="user-greeting" class="user-greeting hidden"></span>
         <button id="login-btn" onclick="abrirModalLogin()" class="custom-btn" aria-label="Fazer login">Login</button>
         <button id="logout-btn" onclick="logout()" class="custom-btn hidden" aria-label="Sair">Sair</button>
-        <button onclick="window.location.href='checkout.html'" class="custom-btn" aria-label="Ir para o checkout">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-          Carrinho
-          <span id="cart-counter" class="cart-counter hidden">0</span>
-        </button>
       </div>
     </div>
   </header>
@@ -890,29 +883,24 @@
     let isLoginMode = true;
 
     function aplicarConfiguracoes() {
-      if (typeof config !== 'undefined') {
-        document.documentElement.style.setProperty('--cor-primaria', config.corPrimaria);
-        document.documentElement.style.setProperty('--cor-secundaria', config.corSecundaria);
-        document.documentElement.style.setProperty('--cor-fundo', config.corFundo);
-        document.documentElement.style.setProperty('--cor-texto', config.corTexto);
-        document.getElementById('page-title').textContent = `Cardápio - ${config.nomePizzaria}`;
-        document.getElementById('logo').src = config.logoUrl;
-        document.getElementById('nome-pizzaria').textContent = config.nomePizzaria;
-        document.getElementById('nome-pizzaria-footer').textContent = config.nomePizzaria;
-        document.getElementById('whatsapp-link').href = config.whatsappLink;
-        document.getElementById('whatsapp-numero').textContent = config.whatsapp;
-        document.getElementById('instagram-link').href = `https://instagram.com/${config.instagram.replace('@', '')}`;
-        document.getElementById('instagram-nome').textContent = config.instagram;
-      }
+      document.documentElement.style.setProperty('--cor-primaria', window.config?.corPrimaria || '#FF4500');
+      document.documentElement.style.setProperty('--cor-secundaria', window.config?.corSecundaria || '#FFD700');
+      document.documentElement.style.setProperty('--cor-fundo', window.config?.corFundo || '#FFF8E7');
+      document.documentElement.style.setProperty('--cor-texto', window.config?.corTexto || '#2D2D2D');
+      document.getElementById('page-title').textContent = `Cardápio - ${window.config?.nomePizzaria || 'La Casa de Pizzas'}`;
+      document.getElementById('logo').src = window.config?.logoUrl || 'https://i.imgur.com/3wbh5W3.jpeg';
+      document.getElementById('nome-pizzaria').textContent = window.config?.nomePizzaria || 'La Casa de Pizzas';
+      document.getElementById('nome-pizzaria-footer').textContent = window.config?.nomePizzaria || 'La Casa de Pizzas';
+      document.getElementById('whatsapp-link').href = window.config?.whatsappLink || 'https://api.whatsapp.com/send?phone=5562995771104&text=Olá,%20gostaria%20de%20fazer%20um%20pedido!';
+      document.getElementById('whatsapp-numero').textContent = window.config?.whatsapp || '(62) 99577-1104';
+      document.getElementById('instagram-link').href = window.config?.instagram ? `https://instagram.com/${window.config.instagram.replace('@', '')}` : 'https://instagram.com/lacasadepizza2025';
+      document.getElementById('instagram-nome').textContent = window.config?.instagram || '@lacasadepizza2025';
     }
 
     function atualizarContadorCarrinho() {
-      const cartCounter = document.getElementById('cart-counter');
       const floatingCartCounter = document.getElementById('floating-cart-counter');
       const totalItems = carrinho.reduce((sum, item) => sum + item.quantidade, 0);
-      cartCounter.textContent = totalItems;
       floatingCartCounter.textContent = totalItems;
-      cartCounter.classList.toggle('hidden', totalItems === 0);
       floatingCartCounter.classList.toggle('hidden', totalItems === 0);
       atualizarCarrinhoPreview();
     }
@@ -953,7 +941,7 @@
       const userGreeting = document.getElementById('user-greeting');
       const loginBtn = document.getElementById('login-btn');
       const logoutBtn = document.getElementById('logout-btn');
-      const usuario = getUsuarioAtual();
+      const usuario = typeof getUsuarioAtual === 'function' ? getUsuarioAtual() : null;
       if (usuario) {
         userGreeting.textContent = `Olá, ${usuario.nome}!`;
         userGreeting.classList.remove('hidden');
@@ -990,6 +978,10 @@
     }
 
     function fazerLogin() {
+      if (typeof verificarLogin !== 'function' || typeof adicionarUsuario !== 'function') {
+        mostrarNotificacao('Erro', 'Sistema de login não está disponível. Verifique se o arquivo login.js foi carregado corretamente.');
+        return;
+      }
       const nome = document.getElementById('login-nome').value.trim();
       const senha = document.getElementById('login-senha').value.trim();
 
@@ -1010,6 +1002,10 @@
     }
 
     function logout() {
+      if (typeof logout !== 'function') {
+        mostrarNotificacao('Erro', 'Sistema de logout não está disponível. Verifique se o arquivo login.js foi carregado corretamente.');
+        return;
+      }
       const resultado = logout();
       mostrarNotificacao('Sucesso', resultado.mensagem);
       atualizarUsuario();
@@ -1052,11 +1048,17 @@
     }
 
     function checkConfigAndInitialize() {
-      const maxAttempts = 10;
+      const maxAttempts = 20;
       let attempts = 0;
 
       const interval = setInterval(() => {
-        if (typeof config !== 'undefined' && typeof cardapio !== 'undefined' && typeof adicionarUsuario !== 'undefined') {
+        const scriptsLoaded = {
+          config: typeof window.config === 'object',
+          cardapio: typeof window.cardapio === 'object',
+          login: typeof window.adicionarUsuario === 'function'
+        };
+
+        if (scriptsLoaded.config && scriptsLoaded.cardapio && scriptsLoaded.login) {
           clearInterval(interval);
           aplicarConfiguracoes();
           atualizarContadorCarrinho();
@@ -1068,8 +1070,12 @@
           configurarFiltros();
         } else if (attempts >= maxAttempts) {
           clearInterval(interval);
-          console.error('Erro: Não foi possível carregar config.js, cardapio.js ou login.js após várias tentativas.');
-          mostrarNotificacao('Erro', 'Não foi possível carregar o cardápio. Verifique se os arquivos config.js, cardapio.js e login.js estão no mesmo diretório e se você está executando o projeto em um servidor local.');
+          const missingScripts = [];
+          if (!scriptsLoaded.config) missingScripts.push('config.js');
+          if (!scriptsLoaded.cardapio) missingScripts.push('cardapio.js');
+          if (!scriptsLoaded.login) missingScripts.push('login.js');
+          console.error('Erro: Não foi possível carregar os seguintes arquivos:', missingScripts.join(', '));
+          mostrarNotificacao('Erro', `Não foi possível carregar o cardápio. Os seguintes arquivos estão faltando ou não foram carregados corretamente: ${missingScripts.join(', ')}. Verifique se eles estão no mesmo diretório e se você está executando o projeto em um servidor local.`);
         }
         attempts++;
       }, 500);
@@ -1086,7 +1092,7 @@
       carouselInner.innerHTML = '';
       carouselDots.innerHTML = '';
 
-      combosItems = cardapio.filter(item => item.categoria === 'Combos');
+      combosItems = window.cardapio.filter(item => item.categoria === 'Combos');
       if (combosItems.length === 0) {
         document.querySelector('.combos-section').style.display = 'none';
         return;
@@ -1094,10 +1100,10 @@
 
       combosItems.forEach((combo, index) => {
         const precoOriginal = combo.itens.reduce((sum, itemId) => {
-          const item = cardapio.find(i => i.id === itemId);
-          return sum + item.preço;
+          const item = window.cardapio.find(i => i.id === itemId);
+          return sum + (item ? item.preço : 0);
         }, 0);
-        const desconto = Math.round(((precoOriginal - combo.preço) / precoOriginal) * 100);
+        const desconto = precoOriginal > 0 ? Math.round(((precoOriginal - combo.preço) / precoOriginal) * 100) : 0;
         const itemDiv = document.createElement('div');
         itemDiv.className = 'carousel-item';
         itemDiv.setAttribute('role', 'tabpanel');
@@ -1171,7 +1177,7 @@
       carouselInner.innerHTML = '';
       carouselDots.innerHTML = '';
 
-      promoItems = cardapio.filter(item => item.promocao && item.promocao.ativo && item.categoria !== 'Combos');
+      promoItems = window.cardapio.filter(item => item.promocao && item.promocao.ativo && item.categoria !== 'Combos');
       if (promoItems.length === 0) {
         document.querySelector('.promo-section').style.display = 'none';
         return;
@@ -1284,7 +1290,7 @@
       categoriasDiv.innerHTML = '';
 
       const itensPorCategoria = {};
-      cardapio.forEach(item => {
+      window.cardapio.forEach(item => {
         if (termo && !item.nome.toLowerCase().includes(termo) && !item.descrição.toLowerCase().includes(termo)) {
           return;
         }
@@ -1427,14 +1433,18 @@
     }
 
     window.adicionarAoCarrinho = function(id) {
-      const item = cardapio.find(p => p.id === id);
+      const item = window.cardapio.find(p => p.id === id);
+      if (!item) {
+        mostrarNotificacao('Erro', 'Item não encontrado.');
+        return;
+      }
       let itemToAdd = { ...item, quantidade: 1, tamanho: item.tamanhos[0].nome };
 
       if (item.categoria === 'Combos') {
         itemToAdd = { ...itemToAdd, itens: item.itens.map(itemId => {
-          const subItem = cardapio.find(i => i.id === itemId);
-          return { ...subItem, tamanho: subItem.tamanhos[0].nome };
-        }) };
+          const subItem = window.cardapio.find(i => i.id === itemId);
+          return subItem ? { ...subItem, tamanho: subItem.tamanhos[0].nome } : null;
+        }).filter(i => i !== null) };
       }
 
       const itemExistente = carrinho.find(i => i.id === id && i.tamanho === item.tamanhos[0].nome && !i.extras && !i.borda);
@@ -1473,9 +1483,9 @@
 
       if (selectedItem.categoria === 'Combos') {
         itemToAdd = { ...itemToAdd, itens: selectedItem.itens.map(itemId => {
-          const subItem = cardapio.find(i => i.id === itemId);
-          return { ...subItem, tamanho: subItem.tamanhos[0].nome };
-        }) };
+          const subItem = window.cardapio.find(i => i.id === itemId);
+          return subItem ? { ...subItem, tamanho: subItem.tamanhos[0].nome } : null;
+        }).filter(i => i !== null) };
       }
 
       const itemExistente = carrinho.find(item =>
