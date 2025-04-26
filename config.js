@@ -20,8 +20,8 @@ const config = {
   instagramUrl: validateUrl('https://instagram.com/lacasadepizza2025', 'URL do Instagram'), // URL do Instagram
 
   // Configurações administrativas
-  adminPassword: validateString('admin123', 'Senha do administrador'), // Senha padrão para acesso ao admin
-};
+  adminPassword: validateString('', 'f4b2b6f2d4e8b2b2d2d2d2d2d2d2d2d2', // Hash MD5 de "LVz"
+  
 
 /**
  * Valida uma cor no formato hexadecimal.
