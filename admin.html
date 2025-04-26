@@ -1,15 +1,61 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Área Administrativa - La Casa de Pizzas</title>
+  <script src="[invalid url, do not cite]
   <style>
     :root {
       --primary-color: #FF4500;
       --secondary-color: #FFD700;
       --background-color: #FFF8E7;
       --text-color: #2D2D2D;
+    }
+
+    .dark-mode {
+      --background-color: #1F2937;
+      --text-color: #F3F4F6;
+      --bg-white: #374151;
     }
 
     body {
@@ -19,13 +65,13 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
       margin: 0;
     }
 
     .container {
       text-align: center;
-      background-color: white;
+      background-color: var(--bg-white, white);
       padding: 30px;
       border-radius: 10px;
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
@@ -41,6 +87,7 @@
     h2 {
       margin-bottom: 20px;
       font-size: 24px;
+      color: var(--primary-color);
     }
 
     input[type="password"] {
@@ -62,12 +109,13 @@
       cursor: pointer;
       font-size: 16px;
       margin: 10px 5px;
-      transition: background-color 0.3s ease;
+      transition: background-color 0.3s ease, transform 0.1s ease;
     }
 
     button:hover:not(:disabled) {
       background-color: var(--secondary-color);
       color: var(--text-color);
+      transform: scale(1.05);
     }
 
     button:disabled {
@@ -101,24 +149,72 @@
       color: var(--secondary-color);
       text-decoration: underline;
     }
+
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+
+    .tooltip .tooltip-text {
+      visibility: hidden;
+      width: 200px;
+      background-color: #555;
+      color: #fff;
+      text-align: center;
+      border-radius: 5px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 20px;
+      }
+
+      .logo {
+        max-width: 120px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      input[type="password"] {
+        max-width: 200px;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <img id="logo" src="https://i.imgur.com/3wbh5W3.jpeg" alt="Logo da La Casa de Pizzas" class="logo">
+    <img id="logo" src="[invalid url, do not cite] alt="Logo da La Casa de Pizzas" class="logo">
     <h2>Área Administrativa</h2>
     <div>
-      <input type="password" id="admin-password" placeholder="Digite a senha" required>
+      <div class="tooltip">
+        <input type="password" id="admin-password" placeholder="Digite a senha" required aria-label="Senha administrativa">
+        <span class="tooltip-text">Insira a senha administrativa para acessar o dashboard.</span>
+      </div>
       <br>
-      <button id="login-button" onclick="validateAdmin()" disabled>Entrar</button>
+      <button id="login-button" onclick="validateAdmin()" disabled><i class="fas fa-sign-in-alt mr-2"></i>Entrar</button>
     </div>
     <p id="success-message">Acesso autorizado! Redirecionando...</p>
-    <p id="error-message">Senha incorreta! Tente novamente.</p>
-    <a href="index.html" class="back-link">Voltar para a página inicial</a>
+    <p id="error-message">A senha inserida está incorreta. Por favor, verifique e tente novamente.</p>
+    <a href="index.html" class="back-link"><i class="fas fa-arrow-left mr-2"></i>Voltar para a página inicial</a>
   </div>
 
   <script src="config.js" id="config-script"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.18.0/js/md5.min.js"></script>
+  <script src="[invalid url, do not cite]
   <script>
     // Função para verificar se o config.js foi carregado e aplicar configurações
     function initializeAdminPage() {
@@ -144,7 +240,7 @@
     }
 
     // Função para validar a senha administrativa
-    function validateAdmin() {
+    async function validateAdmin() {
       const inputPassword = document.getElementById("admin-password").value;
       const errorMessage = document.getElementById("error-message");
       const successMessage = document.getElementById("success-message");
@@ -158,39 +254,48 @@
       }
 
       loginButton.disabled = true;
-      loginButton.textContent = "Validando...";
+      loginButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Validando...';
 
       try {
-        const hashedInput = md5(inputPassword);
+        // Converte a senha inserida para hash SHA-256
+        const encoder = new TextEncoder();
+        const data = encoder.encode(inputPassword);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashedInput = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
         console.log("Senha inserida (hash):", hashedInput);
         console.log("Senha esperada (hash):", window.config.adminPassword);
 
+        // A senha "LVz" agora é armazenada como hash SHA-256
         if (hashedInput === window.config.adminPassword) {
           console.log("Autenticação bem-sucedida!");
           successMessage.style.display = "block";
           errorMessage.style.display = "none";
+          localStorage.setItem("adminToken", "authenticated");
           document.getElementById("admin-password").value = "";
           setTimeout(() => {
             window.location.href = "dashboard.html";
           }, 1000);
         } else {
           console.log("Senha incorreta!");
-          errorMessage.textContent = "Senha incorreta! Tente novamente.";
+          errorMessage.textContent = "A senha inserida está incorreta. Por favor, verifique e tente novamente.";
           errorMessage.style.display = "block";
           successMessage.style.display = "none";
           document.getElementById("admin-password").value = "";
           loginButton.disabled = false;
-          loginButton.textContent = "Entrar";
+          loginButton.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Entrar';
         }
       } catch (err) {
         console.error("Erro durante a validação:", err);
         errorMessage.textContent = "Erro durante a validação.";
         errorMessage.style.display = "block";
         loginButton.disabled = false;
-        loginButton.textContent = "Entrar";
+        loginButton.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Entrar';
       }
     }
 
+    // Aguarda o carregamento do config.js antes de inicializar a página
     const configScript = document.getElementById("config-script");
     configScript.onload = function() {
       console.log("Config.js foi carregado.");
@@ -204,6 +309,7 @@
       document.getElementById("login-button").disabled = true;
     };
 
+    // Permite login ao pressionar Enter
     document.getElementById("admin-password").addEventListener("keypress", function(event) {
       if (event.key === "Enter") {
         event.preventDefault();

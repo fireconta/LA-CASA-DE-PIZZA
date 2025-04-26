@@ -1,356 +1,199 @@
 /**
- * Lista de itens do cardápio da pizzaria.
- * Cada item contém informações como nome, categoria, preço, imagem, tamanhos disponíveis, etc.
- * Combos são itens especiais que agrupam outros itens do cardápio.
+ * Arquivo de dados do cardápio para a pizzaria "La Casa de Pizzas".
+ * Contém a lista inicial de itens do cardápio e funções para validação e carregamento.
+ * Os dados são sincronizados com o localStorage para persistência.
  */
-const cardapio = [
-  // Pizzas Salgadas
+
+/**
+ * Estrutura de um item do cardápio:
+ * @typedef {Object} CardapioItem
+ * @property {number} id - Identificador único do item (ex.: 1)
+ * @property {string} nome - Nome do item (ex.: "Pizza Margherita")
+ * @property {string} categoria - Categoria do item (ex.: "Salgadas", "Doces", "Vegetarianas", "Bebidas", "Combos")
+ * @property {number} preço - Preço base do item em reais (ex.: 29.90)
+ * @property {string} imagem - URL da imagem do item (ex.: "https://example.com/pizza.jpg")
+ * @property {string} descrição - Descrição do item (ex.: "Pizza clássica com molho de tomate, muçarela e manjericão")
+ * @property {string} ingredientes - Ingredientes separados por vírgula (ex.: "tomate, muçarela, manjericão")
+ * @property {Object} tamanhos - Objeto com tamanhos e preços adicionais (ex.: { "P": 20.00, "M": 29.90, "G": 39.90 })
+ * @property {Object} extrasDisponiveis - Objeto com extras e preços adicionais (ex.: { "Azeitonas": 3.00, "Chantilly": 5.00 })
+ * @property {number|null} avaliacao - Avaliação média do item (ex.: 4.5, ou null se não avaliado)
+ * @property {number} numAvaliacoes - Número de avaliações (ex.: 10)
+ */
+
+/**
+ * Valida um item do cardápio para garantir consistência.
+ * @param {CardapioItem} item - Item a ser validado
+ * @returns {boolean} - True se o item for válido, false caso contrário
+ */
+function validateCardapioItem(item) {
+  // Verifica campos obrigatórios
+  if (!item.id || typeof item.id !== 'number') {
+    console.error("Item inválido: ID deve ser um número.", item);
+    return false;
+  }
+  if (!item.nome || typeof item.nome !== 'string') {
+    console.error("Item inválido: Nome deve ser uma string.", item);
+    return false;
+  }
+  if (!item.categoria || !["Salgadas", "Doces", "Vegetarianas", "Bebidas", "Combos"].includes(item.categoria)) {
+    console.error("Item inválido: Categoria inválida.", item);
+    return false;
+  }
+  if (typeof item.preço !== 'number' || item.preço < 0) {
+    console.error("Item inválido: Preço deve ser um número positivo.", item);
+    return false;
+  }
+  if (!item.imagem || !/\.(jpeg|jpg|gif|png)$/i.test(item.imagem)) {
+    console.error("Item inválido: Imagem deve ser uma URL válida (jpeg, jpg, gif, png).", item);
+    return false;
+  }
+  if (!item.descrição || typeof item.descrição !== 'string') {
+    console.error("Item inválido: Descrição deve ser uma string.", item);
+    return false;
+  }
+  if (item.ingredientes && typeof item.ingredientes !== 'string') {
+    console.error("Item inválido: Ingredientes devem ser uma string.", item);
+    return false;
+  }
+  if (item.tamanhos) {
+    if (typeof item.tamanhos !== 'object') {
+      console.error("Item inválido: Tamanhos deve ser um objeto.", item);
+      return false;
+    }
+    for (let [size, price] of Object.entries(item.tamanhos)) {
+      if (typeof size !== 'string' || typeof price !== 'number' || price < 0) {
+        console.error("Item inválido: Tamanho ou preço inválido.", item);
+        return false;
+      }
+    }
+  }
+  if (item.extrasDisponiveis) {
+    if (typeof item.extrasDisponiveis !== 'object') {
+      console.error("Item inválido: ExtrasDisponiveis deve ser um objeto.", item);
+      return false;
+    }
+    for (let [extra, price] of Object.entries(item.extrasDisponiveis)) {
+      if (typeof extra !== 'string' || typeof price !== 'number' || price < 0) {
+        console.error("Item inválido: Extra ou preço inválido.", item);
+        return false;
+      }
+    }
+  }
+  if (item.avaliacao !== null && (typeof item.avaliacao !== 'number' || item.avaliacao < 0 || item.avaliacao > 5)) {
+    console.error("Item inválido: Avaliação deve ser um número entre 0 e 5 ou null.", item);
+    return false;
+  }
+  if (typeof item.numAvaliacoes !== 'number' || item.numAvaliacoes < 0) {
+    console.error("Item inválido: NumAvaliacoes deve ser um número não negativo.", item);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Valida o cardápio completo.
+ * @param {CardapioItem[]} cardapio - Lista de itens do cardápio
+ * @returns {CardapioItem[]} - Cardápio validado
+ */
+function validateCardapio(cardapio) {
+  if (!Array.isArray(cardapio)) {
+    console.error("Cardápio deve ser um array.");
+    return [];
+  }
+
+  const validCardapio = cardapio.filter(item => validateCardapioItem(item));
+  if (validCardapio.length !== cardapio.length) {
+    console.warn("Alguns itens do cardápio foram descartados por serem inválidos.");
+  }
+
+  return validCardapio;
+}
+
+// Cardápio inicial
+const initialCardapio = [
   {
     id: 1,
-    nome: "Margherita",
+    nome: "Pizza Margherita",
     categoria: "Salgadas",
-    preço: 45.00,
-    imagem: validateUrl("https://images.pexels.com/photos/2147491/pexels-photo-2147491.jpeg?auto=compress&cs=tinysrgb&w=300"),
-    descrição: "Pizza clássica com molho de tomate artesanal, muçarela de búfala e manjericão fresco colhido na hora.",
-    ingredientes: ["molho de tomate artesanal", "muçarela de búfala", "manjericão fresco", "azeite extra virgem"],
-    tamanhos: [
-      { nome: "Pequena", preço: 35.00 },
-      { nome: "Média", preço: 45.00 },
-      { nome: "Grande", preço: 55.00 },
-      { nome: "Família", preço: 65.00 },
-    ],
-    extrasDisponiveis: [
-      { nome: "Azeitonas Pretas", preço: 5.00 },
-      { nome: "Parmesão Ralado", preço: 7.00 },
-      { nome: "Rúcula Fresca", preço: 6.00 },
-      { nome: "Tomate Seco", preço: 8.00 },
-    ],
-    bordasDisponiveis: [
-      { nome: "Tradicional", preço: 0.00 },
-      { nome: "Catupiry", preço: 8.00 },
-      { nome: "Cheddar Cremoso", preço: 8.00 },
-      { nome: "Gorgonzola", preço: 10.00 },
-    ],
-    promocao: { ativo: true, precoPromocional: 40.00 },
+    preço: 29.90,
+    imagem: "[invalid url, do not cite]
+    descrição: "Pizza clássica com molho de tomate, muçarela e manjericão.",
+    ingredientes: "tomate, muçarela, manjericão",
+    tamanhos: { "P": 20.00, "M": 29.90, "G": 39.90 },
+    extrasDisponiveis: { "Azeitonas": 3.00, "Orégano Extra": 1.50 },
     avaliacao: 4.5,
-    numAvaliacoes: 120,
+    numAvaliacoes: 10
   },
   {
     id: 2,
-    nome: "Calabresa",
-    categoria: "Salgadas",
-    preço: 48.00,
-    imagem: validateUrl("https://images.pexels.com/photos/905847/pexels-photo-905847.jpeg?auto=compress&cs=tinysrgb&w=300"),
-    descrição: "Pizza tradicional com calabresa artesanal fatiada, cebola caramelizada e muçarela derretida, finalizada com orégano.",
-    ingredientes: ["molho de tomate", "calabresa artesanal", "cebola caramelizada", "muçarela", "orégano"],
-    tamanhos: [
-      { nome: "Pequena", preço: 38.00 },
-      { nome: "Média", preço: 48.00 },
-      { nome: "Grande", preço: 58.00 },
-      { nome: "Família", preço: 68.00 },
-    ],
-    extrasDisponiveis: [
-      { nome: "Orégano Extra", preço: 3.00 },
-      { nome: "Azeitonas Verdes", preço: 5.00 },
-      { nome: "Pimenta Calabresa", preço: 4.00 },
-      { nome: "Cebola Extra", preço: 5.00 },
-      { nome: "Bacon Crocante", preço: 7.00 },
-    ],
-    bordasDisponiveis: [
-      { nome: "Tradicional", preço: 0.00 },
-      { nome: "Catupiry", preço: 8.00 },
-      { nome: "Parmesão", preço: 9.00 },
-      { nome: "Cream Cheese", preço: 10.00 },
-    ],
-    promocao: null,
-    avaliacao: 4.2,
-    numAvaliacoes: 95,
+    nome: "Pizza Chocolate",
+    categoria: "Doces",
+    preço: 32.00,
+    imagem: "[invalid url, do not cite]
+    descrição: "Pizza doce com chocolate derretido e morangos.",
+    ingredientes: "chocolate, morangos",
+    tamanhos: { "P": 22.00, "M": 32.00, "G": 42.00 },
+    extrasDisponiveis: { "Chantilly": 5.00, "Granulado": 2.00 },
+    avaliacao: null,
+    numAvaliacoes: 0
   },
   {
     id: 3,
-    nome: "Quatro Queijos",
-    categoria: "Salgadas",
-    preço: 52.00,
-    imagem: validateUrl("https://images.pexels.com/photos/367915/pexels-photo-367915.jpeg?auto=compress&cs=tinysrgb&w=300"),
-    descrição: "Pizza cremosa com uma combinação de muçarela, gorgonzola, parmesão e catupiry, finalizada com um toque de azeite trufado.",
-    ingredientes: ["molho de tomate", "muçarela", "gorgonzola", "parmesão", "catupiry", "azeite trufado"],
-    tamanhos: [
-      { nome: "Pequena", preço: 42.00 },
-      { nome: "Média", preço: 52.00 },
-      { nome: "Grande", preço: 62.00 },
-      { nome: "Família", preço: 72.00 },
-    ],
-    extrasDisponiveis: [
-      { nome: "Manjericão", preço: 4.00 },
-      { nome: "Tomate Seco", preço: 8.00 },
-      { nome: "Azeitonas Pretas", preço: 5.00 },
-      { nome: "Mel", preço: 6.00 },
-    ],
-    bordasDisponiveis: [
-      { nome: "Tradicional", preço: 0.00 },
-      { nome: "Catupiry", preço: 8.00 },
-      { nome: "Cheddar", preço: 8.00 },
-      { nome: "Gorgonzola", preço: 10.00 },
-    ],
-    promocao: { ativo: true, precoPromocional: 48.00 },
-    avaliacao: 4.7,
-    numAvaliacoes: 150,
+    nome: "Pizza Vegetariana",
+    categoria: "Vegetarianas",
+    preço: 28.50,
+    imagem: "[invalid url, do not cite]
+    descrição: "Pizza com vegetais frescos e queijo vegano.",
+    ingredientes: "brócolis, cenoura, queijo vegano",
+    tamanhos: { "P": 19.00, "M": 28.50, "G": 38.00 },
+    extrasDisponiveis: { "Azeite de Oliva": 2.00 },
+    avaliacao: 4.0,
+    numAvaliacoes: 5
   },
-  // Pizzas Doces
   {
     id: 4,
-    nome: "Chocolate com Morango",
-    categoria: "Doces",
-    preço: 50.00,
-    imagem: validateUrl("https://images.pexels.com/photos/230477/pexels-photo-230477.jpeg?auto=compress&cs=tinysrgb&w=300"),
-    descrição: "Pizza doce com chocolate belga derretido, morangos frescos e um toque de açúcar de confeiteiro.",
-    ingredientes: ["chocolate belga", "morangos frescos", "creme de leite", "açúcar de confeiteiro"],
-    tamanhos: [
-      { nome: "Pequena", preço: 40.00 },
-      { nome: "Média", preço: 50.00 },
-      { nome: "Grande", preço: 60.00 },
-    ],
-    extrasDisponiveis: [
-      { nome: "Granulado Colorido", preço: 4.00 },
-      { nome: "Leite Condensado", preço: 6.00 },
-      { nome: "Chantilly", preço: 7.00 },
-      { nome: "Amêndoas Laminadas", preço: 8.00 },
-      { nome: "Calda de Caramelo", preço: 6.00 },
-    ],
-    bordasDisponiveis: [
-      { nome: "Chocolate", preço: 8.00 },
-      { nome: "Doce de Leite", preço: 8.00 },
-    ],
-    promocao: { ativo: true, precoPromocional: 45.00 },
-    avaliacao: 4.8,
-    numAvaliacoes: 80,
+    nome: "Coca-Cola 2L",
+    categoria: "Bebidas",
+    preço: 8.00,
+    imagem: "[invalid url, do not cite]
+    descrição: "Refrigerante Coca-Cola 2 litros.",
+    ingredientes: "",
+    tamanhos: {},
+    extrasDisponiveis: {},
+    avaliacao: null,
+    numAvaliacoes: 0
   },
   {
     id: 5,
-    nome: "Banana com Canela",
-    categoria: "Doces",
-    preço: 48.00,
-    imagem: validateUrl("https://images.pexels.com/photos/3338681/pexels-photo-3338681.jpeg?auto=compress&cs=tinysrgb&w=300"),
-    descrição: "Pizza doce com banana caramelizada, canela em pó e uma generosa camada de doce de leite.",
-    ingredientes: ["banana caramelizada", "canela em pó", "doce de leite", "massa doce"],
-    tamanhos: [
-      { nome: "Pequena", preço: 38.00 },
-      { nome: "Média", preço: 48.00 },
-      { nome: "Grande", preço: 58.00 },
-    ],
-    extrasDisponiveis: [
-      { nome: "Leite Condensado", preço: 6.00 },
-      { nome: "Castanha de Caju", preço: 7.00 },
-      { nome: "Chantilly", preço: 7.00 },
-      { nome: "Calda de Chocolate", preço: 6.00 },
-    ],
-    bordasDisponiveis: [
-      { nome: "Chocolate", preço: 8.00 },
-      { nome: "Doce de Leite", preço: 8.00 },
-    ],
-    promocao: null,
-    avaliacao: 4.6,
-    numAvaliacoes: 60,
-  },
-  // Pizzas Vegetarianas
-  {
-    id: 6,
-    nome: "Vegetariana Suprema",
-    categoria: "Vegetarianas",
-    preço: 47.00,
-    imagem: validateUrl("https://images.pexels.com/photos/1146760/pexels-photo-1146760.jpeg?auto=compress&cs=tinysrgb&w=300"),
-    descrição: "Pizza com brócolis, pimentão vermelho e amarelo, tomate cereja, muçarela e um toque de azeite de ervas.",
-    ingredientes: ["molho de tomate", "brócolis", "pimentão vermelho", "pimentão amarelo", "tomate cereja", "muçarela", "azeite de ervas"],
-    tamanhos: [
-      { nome: "Pequena", preço: 37.00 },
-      { nome: "Média", preço: 47.00 },
-      { nome: "Grande", preço: 57.00 },
-      { nome: "Família", preço: 67.00 },
-    ],
-    extrasDisponiveis: [
-      { nome: "Azeitonas Verdes", preço: 5.00 },
-      { nome: "Rúcula", preço: 6.00 },
-      { nome: "Cogumelos Frescos", preço: 7.00 },
-      { nome: "Queijo Vegano Extra", preço: 8.00 },
-      { nome: "Alho Poró", preço: 6.00 },
-    ],
-    bordasDisponiveis: [
-      { nome: "Tradicional", preço: 0.00 },
-      { nome: "Catupiry", preço: 8.00 },
-      { nome: "Cream Cheese", preço: 10.00 },
-    ],
-    promocao: null,
-    avaliacao: 4.3,
-    numAvaliacoes: 65,
-  },
-  {
-    id: 7,
-    nome: "Rúcula com Tomate Seco",
-    categoria: "Vegetarianas",
-    preço: 49.00,
-    imagem: validateUrl("https://images.pexels.com/photos/5946625/pexels-photo-5946625.jpeg?auto=compress&cs=tinysrgb&w=300"),
-    descrição: "Pizza leve com rúcula fresca, tomate seco, muçarela de búfala e parmesão, regada com azeite extra virgem.",
-    ingredientes: ["molho de tomate", "rúcula", "tomate seco", "muçarela de búfala", "parmesão", "azeite extra virgem"],
-    tamanhos: [
-      { nome: "Pequena", preço: 39.00 },
-      { nome: "Média", preço: 49.00 },
-      { nome: "Grande", preço: 59.00 },
-      { nome: "Família", preço: 69.00 },
-    ],
-    extrasDisponiveis: [
-      { nome: "Azeitonas Pretas", preço: 5.00 },
-      { nome: "Castanhas", preço: 7.00 },
-      { nome: "Manjericão", preço: 4.00 },
-      { nome: "Pesto de Manjericão", preço: 6.00 },
-    ],
-    bordasDisponiveis: [
-      { nome: "Tradicional", preço: 0.00 },
-      { nome: "Catupiry", preço: 8.00 },
-      { nome: "Gorgonzola", preço: 10.00 },
-    ],
-    promocao: { ativo: true, precoPromocional: 44.00 },
-    avaliacao: 4.4,
-    numAvaliacoes: 70,
-  },
-  // Bebidas
-  {
-    id: 8,
-    nome: "Coca-Cola",
-    categoria: "Bebidas",
-    preço: 12.00,
-    imagem: validateUrl("https://images.pexels.com/photos/4119857/pexels-photo-4119857.jpeg?auto=compress&cs=tinysrgb&w=300"),
-    descrição: "Refrigerante Coca-Cola gelado, perfeito para acompanhar sua pizza.",
-    ingredientes: [],
-    tamanhos: [
-      { nome: "Lata 350ml", preço: 6.00 },
-      { nome: "Garrafa 600ml", preço: 8.00 },
-      { nome: "Garrafa 2L", preço: 12.00 },
-    ],
-    extrasDisponiveis: [
-      { nome: "Gelo Extra", preço: 2.00 },
-      { nome: "Limão", preço: 2.00 },
-    ],
-    bordasDisponiveis: [],
-    promocao: null,
-    avaliacao: 4.0,
-    numAvaliacoes: 50,
-  },
-  {
-    id: 9,
-    nome: "Suco de Laranja Natural",
-    categoria: "Bebidas",
-    preço: 10.00,
-    imagem: validateUrl("https://images.pexels.com/photos/161588/pexels-photo-161588.jpeg?auto=compress&cs=tinysrgb&w=300"),
-    descrição: "Suco de laranja natural, feito na hora, refrescante e sem açúcar adicionado.",
-    ingredientes: ["laranja"],
-    tamanhos: [
-      { nome: "Copo 300ml", preço: 8.00 },
-      { nome: "Jarra 1L", preço: 18.00 },
-    ],
-    extrasDisponiveis: [
-      { nome: "Gelo Extra", preço: 2.00 },
-      { nome: "Açúcar", preço: 1.00 },
-      { nome: "Hortelã", preço: 2.00 },
-      { nome: "Morango", preço: 3.00 },
-    ],
-    bordasDisponiveis: [],
-    promocao: { ativo: true, precoPromocional: 8.00 },
-    avaliacao: 4.5,
-    numAvaliacoes: 40,
-  },
-  {
-    id: 10,
-    nome: "Água com Gás",
-    categoria: "Bebidas",
-    preço: 6.00,
-    imagem: validateUrl("https://images.pexels.com/photos/1446476/pexels-photo-1446476.jpeg?auto=compress&cs=tinysrgb&w=300"),
-    descrição: "Água com gás gelada, ideal para acompanhar sua refeição.",
-    ingredientes: [],
-    tamanhos: [
-      { nome: "Garrafa 500ml", preço: 6.00 },
-      { nome: "Garrafa 1L", preço: 10.00 },
-    ],
-    extrasDisponiveis: [
-      { nome: "Gelo Extra", preço: 2.00 },
-      { nome: "Limão", preço: 2.00 },
-      { nome: "Hortelã", preço: 2.00 },
-    ],
-    bordasDisponiveis: [],
-    promocao: null,
-    avaliacao: 4.0,
-    numAvaliacoes: 30,
-  },
-  // Combos
-  {
-    id: 11,
     nome: "Combo Família",
     categoria: "Combos",
-    preço: 110.00,
-    imagem: validateUrl("https://images.pexels.com/photos/2232/pexels-photo-2232.jpeg?auto=compress&cs=tinysrgb&w=300"),
-    descrição: "Perfeito para a família! Inclui duas pizzas grandes à sua escolha e uma Coca-Cola 2L.",
-    itens: [1, 2, 8],
-    tamanhos: [],
-    extrasDisponiveis: [
-      { nome: "Adicionar Sobremesa", preço: 15.00 },
-      { nome: "Batata Frita Extra", preço: 12.00 },
-      { nome: "Molho Extra", preço: 5.00 },
-    ],
-    bordasDisponiveis: [],
-    promocao: { ativo: true, precoPromocional: 99.00 },
-    avaliacao: 4.9,
-    numAvaliacoes: 200,
-  },
-  {
-    id: 12,
-    nome: "Combo Doce e Salgado",
-    categoria: "Combos",
-    preço: 85.00,
-    imagem: validateUrl("https://images.pexels.com/photos/825661/pexels-photo-825661.jpeg?auto=compress&cs=tinysrgb&w=300"),
-    descrição: "Uma pizza salgada média, uma pizza doce média e um suco de laranja 1L para acompanhar.",
-    itens: [2, 4, 9],
-    tamanhos: [],
-    extrasDisponiveis: [
-      { nome: "Adicionar Sobremesa", preço: 15.00 },
-      { nome: "Batata Frita Extra", preço: 12.00 },
-      { nome: "Molho Extra", preço: 5.00 },
-      { nome: "Chantilly Extra", preço: 7.00 },
-    ],
-    bordasDisponiveis: [],
-    promocao: null,
-    avaliacao: 4.7,
-    numAvaliacoes: 150,
-  },
-  {
-    id: 13,
-    nome: "Combo Vegetariano",
-    categoria: "Combos",
-    preço: 90.00,
-    imagem: validateUrl("https://images.pexels.com/photos/723198/pexels-photo-723198.jpeg?auto=compress&cs=tinysrgb&w=300"),
-    descrição: "Duas pizzas vegetarianas médias e uma jarra de suco de laranja natural 1L.",
-    itens: [6, 7, 9],
-    tamanhos: [],
-    extrasDisponiveis: [
-      { nome: "Adicionar Sobremesa", preço: 15.00 },
-      { nome: "Salada Extra", preço: 10.00 },
-      { nome: "Molho Extra", preço: 5.00 },
-    ],
-    bordasDisponiveis: [],
-    promocao: { ativo: true, precoPromocional: 80.00 },
-    avaliacao: 4.6,
-    numAvaliacoes: 90,
-  },
+    preço: 59.90,
+    imagem: "[invalid url, do not cite]
+    descrição: "Pizza grande salgada, pizza média doce e 2L de refrigerante.",
+    ingredientes: "pizza salgada, pizza doce, refrigerante",
+    tamanhos: {},
+    extrasDisponiveis: { "Borda Recheada": 10.00 },
+    avaliacao: 4.8,
+    numAvaliacoes: 15
+  }
 ];
 
-// Função para validar URLs de imagens
-function validateUrl(url) {
-  try {
-    new URL(url);
-    return url;
-  } catch (e) {
-    console.error(`URL inválida: ${url}`);
-    return "https://via.placeholder.com/300x200.png?text=Imagem+Indisponível";
+// Carrega o cardápio do localStorage ou usa o inicial
+let cardapio = [];
+try {
+  const storedData = localStorage.getItem("cardapioData");
+  if (storedData) {
+    cardapio = validateCardapio(JSON.parse(storedData));
   }
+  if (!cardapio.length) {
+    cardapio = validateCardapio(initialCardapio);
+    localStorage.setItem("cardapioData", JSON.stringify(cardapio));
+  }
+} catch (err) {
+  console.error("Erro ao carregar o cardápio do localStorage:", err);
+  cardapio = validateCardapio(initialCardapio);
+  localStorage.setItem("cardapioData", JSON.stringify(cardapio));
 }
 
-// Exporta o cardápio para uso em outros arquivos
+// Exporta o cardápio para uso global
 window.cardapio = cardapio;
