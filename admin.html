@@ -151,7 +151,7 @@
       <br>
       <button id="login-button" onclick="validateAdmin()">Entrar</button>
     </div>
-    <p id="success-message">Acesso autorizado! Redirecionando...</p>
+    <p id="success-message">Acesso autorizado! Bem-vindo.</p>
     <p id="error-message">Senha incorreta! Tente novamente.</p>
     <a href="index.html" class="back-link">Voltar para a página inicial</a>
   </div>
@@ -159,12 +159,6 @@
   <script src="config.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.18.0/js/md5.min.js"></script>
   <script>
-    // Aplica as cores do config.js dinamicamente às variáveis CSS
-    document.documentElement.style.setProperty('--primary-color', window.config.primaryColor);
-    document.documentElement.style.setProperty('--secondary-color', window.config.secondaryColor);
-    document.documentElement.style.setProperty('--background-color', window.config.backgroundColor);
-    document.documentElement.style.setProperty('--text-color', window.config.textColor);
-
     // Função para validar a senha administrativa
     function validateAdmin() {
       const inputPassword = document.getElementById("admin-password").value;
@@ -172,30 +166,58 @@
       const successMessage = document.getElementById("success-message");
       const loginButton = document.getElementById("login-button");
 
+      // Verifica se o config.js foi carregado corretamente
+      if (!window.config || !window.config.adminPassword) {
+        console.error("Erro: Config não foi carregado corretamente.");
+        errorMessage.textContent = "Erro: Configuração não carregada.";
+        errorMessage.style.display = "block";
+        return;
+      }
+
       // Desativa o botão para evitar múltiplos cliques
       loginButton.disabled = true;
       loginButton.textContent = "Validando...";
 
-      // Converte a senha inserida para hash MD5
-      const hashedInput = md5(inputPassword);
+      try {
+        // Converte a senha inserida para hash MD5
+        const hashedInput = md5(inputPassword);
+        console.log("Senha inserida (hash):", hashedInput);
+        console.log("Senha esperada (hash):", window.config.adminPassword);
 
-      // Compara com a senha armazenada no config.js
-      if (hashedInput === window.config.adminPassword) {
-        successMessage.style.display = "block";
-        errorMessage.style.display = "none";
-        // Simula um redirecionamento após 1 segundo
-        setTimeout(() => {
-          // Redireciona para uma página de dashboard (pode ser criada futuramente)
-          window.location.href = "dashboard.html"; // Se dashboard.html não existir, pode ser substituído por outra ação
-        }, 1000);
-      } else {
+        // Compara com a senha armazenada no config.js
+        if (hashedInput === window.config.adminPassword) {
+          console.log("Autenticação bem-sucedida!");
+          successMessage.style.display = "block";
+          errorMessage.style.display = "none";
+          // Limpa o campo de senha
+          document.getElementById("admin-password").value = "";
+          // Aqui você pode adicionar um redirecionamento ou carregar o painel admin
+          // Por exemplo: window.location.href = "dashboard.html";
+        } else {
+          console.log("Senha incorreta!");
+          errorMessage.style.display = "block";
+          successMessage.style.display = "none";
+          document.getElementById("admin-password").value = "";
+        }
+      } catch (err) {
+        console.error("Erro durante a validação:", err);
+        errorMessage.textContent = "Erro durante a validação.";
         errorMessage.style.display = "block";
-        successMessage.style.display = "none";
-        document.getElementById("admin-password").value = "";
-        // Reativa o botão
+      } finally {
+        // Reativa o botão independentemente do resultado
         loginButton.disabled = false;
         loginButton.textContent = "Entrar";
       }
+    }
+
+    // Aplica as cores do config.js dinamicamente às variáveis CSS
+    if (window.config) {
+      document.documentElement.style.setProperty('--primary-color', window.config.primaryColor);
+      document.documentElement.style.setProperty('--secondary-color', window.config.secondaryColor);
+      document.documentElement.style.setProperty('--background-color', window.config.backgroundColor);
+      document.documentElement.style.setProperty('--text-color', window.config.textColor);
+    } else {
+      console.error("Config.js não foi carregado corretamente.");
     }
 
     // Permite login ao pressionar Enter
