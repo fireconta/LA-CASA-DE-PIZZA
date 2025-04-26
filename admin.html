@@ -42,614 +42,169 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel Administrativo - La Casa de Pizzas</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="config.js" defer></script>
-  <script src="cardapio.js" defer></script>
+  <title>Área Administrativa - La Casa de Pizzas</title>
   <style>
     :root {
-      --cor-primaria: #FF4500;
-      --cor-secundaria: #FFD700;
-      --cor-fundo: #FFF8E7;
-      --cor-texto: #2D2D2D;
+      --primary-color: #FF4500;
+      --secondary-color: #FFD700;
+      --background-color: #FFF8E7;
+      --text-color: #2D2D2D;
     }
+
     body {
-      background-color: var(--cor-fundo);
-      color: var(--cor-texto);
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    .fade-in {
-      animation: fadeIn 0.5s ease-in;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .custom-btn {
-      transition: all 0.3s ease;
-    }
-    .custom-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.7);
+      font-family: Arial, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
       display: flex;
-      align-items: center;
       justify-content: center;
-      z-index: 50;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
     }
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 15px;
-      max-width: 600px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-      position: relative;
+
+    .container {
+      text-align: center;
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
     }
-    .item-card {
-      transition: all 0.3s ease;
+
+    .logo {
+      max-width: 150px;
+      margin-bottom: 20px;
     }
-    .item-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 24px;
     }
-    @media (max-width: 640px) {
-      .modal-content {
-        width: 95%;
-        padding: 1rem;
-      }
-      .item-grid {
-        grid-template-columns: 1fr;
-      }
+
+    input[type="password"] {
+      padding: 10px;
+      margin: 10px 0;
+      width: 100%;
+      max-width: 250px;
+      border: 2px solid var(--primary-color);
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--secondary-color);
+      color: var(--text-color);
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    #error-message, #success-message {
+      margin-top: 10px;
+      font-size: 14px;
+      display: none;
+    }
+
+    #error-message {
+      color: red;
+    }
+
+    #success-message {
+      color: green;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 15px;
+      color: var(--primary-color);
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .back-link:hover {
+      color: var(--secondary-color);
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <header class="bg-[var(--cor-primaria)] text-white p-4 shadow-lg sticky top-0 z-40">
-    <div class="container mx-auto px-4 flex justify-between items-center">
-      <h1 class="text-2xl font-bold">Painel Administrativo</h1>
-      <button onclick="logoutAdmin()" class="custom-btn bg-white text-[var(--cor-primaria)] px-4 py-2 rounded-lg" aria-label="Sair do painel administrativo">Sair</button>
+  <div class="container">
+    <img id="logo" src="https://i.imgur.com/3wbh5W3.jpeg" alt="Logo da La Casa de Pizzas" class="logo">
+    <h2>Área Administrativa</h2>
+    <div>
+      <input type="password" id="admin-password" placeholder="Digite a senha" required>
+      <br>
+      <button id="login-button" onclick="validateAdmin()">Entrar</button>
     </div>
-  </header>
-
-  <section id="login-section" class="container mx-auto px-4 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-      <h3 class="text-xl font-semibold mb-4 text-center">Acesso Administrativo</h3>
-      <p class="text-center mb-4">Digite a Senha</p>
-      <input type="password" id="admin-password" placeholder="Senha administrativa" class="w-full p-2 border rounded mb-4" aria-label="Senha administrativa">
-      <p id="login-error" class="text-red-500 text-sm text-center mb-4 hidden"></p>
-      <button onclick="loginAdmin()" class="custom-btn w-full bg-[var(--cor-primaria)] text-white p-2 rounded-lg" aria-label="Entrar no painel administrativo">Entrar</button>
-    </div>
-  </section>
-
-  <section id="admin-content" class="container mx-auto px-4 py-8 hidden">
-    <div class="admin-section">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold">Gerenciar Cardápio</h2>
-        <button onclick="abrirModalAdicionar()" class="custom-btn bg-[var(--cor-primaria)] text-white px-4 py-2 rounded-lg" aria-label="Adicionar novo item ao cardápio">Adicionar Item</button>
-      </div>
-      <div class="mb-6 flex flex-col sm:flex-row gap-4">
-        <input type="text" id="search-input" placeholder="Pesquisar itens..." class="flex-1 p-2 border rounded-lg" aria-label="Pesquisar itens no cardápio">
-        <select id="sort-select" class="p-2 border rounded-lg" aria-label="Ordenar itens">
-          <option value="nome-asc">Nome (A-Z)</option>
-          <option value="nome-desc">Nome (Z-A)</option>
-          <option value="preco-asc">Preço (Crescente)</option>
-          <option value="preco-desc">Preço (Decrescente)</option>
-        </select>
-      </div>
-      <div id="item-grid" class="item-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-    </div>
-  </section>
-
-  <div id="modal-item" class="modal hidden" role="dialog" aria-labelledby="modal-title">
-    <div class="modal-content">
-      <button class="close-btn absolute top-4 right-4 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center" onclick="fecharModalItem()" aria-label="Fechar modal">X</button>
-      <h3 id="modal-title" class="text-xl font-semibold mb-4 text-center"></h3>
-      <p id="modal-error" class="text-red-500 text-sm text-center mb-4 hidden"></p>
-      <div class="space-y-4">
-        <div>
-          <label for="item-nome" class="block font-medium">Nome:</label>
-          <input type="text" id="item-nome" placeholder="Nome do item" class="w-full p-2 border rounded-lg" aria-label="Nome do item">
-        </div>
-        <div>
-          <label for="item-categoria" class="block font-medium">Categoria:</label>
-          <select id="item-categoria" class="w-full p-2 border rounded-lg" aria-label="Categoria do item">
-            <option value="Salgadas">Salgadas</option>
-            <option value="Doces">Doces</option>
-            <option value="Vegetarianas">Vegetarianas</option>
-            <option value="Bebidas">Bebidas</option>
-            <option value="Combos">Combos</option>
-          </select>
-        </div>
-        <div>
-          <label for="item-preco" class="block font-medium">Preço (R$):</label>
-          <input type="number" id="item-preco" step="0.01" placeholder="Preço" class="w-full p-2 border rounded-lg" aria-label="Preço do item">
-        </div>
-        <div>
-          <label for="item-imagem" class="block font-medium">URL da Imagem:</label>
-          <input type="text" id="item-imagem" placeholder="URL da imagem" class="w-full p-2 border rounded-lg mb-2" aria-label="URL da imagem do item">
-          <img id="image-preview" src="" alt="Pré-visualização da imagem" class="w-full h-32 object-cover rounded-lg hidden">
-        </div>
-        <div>
-          <label for="item-descricao" class="block font-medium">Descrição:</label>
-          <textarea id="item-descricao" placeholder="Descrição do item" rows="3" class="w-full p-2 border rounded-lg" aria-label="Descrição do item"></textarea>
-        </div>
-        <div class="ingredient-list">
-          <label for="item-ingredientes" class="block font-medium">Ingredientes (separados por vírgula):</label>
-          <input type="text" id="item-ingredientes" placeholder="Ex: molho de tomate, muçarela" class="w-full p-2 border rounded-lg" aria-label="Ingredientes do item">
-        </div>
-        <div class="size-list">
-          <label class="block font-medium">Tamanhos:</label>
-          <div id="item-tamanhos" class="space-y-2"></div>
-          <button onclick="adicionarTamanho()" class="custom-btn bg-[var(--cor-primaria)] text-white px-4 py-2 rounded-lg mt-2" aria-label="Adicionar outro tamanho">Adicionar Tamanho</button>
-        </div>
-        <div class="extra-list">
-          <label class="block font-medium">Extras Disponíveis:</label>
-          <div id="item-extras" class="space-y-2"></div>
-          <button onclick="adicionarExtra()" class="custom-btn bg-[var(--cor-primaria)] text-white px-4 py-2 rounded-lg mt-2" aria-label="Adicionar outro extra">Adicionar Extra</button>
-        </div>
-        <div class="border-list">
-          <label class="block font-medium">Bordas Disponíveis:</label>
-          <div id="item-bordas" class="space-y-2"></div>
-          <button onclick="adicionarBorda()" class="custom-btn bg-[var(--cor-primaria)] text-white px-4 py-2 rounded-lg mt-2" aria-label="Adicionar outra borda">Adicionar Borda</button>
-        </div>
-        <div id="combo-itens-section" class="hidden">
-          <label class="block font-medium">Itens do Combo:</label>
-          <div id="item-combo-itens" class="space-y-2"></div>
-        </div>
-        <div>
-          <label class="block font-medium">Promoção:</label>
-          <div class="flex items-center gap-2 mb-2">
-            <input type="checkbox" id="item-promocao-ativo" aria-label="Ativar promoção">
-            <label for="item-promocao-ativo">Ativar Promoção</label>
-          </div>
-          <input type="number" id="item-promocao-preco" step="0.01" placeholder="Preço Promocional" class="w-full p-2 border rounded-lg hidden" aria-label="Preço promocional">
-        </div>
-      </div>
-      <button id="modal-submit-btn" onclick="salvarItem()" class="custom-btn w-full bg-[var(--cor-primaria)] text-white p-2 rounded-lg mt-4" aria-label="Salvar item">Salvar</button>
-    </div>
+    <p id="success-message">Acesso autorizado! Redirecionando...</p>
+    <p id="error-message">Senha incorreta! Tente novamente.</p>
+    <a href="index.html" class="back-link">Voltar para a página inicial</a>
   </div>
 
+  <script src="config.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.18.0/js/md5.min.js"></script>
   <script>
-    let editingItemId = null;
-    let searchTimeout;
+    // Aplica as cores do config.js dinamicamente às variáveis CSS
+    document.documentElement.style.setProperty('--primary-color', window.config.primaryColor);
+    document.documentElement.style.setProperty('--secondary-color', window.config.secondaryColor);
+    document.documentElement.style.setProperty('--background-color', window.config.backgroundColor);
+    document.documentElement.style.setProperty('--text-color', window.config.textColor);
 
-    // Inicialização
-    document.addEventListener('DOMContentLoaded', () => {
-      if (!window.config || !window.cardapio) {
-        alert('Erro ao carregar dependências. Verifique se os scripts estão carregados corretamente.');
-        return;
-      }
+    // Função para validar a senha administrativa
+    function validateAdmin() {
+      const inputPassword = document.getElementById("admin-password").value;
+      const errorMessage = document.getElementById("error-message");
+      const successMessage = document.getElementById("success-message");
+      const loginButton = document.getElementById("login-button");
 
-      // Configurações iniciais
-      document.documentElement.style.setProperty('--cor-primaria', window.config.primaryColor);
-      document.documentElement.style.setProperty('--cor-secundaria', window.config.secondaryColor);
-      document.documentElement.style.setProperty('--cor-fundo', window.config.backgroundColor);
-      document.documentElement.style.setProperty('--cor-texto', window.config.textColor);
+      // Desativa o botão para evitar múltiplos cliques
+      loginButton.disabled = true;
+      loginButton.textContent = "Validando...";
 
-      // Verifica se o admin está logado
-      if (localStorage.getItem('adminLoggedIn') === 'true') {
-        document.getElementById('login-section').classList.add('hidden');
-        document.getElementById('admin-content').classList.remove('hidden');
-        carregarItens();
-      }
+      // Converte a senha inserida para hash MD5
+      const hashedInput = md5(inputPassword);
 
-      // Listeners
-      document.getElementById('search-input').addEventListener('input', () => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(filtrarItens, 300);
-      });
-
-      document.getElementById('sort-select').addEventListener('change', filtrarItens);
-
-      document.getElementById('item-categoria').addEventListener('change', (e) => {
-        const isCombo = e.target.value === 'Combos';
-        document.getElementById('combo-itens-section').classList.toggle('hidden', !isCombo);
-        if (isCombo) carregarItensCombo();
-      });
-
-      document.getElementById('item-promocao-ativo').addEventListener('change', (e) => {
-        document.getElementById('item-promocao-preco').classList.toggle('hidden', !e.target.checked);
-      });
-
-      document.getElementById('item-imagem').addEventListener('input', (e) => {
-        const preview = document.getElementById('image-preview');
-        try {
-          new URL(e.target.value);
-          preview.src = e.target.value;
-          preview.classList.remove('hidden');
-        } catch {
-          preview.classList.add('hidden');
-        }
-      });
-    });
-
-    // Função para login do admin
-    function loginAdmin() {
-      const passwordInput = document.getElementById('admin-password').value;
-      const errorElement = document.getElementById('login-error');
-      const hashedPassword = simpleHash(passwordInput);
-
-      if (hashedPassword === window.config.adminPassword) {
-        localStorage.setItem('adminLoggedIn', 'true');
-        document.getElementById('login-section').classList.add('hidden');
-        document.getElementById('admin-content').classList.remove('hidden');
-        carregarItens();
+      // Compara com a senha armazenada no config.js
+      if (hashedInput === window.config.adminPassword) {
+        successMessage.style.display = "block";
+        errorMessage.style.display = "none";
+        // Simula um redirecionamento após 1 segundo
+        setTimeout(() => {
+          // Redireciona para uma página de dashboard (pode ser criada futuramente)
+          window.location.href = "dashboard.html"; // Se dashboard.html não existir, pode ser substituído por outra ação
+        }, 1000);
       } else {
-        errorElement.textContent = 'Senha incorreta.';
-        errorElement.classList.remove('hidden');
+        errorMessage.style.display = "block";
+        successMessage.style.display = "none";
+        document.getElementById("admin-password").value = "";
+        // Reativa o botão
+        loginButton.disabled = false;
+        loginButton.textContent = "Entrar";
       }
     }
 
-    // Função para logout do admin
-    function logoutAdmin() {
-      localStorage.removeItem('adminLoggedIn');
-      window.location.href = 'index.html';
-    }
-
-    // Função para gerar hash simples (compatível com config.js)
-    function simpleHash(str) {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash;
+    // Permite login ao pressionar Enter
+    document.getElementById("admin-password").addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        validateAdmin();
       }
-      return hash.toString(16);
-    }
-
-    // Função para renderizar itens no grid
-    function renderItens(items) {
-      const grid = document.getElementById('item-grid');
-      grid.innerHTML = '';
-      items.forEach((item, index) => {
-        const card = document.createElement('div');
-        card.className = 'item-card bg-white rounded-lg shadow-md fade-in';
-        card.style.animationDelay = `${index * 0.1}s`;
-        card.innerHTML = `
-          <img src="${item.imagem}" alt="${item.nome}" class="w-full h-48 object-cover rounded-t-lg">
-          <div class="p-4">
-            <h3 class="text-lg font-semibold">${item.nome}</h3>
-            <p class="text-gray-600 text-sm">Categoria: ${item.categoria}</p>
-            <p class="text-[var(--cor-primaria)] font-bold mt-2">R$ ${item.preço.toFixed(2)}</p>
-            <div class="flex gap-2 mt-4">
-              <button onclick="editarItem(${item.id})" class="custom-btn bg-[var(--cor-primaria)] text-white px-4 py-2 rounded-lg" aria-label="Editar item ${item.nome}">Editar</button>
-              <button onclick="removerItem(${item.id})" class="custom-btn bg-red-500 text-white px-4 py-2 rounded-lg" aria-label="Remover item ${item.nome}">Remover</button>
-            </div>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-    }
-
-    // Função para carregar itens
-    function carregarItens() {
-      renderItens(window.cardapio);
-    }
-
-    // Função para filtrar e ordenar itens
-    function filtrarItens() {
-      const searchTerm = document.getElementById('search-input').value.toLowerCase();
-      const sortOption = document.getElementById('sort-select').value;
-      let filtered = window.cardapio.filter(item => 
-        item.nome.toLowerCase().includes(searchTerm) || 
-        item.categoria.toLowerCase().includes(searchTerm)
-      );
-
-      if (sortOption === 'nome-asc') {
-        filtered.sort((a, b) => a.nome.localeCompare(b.nome));
-      } else if (sortOption === 'nome-desc') {
-        filtered.sort((a, b) => b.nome.localeCompare(a.nome));
-      } else if (sortOption === 'preco-asc') {
-        filtered.sort((a, b) => a.preço - b.preço);
-      } else if (sortOption === 'preco-desc') {
-        filtered.sort((a, b) => b.preço - a.preço);
-      }
-
-      renderItens(filtered);
-    }
-
-    // Função para abrir modal de adição
-    function abrirModalAdicionar() {
-      editingItemId = null;
-      document.getElementById('modal-title').textContent = 'Adicionar Novo Item';
-      document.getElementById('modal-submit-btn').textContent = 'Adicionar';
-      limparModal();
-      document.getElementById('modal-item').classList.remove('hidden');
-    }
-
-    // Função para editar item
-    function editarItem(id) {
-      const item = window.cardapio.find(i => i.id === id);
-      if (!item) return;
-
-      editingItemId = id;
-      document.getElementById('modal-title').textContent = 'Editar Item';
-      document.getElementById('modal-submit-btn').textContent = 'Salvar Alterações';
-      limparModal();
-
-      document.getElementById('item-nome').value = item.nome;
-      document.getElementById('item-categoria').value = item.categoria;
-      document.getElementById('item-preco').value = item.preço;
-      document.getElementById('item-imagem').value = item.imagem;
-      document.getElementById('image-preview').src = item.imagem;
-      document.getElementById('image-preview').classList.remove('hidden');
-      document.getElementById('item-descricao').value = item.descrição;
-      document.getElementById('item-ingredientes').value = item.ingredientes.join(', ');
-
-      const tamanhosContainer = document.getElementById('item-tamanhos');
-      tamanhosContainer.innerHTML = '';
-      item.tamanhos.forEach(tamanho => {
-        const div = document.createElement('div');
-        div.className = 'size-item flex gap-2 items-center';
-        div.innerHTML = `
-          <input type="text" value="${tamanho.nome}" class="size-nome flex-1 p-2 border rounded" aria-label="Nome do tamanho">
-          <input type="number" step="0.01" value="${tamanho.preço}" class="size-preco w-24 p-2 border rounded" aria-label="Preço do tamanho">
-          <button onclick="removerCampo(this)" class="bg-red-500 text-white px-2 py-1 rounded" aria-label="Remover tamanho">X</button>
-        `;
-        tamanhosContainer.appendChild(div);
-      });
-
-      const extrasContainer = document.getElementById('item-extras');
-      extrasContainer.innerHTML = '';
-      item.extrasDisponiveis.forEach(extra => {
-        const div = document.createElement('div');
-        div.className = 'extra-item flex gap-2 items-center';
-        div.innerHTML = `
-          <input type="text" value="${extra.nome}" class="extra-nome flex-1 p-2 border rounded" aria-label="Nome do extra">
-          <input type="number" step="0.01" value="${extra.preço}" class="extra-preco w-24 p-2 border rounded" aria-label="Preço do extra">
-          <button onclick="removerCampo(this)" class="bg-red-500 text-white px-2 py-1 rounded" aria-label="Remover extra">X</button>
-        `;
-        extrasContainer.appendChild(div);
-      });
-
-      const bordasContainer = document.getElementById('item-bordas');
-      bordasContainer.innerHTML = '';
-      item.bordasDisponiveis.forEach(borda => {
-        const div = document.createElement('div');
-        div.className = 'border-item flex gap-2 items-center';
-        div.innerHTML = `
-          <input type="text" value="${borda.nome}" class="border-nome flex-1 p-2 border rounded" aria-label="Nome da borda">
-          <input type="number" step="0.01" value="${borda.preço}" class="border-preco w-24 p-2 border rounded" aria-label="Preço da borda">
-          <button onclick="removerCampo(this)" class="bg-red-500 text-white px-2 py-1 rounded" aria-label="Remover borda">X</button>
-        `;
-        bordasContainer.appendChild(div);
-      });
-
-      const isCombo = item.categoria === 'Combos';
-      document.getElementById('combo-itens-section').classList.toggle('hidden', !isCombo);
-      if (isCombo) {
-        carregarItensCombo();
-        item.itens.forEach(itemId => {
-          document.getElementById(`combo-item-${itemId}`).checked = true;
-        });
-      }
-
-      if (item.promocao && item.promocao.ativo) {
-        document.getElementById('item-promocao-ativo').checked = true;
-        document.getElementById('item-promocao-preco').classList.remove('hidden');
-        document.getElementById('item-promocao-preco').value = item.promocao.precoPromocional;
-      }
-
-      document.getElementById('modal-item').classList.remove('hidden');
-    }
-
-    // Função para carregar itens do combo no modal
-    function carregarItensCombo() {
-      const comboItensContainer = document.getElementById('item-combo-itens');
-      comboItensContainer.innerHTML = '';
-      const nonComboItems = window.cardapio.filter(item => item.categoria !== 'Combos');
-      nonComboItems.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'flex items-center gap-2';
-        div.innerHTML = `
-          <input type="checkbox" id="combo-item-${item.id}" value="${item.id}" aria-label="Incluir ${item.nome} no combo">
-          <label for="combo-item-${item.id}">${item.nome} (${item.categoria})</label>
-        `;
-        comboItensContainer.appendChild(div);
-      });
-    }
-
-    // Função para remover item
-    function removerItem(id) {
-      if (!confirm('Tem certeza que deseja remover este item?')) return;
-      window.cardapio = window.cardapio.filter(item => item.id !== id);
-      localStorage.setItem('cardapio', JSON.stringify(window.cardapio));
-      carregarItens();
-    }
-
-    // Função para adicionar campo de tamanho
-    function adicionarTamanho() {
-      const tamanhosContainer = document.getElementById('item-tamanhos');
-      const div = document.createElement('div');
-      div.className = 'size-item flex gap-2 items-center';
-      div.innerHTML = `
-        <input type="text" placeholder="Nome (ex: Pequena)" class="size-nome flex-1 p-2 border rounded" aria-label="Nome do tamanho">
-        <input type="number" step="0.01" placeholder="Preço" class="size-preco w-24 p-2 border rounded" aria-label="Preço do tamanho">
-        <button onclick="removerCampo(this)" class="bg-red-500 text-white px-2 py-1 rounded" aria-label="Remover tamanho">X</button>
-      `;
-      tamanhosContainer.appendChild(div);
-    }
-
-    // Função para adicionar campo de extra
-    function adicionarExtra() {
-      const extrasContainer = document.getElementById('item-extras');
-      const div = document.createElement('div');
-      div.className = 'extra-item flex gap-2 items-center';
-      div.innerHTML = `
-        <input type="text" placeholder="Nome (ex: Azeitonas)" class="extra-nome flex-1 p-2 border rounded" aria-label="Nome do extra">
-        <input type="number" step="0.01" placeholder="Preço" class="extra-preco w-24 p-2 border rounded" aria-label="Preço do extra">
-        <button onclick="removerCampo(this)" class="bg-red-500 text-white px-2 py-1 rounded" aria-label="Remover extra">X</button>
-      `;
-      extrasContainer.appendChild(div);
-    }
-
-    // Função para adicionar campo de borda
-    function adicionarBorda() {
-      const bordasContainer = document.getElementById('item-bordas');
-      const div = document.createElement('div');
-      div.className = 'border-item flex gap-2 items-center';
-      div.innerHTML = `
-        <input type="text" placeholder="Nome (ex: Catupiry)" class="border-nome flex-1 p-2 border rounded" aria-label="Nome da borda">
-        <input type="number" step="0.01" placeholder="Preço" class="border-preco w-24 p-2 border rounded" aria-label="Preço da borda">
-        <button onclick="removerCampo(this)" class="bg-red-500 text-white px-2 py-1 rounded" aria-label="Remover borda">X</button>
-      `;
-      bordasContainer.appendChild(div);
-    }
-
-    // Função para remover campo dinâmico
-    function removerCampo(button) {
-      button.parentElement.remove();
-    }
-
-    // Função para limpar o modal
-    function limparModal() {
-      document.getElementById('modal-error').classList.add('hidden');
-      document.getElementById('item-nome').value = '';
-      document.getElementById('item-categoria').value = 'Salgadas';
-      document.getElementById('item-preco').value = '';
-      document.getElementById('item-imagem').value = '';
-      document.getElementById('image-preview').classList.add('hidden');
-      document.getElementById('item-descricao').value = '';
-      document.getElementById('item-ingredientes').value = '';
-      document.getElementById('item-tamanhos').innerHTML = '';
-      adicionarTamanho();
-      document.getElementById('item-extras').innerHTML = '';
-      document.getElementById('item-bordas').innerHTML = '';
-      document.getElementById('combo-itens-section').classList.add('hidden');
-      document.getElementById('item-combo-itens').innerHTML = '';
-      document.getElementById('item-promocao-ativo').checked = false;
-      document.getElementById('item-promocao-preco').classList.add('hidden');
-      document.getElementById('item-promocao-preco').value = '';
-    }
-
-    // Função para salvar item
-    function salvarItem() {
-      const errorElement = document.getElementById('modal-error');
-      const nome = document.getElementById('item-nome').value.trim();
-      const categoria = document.getElementById('item-categoria').value;
-      const preco = parseFloat(document.getElementById('item-preco').value);
-      const imagem = document.getElementById('item-imagem').value.trim();
-      const descricao = document.getElementById('item-descricao').value.trim();
-      const ingredientes = document.getElementById('item-ingredientes').value.split(',').map(i => i.trim()).filter(i => i);
-
-      // Validações
-      if (!nome || nome.length < 3) {
-        errorElement.textContent = 'O nome deve ter pelo menos 3 caracteres.';
-        errorElement.classList.remove('hidden');
-        return;
-      }
-      if (isNaN(preco) || preco <= 0) {
-        errorElement.textContent = 'O preço deve ser um número maior que 0.';
-        errorElement.classList.remove('hidden');
-        return;
-      }
-      try {
-        new URL(imagem);
-      } catch {
-        errorElement.textContent = 'A URL da imagem é inválida.';
-        errorElement.classList.remove('hidden');
-        return;
-      }
-      if (!descricao) {
-        errorElement.textContent = 'A descrição é obrigatória.';
-        errorElement.classList.remove('hidden');
-        return;
-      }
-
-      const tamanhos = Array.from(document.querySelectorAll('.size-item')).map(div => {
-        const nome = div.querySelector('.size-nome').value.trim();
-        const preco = parseFloat(div.querySelector('.size-preco').value);
-        if (!nome || isNaN(preco) || preco < 0) {
-          throw new Error('Todos os tamanhos devem ter nome e preço válidos.');
-        }
-        return { nome, preço: preco };
-      });
-
-      const extras = Array.from(document.querySelectorAll('.extra-item')).map(div => {
-        const nome = div.querySelector('.extra-nome').value.trim();
-        const preco = parseFloat(div.querySelector('.extra-preco').value);
-        if (!nome || isNaN(preco) || preco < 0) {
-          throw new Error('Todos os extras devem ter nome e preço válidos.');
-        }
-        return { nome, preço: preco };
-      });
-
-      const bordas = Array.from(document.querySelectorAll('.border-item')).map(div => {
-        const nome = div.querySelector('.border-nome').value.trim();
-        const preco = parseFloat(div.querySelector('.border-preco').value);
-        if (!nome || isNaN(preco) || preco < 0) {
-          throw new Error('Todas as bordas devem ter nome e preço válidos.');
-        }
-        return { nome, preço: preco };
-      });
-
-      let comboItens = [];
-      if (categoria === 'Combos') {
-        comboItens = Array.from(document.querySelectorAll('#item-combo-itens input:checked')).map(input => parseInt(input.value));
-        if (comboItens.length < 2) {
-          errorElement.textContent = 'Um combo deve incluir pelo menos 2 itens.';
-          errorElement.classList.remove('hidden');
-          return;
-        }
-      }
-
-      const promocaoAtivo = document.getElementById('item-promocao-ativo').checked;
-      const promocaoPreco = parseFloat(document.getElementById('item-promocao-preco').value);
-      let promocao = null;
-      if (promocaoAtivo) {
-        if (isNaN(promocaoPreco) || promocaoPreco <= 0 || promocaoPreco >= preco) {
-          errorElement.textContent = 'O preço promocional deve ser maior que 0 e menor que o preço normal.';
-          errorElement.classList.remove('hidden');
-          return;
-        }
-        promocao = { ativo: true, precoPromocional: promocaoPreco };
-      }
-
-      const newItem = {
-        id: editingItemId || Date.now(),
-        nome,
-        categoria,
-        preço: preco,
-        imagem,
-        descrição: descricao,
-        ingredientes,
-        tamanhos,
-        extrasDisponiveis: extras,
-        bordasDisponiveis: bordas,
-        ...(categoria === 'Combos' ? { itens: comboItens } : {}),
-        promocao,
-        avaliacao: editingItemId ? window.cardapio.find(i => i.id === editingItemId).avaliacao : 0,
-        numAvaliacoes: editingItemId ? window.cardapio.find(i => i.id === editingItemId).numAvaliacoes : 0,
-      };
-
-      try {
-        if (editingItemId) {
-          const index = window.cardapio.findIndex(i => i.id === editingItemId);
-          window.cardapio[index] = newItem;
-        } else {
-          window.cardapio.push(newItem);
-        }
-        localStorage.setItem('cardapio', JSON.stringify(window.cardapio));
-        fecharModalItem();
-        carregarItens();
-      } catch (e) {
-        errorElement.textContent = e.message;
-        errorElement.classList.remove('hidden');
-      }
-    }
-
-    // Função para fechar o modal
-    function fecharModalItem() {
-      document.getElementById('modal-item').classList.add('hidden');
-    }
+    });
   </script>
 </body>
 </html>
