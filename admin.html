@@ -74,9 +74,24 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
     .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 600px;
+      width: 90%;
       max-height: 80vh;
       overflow-y: auto;
+      position: relative;
     }
     .item-card {
       transition: all 0.3s ease;
@@ -134,8 +149,8 @@
   </section>
 
   <div id="modal-item" class="modal hidden" role="dialog" aria-labelledby="modal-title">
-    <div class="modal-content bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
-      <button class="close-btn bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center absolute top-4 right-4" onclick="fecharModalItem()" aria-label="Fechar modal">X</button>
+    <div class="modal-content">
+      <button class="close-btn absolute top-4 right-4 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center" onclick="fecharModalItem()" aria-label="Fechar modal">X</button>
       <h3 id="modal-title" class="text-xl font-semibold mb-4 text-center"></h3>
       <p id="modal-error" class="text-red-500 text-sm text-center mb-4 hidden"></p>
       <div class="space-y-4">
@@ -206,7 +221,80 @@
     let editingItemId = null;
     let searchTimeout;
 
-    // Função para gerar hash simples
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!window.config || !window.cardapio) {
+        alert('Erro ao carregar dependências. Verifique se os scripts estão carregados corretamente.');
+        return;
+      }
+
+      // Configurações iniciais
+      document.documentElement.style.setProperty('--cor-primaria', window.config.primaryColor);
+      document.documentElement.style.setProperty('--cor-secundaria', window.config.secondaryColor);
+      document.documentElement.style.setProperty('--cor-fundo', window.config.backgroundColor);
+      document.documentElement.style.setProperty('--cor-texto', window.config.textColor);
+
+      // Verifica se o admin está logado
+      if (localStorage.getItem('adminLoggedIn') === 'true') {
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('admin-content').classList.remove('hidden');
+        carregarItens();
+      }
+
+      // Listeners
+      document.getElementById('search-input').addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(filtrarItens, 300);
+      });
+
+      document.getElementById('sort-select').addEventListener('change', filtrarItens);
+
+      document.getElementById('item-categoria').addEventListener('change', (e) => {
+        const isCombo = e.target.value === 'Combos';
+        document.getElementById('combo-itens-section').classList.toggle('hidden', !isCombo);
+        if (isCombo) carregarItensCombo();
+      });
+
+      document.getElementById('item-promocao-ativo').addEventListener('change', (e) => {
+        document.getElementById('item-promocao-preco').classList.toggle('hidden', !e.target.checked);
+      });
+
+      document.getElementById('item-imagem').addEventListener('input', (e) => {
+        const preview = document.getElementById('image-preview');
+        try {
+          new URL(e.target.value);
+          preview.src = e.target.value;
+          preview.classList.remove('hidden');
+        } catch {
+          preview.classList.add('hidden');
+        }
+      });
+    });
+
+    // Função para login do admin
+    function loginAdmin() {
+      const passwordInput = document.getElementById('admin-password').value;
+      const errorElement = document.getElementById('login-error');
+      const hashedPassword = simpleHash(passwordInput);
+
+      if (hashedPassword === window.config.adminPassword) {
+        localStorage.setItem('adminLoggedIn', 'true');
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('admin-content').classList.remove('hidden');
+        carregarItens();
+      } else {
+        errorElement.textContent = 'Senha incorreta.';
+        errorElement.classList.remove('hidden');
+      }
+    }
+
+    // Função para logout do admin
+    function logoutAdmin() {
+      localStorage.removeItem('adminLoggedIn');
+      window.location.href = 'index.html';
+    }
+
+    // Função para gerar hash simples (compatível com config.js)
     function simpleHash(str) {
       let hash = 0;
       for (let i = 0; i < str.length; i++) {
@@ -335,21 +423,13 @@
         bordasContainer.appendChild(div);
       });
 
-      if (item.categoria === 'Combos') {
-        const comboItensContainer = document.getElementById('item-combo-itens');
-        comboItensContainer.innerHTML = '';
-        window.cardapio.forEach(i => {
-          if (i.categoria !== 'Combos') {
-            const div = document.createElement('div');
-            div.className = 'flex items-center gap-2';
-            div.innerHTML = `
-              <input type="checkbox" id="combo-item-${i.id}" value="${i.id}" ${item.itens.includes(i.id) ? 'checked' : ''} aria-label="Incluir ${i.nome} no combo">
-              <label for="combo-item-${i.id}">${i.nome}</label>
-            `;
-            comboItensContainer.appendChild(div);
-          }
+      const isCombo = item.categoria === 'Combos';
+      document.getElementById('combo-itens-section').classList.toggle('hidden', !isCombo);
+      if (isCombo) {
+        carregarItensCombo();
+        item.itens.forEach(itemId => {
+          document.getElementById(`combo-item-${itemId}`).checked = true;
         });
-        document.getElementById('combo-itens-section').classList.remove('hidden');
       }
 
       if (item.promocao && item.promocao.ativo) {
@@ -361,27 +441,215 @@
       document.getElementById('modal-item').classList.remove('hidden');
     }
 
-    // Função para remover item
-    function removerItem(id) {
-      if (confirm('Tem certeza que deseja remover este item?')) {
-        window.cardapio = window.cardapio.filter(i => i.id !== id);
-        localStorage.setItem('cardapio', JSON.stringify(window.cardapio));
-        carregarItens();
-      }
+    // Função para carregar itens do combo no modal
+    function carregarItensCombo() {
+      const comboItensContainer = document.getElementById('item-combo-itens');
+      comboItensContainer.innerHTML = '';
+      const nonComboItems = window.cardapio.filter(item => item.categoria !== 'Combos');
+      nonComboItems.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center gap-2';
+        div.innerHTML = `
+          <input type="checkbox" id="combo-item-${item.id}" value="${item.id}" aria-label="Incluir ${item.nome} no combo">
+          <label for="combo-item-${item.id}">${item.nome} (${item.categoria})</label>
+        `;
+        comboItensContainer.appendChild(div);
+      });
     }
 
-    // Função para limpar modal
+    // Função para remover item
+    function removerItem(id) {
+      if (!confirm('Tem certeza que deseja remover este item?')) return;
+      window.cardapio = window.cardapio.filter(item => item.id !== id);
+      localStorage.setItem('cardapio', JSON.stringify(window.cardapio));
+      carregarItens();
+    }
+
+    // Função para adicionar campo de tamanho
+    function adicionarTamanho() {
+      const tamanhosContainer = document.getElementById('item-tamanhos');
+      const div = document.createElement('div');
+      div.className = 'size-item flex gap-2 items-center';
+      div.innerHTML = `
+        <input type="text" placeholder="Nome (ex: Pequena)" class="size-nome flex-1 p-2 border rounded" aria-label="Nome do tamanho">
+        <input type="number" step="0.01" placeholder="Preço" class="size-preco w-24 p-2 border rounded" aria-label="Preço do tamanho">
+        <button onclick="removerCampo(this)" class="bg-red-500 text-white px-2 py-1 rounded" aria-label="Remover tamanho">X</button>
+      `;
+      tamanhosContainer.appendChild(div);
+    }
+
+    // Função para adicionar campo de extra
+    function adicionarExtra() {
+      const extrasContainer = document.getElementById('item-extras');
+      const div = document.createElement('div');
+      div.className = 'extra-item flex gap-2 items-center';
+      div.innerHTML = `
+        <input type="text" placeholder="Nome (ex: Azeitonas)" class="extra-nome flex-1 p-2 border rounded" aria-label="Nome do extra">
+        <input type="number" step="0.01" placeholder="Preço" class="extra-preco w-24 p-2 border rounded" aria-label="Preço do extra">
+        <button onclick="removerCampo(this)" class="bg-red-500 text-white px-2 py-1 rounded" aria-label="Remover extra">X</button>
+      `;
+      extrasContainer.appendChild(div);
+    }
+
+    // Função para adicionar campo de borda
+    function adicionarBorda() {
+      const bordasContainer = document.getElementById('item-bordas');
+      const div = document.createElement('div');
+      div.className = 'border-item flex gap-2 items-center';
+      div.innerHTML = `
+        <input type="text" placeholder="Nome (ex: Catupiry)" class="border-nome flex-1 p-2 border rounded" aria-label="Nome da borda">
+        <input type="number" step="0.01" placeholder="Preço" class="border-preco w-24 p-2 border rounded" aria-label="Preço da borda">
+        <button onclick="removerCampo(this)" class="bg-red-500 text-white px-2 py-1 rounded" aria-label="Remover borda">X</button>
+      `;
+      bordasContainer.appendChild(div);
+    }
+
+    // Função para remover campo dinâmico
+    function removerCampo(button) {
+      button.parentElement.remove();
+    }
+
+    // Função para limpar o modal
     function limparModal() {
       document.getElementById('modal-error').classList.add('hidden');
       document.getElementById('item-nome').value = '';
       document.getElementById('item-categoria').value = 'Salgadas';
       document.getElementById('item-preco').value = '';
       document.getElementById('item-imagem').value = '';
-      document.getElementById('image-preview').src = '';
       document.getElementById('image-preview').classList.add('hidden');
       document.getElementById('item-descricao').value = '';
       document.getElementById('item-ingredientes').value = '';
-      document.getElementById('item-tamanhos').innerHTML = `
-        <div class="size-item flex gap-2 items-center">
-          <input type="text" placeholder="Nome (ex: Pequena)" class="size-nome flex-1 p-2 border rounded" aria-label="Nome do tamanho">
-          <input type="number" step="0.01" placeholder="Preço" class="size-preco w-24 p
+      document.getElementById('item-tamanhos').innerHTML = '';
+      adicionarTamanho();
+      document.getElementById('item-extras').innerHTML = '';
+      document.getElementById('item-bordas').innerHTML = '';
+      document.getElementById('combo-itens-section').classList.add('hidden');
+      document.getElementById('item-combo-itens').innerHTML = '';
+      document.getElementById('item-promocao-ativo').checked = false;
+      document.getElementById('item-promocao-preco').classList.add('hidden');
+      document.getElementById('item-promocao-preco').value = '';
+    }
+
+    // Função para salvar item
+    function salvarItem() {
+      const errorElement = document.getElementById('modal-error');
+      const nome = document.getElementById('item-nome').value.trim();
+      const categoria = document.getElementById('item-categoria').value;
+      const preco = parseFloat(document.getElementById('item-preco').value);
+      const imagem = document.getElementById('item-imagem').value.trim();
+      const descricao = document.getElementById('item-descricao').value.trim();
+      const ingredientes = document.getElementById('item-ingredientes').value.split(',').map(i => i.trim()).filter(i => i);
+
+      // Validações
+      if (!nome || nome.length < 3) {
+        errorElement.textContent = 'O nome deve ter pelo menos 3 caracteres.';
+        errorElement.classList.remove('hidden');
+        return;
+      }
+      if (isNaN(preco) || preco <= 0) {
+        errorElement.textContent = 'O preço deve ser um número maior que 0.';
+        errorElement.classList.remove('hidden');
+        return;
+      }
+      try {
+        new URL(imagem);
+      } catch {
+        errorElement.textContent = 'A URL da imagem é inválida.';
+        errorElement.classList.remove('hidden');
+        return;
+      }
+      if (!descricao) {
+        errorElement.textContent = 'A descrição é obrigatória.';
+        errorElement.classList.remove('hidden');
+        return;
+      }
+
+      const tamanhos = Array.from(document.querySelectorAll('.size-item')).map(div => {
+        const nome = div.querySelector('.size-nome').value.trim();
+        const preco = parseFloat(div.querySelector('.size-preco').value);
+        if (!nome || isNaN(preco) || preco < 0) {
+          throw new Error('Todos os tamanhos devem ter nome e preço válidos.');
+        }
+        return { nome, preço: preco };
+      });
+
+      const extras = Array.from(document.querySelectorAll('.extra-item')).map(div => {
+        const nome = div.querySelector('.extra-nome').value.trim();
+        const preco = parseFloat(div.querySelector('.extra-preco').value);
+        if (!nome || isNaN(preco) || preco < 0) {
+          throw new Error('Todos os extras devem ter nome e preço válidos.');
+        }
+        return { nome, preço: preco };
+      });
+
+      const bordas = Array.from(document.querySelectorAll('.border-item')).map(div => {
+        const nome = div.querySelector('.border-nome').value.trim();
+        const preco = parseFloat(div.querySelector('.border-preco').value);
+        if (!nome || isNaN(preco) || preco < 0) {
+          throw new Error('Todas as bordas devem ter nome e preço válidos.');
+        }
+        return { nome, preço: preco };
+      });
+
+      let comboItens = [];
+      if (categoria === 'Combos') {
+        comboItens = Array.from(document.querySelectorAll('#item-combo-itens input:checked')).map(input => parseInt(input.value));
+        if (comboItens.length < 2) {
+          errorElement.textContent = 'Um combo deve incluir pelo menos 2 itens.';
+          errorElement.classList.remove('hidden');
+          return;
+        }
+      }
+
+      const promocaoAtivo = document.getElementById('item-promocao-ativo').checked;
+      const promocaoPreco = parseFloat(document.getElementById('item-promocao-preco').value);
+      let promocao = null;
+      if (promocaoAtivo) {
+        if (isNaN(promocaoPreco) || promocaoPreco <= 0 || promocaoPreco >= preco) {
+          errorElement.textContent = 'O preço promocional deve ser maior que 0 e menor que o preço normal.';
+          errorElement.classList.remove('hidden');
+          return;
+        }
+        promocao = { ativo: true, precoPromocional: promocaoPreco };
+      }
+
+      const newItem = {
+        id: editingItemId || Date.now(),
+        nome,
+        categoria,
+        preço: preco,
+        imagem,
+        descrição: descricao,
+        ingredientes,
+        tamanhos,
+        extrasDisponiveis: extras,
+        bordasDisponiveis: bordas,
+        ...(categoria === 'Combos' ? { itens: comboItens } : {}),
+        promocao,
+        avaliacao: editingItemId ? window.cardapio.find(i => i.id === editingItemId).avaliacao : 0,
+        numAvaliacoes: editingItemId ? window.cardapio.find(i => i.id === editingItemId).numAvaliacoes : 0,
+      };
+
+      try {
+        if (editingItemId) {
+          const index = window.cardapio.findIndex(i => i.id === editingItemId);
+          window.cardapio[index] = newItem;
+        } else {
+          window.cardapio.push(newItem);
+        }
+        localStorage.setItem('cardapio', JSON.stringify(window.cardapio));
+        fecharModalItem();
+        carregarItens();
+      } catch (e) {
+        errorElement.textContent = e.message;
+        errorElement.classList.remove('hidden');
+      }
+    }
+
+    // Função para fechar o modal
+    function fecharModalItem() {
+      document.getElementById('modal-item').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
