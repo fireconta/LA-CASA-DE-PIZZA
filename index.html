@@ -42,7 +42,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="page-title">La Casa de Pizzas</title>
+  <title id="page-title">Cardápio - La Casa de Pizzas</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="config.js"></script>
   <script src="cardapio.js"></script>
@@ -50,94 +50,229 @@
     body {
       background-color: var(--cor-fundo, #FFF8E7);
       color: var(--cor-texto, #2D2D2D);
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: var(--cor-primaria, #FF4500);
+      color: white;
+      padding: 1.5rem 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    header .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header img {
+      height: 48px;
+      border-radius: 8px;
+    }
+    header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
     }
     .custom-btn {
       display: flex;
       align-items: center;
       gap: 8px;
       padding: 10px 20px;
-      border-radius: 25px;
+      border-radius: 12px;
+      background: white;
+      color: var(--cor-primaria, #FF4500);
+      font-weight: 600;
       transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
     }
     .custom-btn:hover {
-      transform: scale(1.05);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+    .category-section {
+      margin-bottom: 3rem;
+    }
+    .category-section h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--cor-texto, #2D2D2D);
+    }
+    .pizza-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .pizza-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      border: 1px solid #e5e7eb;
+    }
+    .pizza-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    .pizza-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+    .pizza-card-content {
+      padding: 1.25rem;
+    }
+    .pizza-card h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .pizza-card p {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-bottom: 1rem;
+    }
+    .pizza-card .price {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--cor-primaria, #FF4500);
+      margin-bottom: 1rem;
+    }
+    .pizza-card .add-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      background: var(--cor-primaria, #FF4500);
+      color: white;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+    .pizza-card .add-btn:hover {
+      background: var(--cor-primaria, #FF4500);
+      opacity: 0.9;
+      transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
-    .card {
-      background-color: white;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
+    footer {
+      background: var(--cor-primaria, #FF4500);
+      color: white;
+      padding: 1.5rem 0;
+      text-align: center;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
     }
-    .card:hover {
-      transform: translateY(-5px);
-    }
-    .pizza-img {
-      width: 100%;
-      height: 150px;
-      object-fit: cover;
-      border-radius: 10px;
-    }
-    .spinner {
-      border: 4px solid rgba(0, 0, 0, 0.1);
-      border-left: 4px solid var(--cor-primaria, #FF4500);
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
+    footer .container {
+      max-width: 1200px;
       margin: 0 auto;
+      padding: 0 1rem;
     }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    footer p {
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+    footer .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+    footer .social-links a {
+      color: white;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+    }
+    footer .social-links a:hover {
+      color: #f5f5f5;
+      text-decoration: underline;
+    }
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+    }
+    @media (max-width: 640px) {
+      .pizza-grid {
+        grid-template-columns: 1fr;
+      }
+      header h1 {
+        font-size: 1.5rem;
+      }
+      header img {
+        height: 40px;
+      }
     }
   </style>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header class="bg-[var(--cor-primaria)] text-white p-4">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
+  <header>
+    <div class="container">
       <div class="flex items-center gap-4">
-        <img id="logo" src="https://i.imgur.com/3wbh5W3.jpeg" alt="Logo" class="h-12">
-        <h1 class="text-2xl font-bold" id="nome-pizzaria">La Casa de Pizzas</h1>
+        <img id="logo" src="https://i.imgur.com/3wbh5W3.jpeg" alt="Logo">
+        <h1 id="nome-pizzaria">La Casa de Pizzas</h1>
       </div>
       <div class="flex gap-4">
-        <button onclick="window.location.href='admin.html'" class="custom-btn bg-white text-[var(--cor-primaria)]" aria-label="Acessar painel de administração">
-          Admin
-        </button>
-        <button onclick="verCarrinho()" class="custom-btn bg-white text-[var(--cor-primaria)] relative" aria-label="Ver carrinho">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l.893-.892L5.96 6H16a1 1 0 00.949-.684l2-6A1 1 0 0018 0H5.668L5.363 1H3zm12 16a2 2 0 110 4 2 2 0 010-4zm-8 0a2 2 0 110 4 2 2 0 010-4z" />
+        <button onclick="window.location.href='checkout.html'" class="custom-btn" aria-label="Ir para o checkout">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
-          <span id="carrinho-contador" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs">0</span>
+          Carrinho
         </button>
       </div>
     </div>
   </header>
 
-  <section class="max-w-7xl mx-auto my-8 p-6">
-    <h2 class="text-3xl font-bold mb-8 text-center">Cardápio</h2>
-    <div class="flex flex-wrap gap-4 mb-8 justify-center">
-      <input type="text" id="pesquisa-cardapio" class="p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" placeholder="Pesquisar pizzas..." aria-label="Pesquisar pizzas no cardápio">
-      <select id="filtro-categoria" class="p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" aria-label="Filtrar pizzas por categoria">
-        <option value="">Todas as Categorias</option>
-      </select>
-    </div>
-    <div id="cardapio-lista" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-    <div id="spinner-cardapio" class="spinner hidden"></div>
+  <section class="container">
+    <h2 class="text-3xl font-bold mb-8 text-center">Nosso Cardápio</h2>
+    <div id="categorias"></div>
   </section>
 
-  <footer class="bg-[var(--cor-primaria)] text-white p-4 text-center">
-    <p>© 2025 <span id="nome-pizzaria-footer">La Casa de Pizzas</span>. Todos os direitos reservados.</p>
-    <div class="flex justify-center gap-4 mt-2">
-      <a id="whatsapp-link" href="https://api.whatsapp.com/send?phone=5562995771104&text=Olá,%20gostaria%20de%20fazer%20um%20pedido!" target="_blank" class="text-white hover:underline" aria-label="Contato via WhatsApp">WhatsApp: <span id="whatsapp-numero">(62) 99577-1104</span></a>
-      <a id="instagram-link" href="https://instagram.com/lacasadepizza2025" target="_blank" class="text-white hover:underline" aria-label="Instagram da pizzaria">Instagram: <span id="instagram-nome">@lacasadepizza2025</span></a>
+  <footer>
+    <div class="container">
+      <p>© 2025 <span id="nome-pizzaria-footer">La Casa de Pizzas</span>. Todos os direitos reservados.</p>
+      <div class="social-links">
+        <a id="whatsapp-link" href="https://api.whatsapp.com/send?phone=5562995771104&text=Olá,%20gostaria%20de%20fazer%20um%20pedido!" target="_blank" aria-label="Contato via WhatsApp">WhatsApp: <span id="whatsapp-numero">(62) 99577-1104</span></a>
+        <a id="instagram-link" href="https://instagram.com/lacasadepizza2025" target="_blank" aria-label="Instagram da pizzaria">Instagram: <span id="instagram-nome">@lacasadepizza2025</span></a>
+      </div>
     </div>
   </footer>
 
+  <!-- Modal de Notificação -->
+  <div id="modal-notificacao" class="modal hidden">
+    <div class="modal-content">
+      <h3 class="text-xl font-semibold mb-4" id="notificacao-titulo"></h3>
+      <p id="notificacao-mensagem"></p>
+      <button onclick="fecharNotificacao()" class="mt-4 custom-btn w-full" aria-label="Fechar notificação">Ok</button>
+    </div>
+  </div>
+
   <script>
-    let pizzasCache = [];
     let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
 
     function aplicarConfiguracoes() {
@@ -146,7 +281,7 @@
         document.documentElement.style.setProperty('--cor-secundaria', config.corSecundaria);
         document.documentElement.style.setProperty('--cor-fundo', config.corFundo);
         document.documentElement.style.setProperty('--cor-texto', config.corTexto);
-        document.getElementById('page-title').textContent = config.nomePizzaria;
+        document.getElementById('page-title').textContent = `Cardápio - ${config.nomePizzaria}`;
         document.getElementById('logo').src = config.logoUrl;
         document.getElementById('nome-pizzaria').textContent = config.nomePizzaria;
         document.getElementById('nome-pizzaria-footer').textContent = config.nomePizzaria;
@@ -157,24 +292,6 @@
       }
     }
 
-    async function initializeApp() {
-      await carregarCardapio();
-      atualizarCarrinhoContador();
-
-      const filtroCategoria = document.getElementById('filtro-categoria');
-      if (config.categoriasPizzas) {
-        config.categoriasPizzas.forEach(categoria => {
-          const option = document.createElement('option');
-          option.value = categoria;
-          option.textContent = categoria;
-          filtroCategoria.appendChild(option);
-        });
-      }
-
-      document.getElementById('pesquisa-cardapio').addEventListener('input', filtrarCardapio);
-      document.getElementById('filtro-categoria').addEventListener('change', filtrarCardapio);
-    }
-
     function checkConfigAndInitialize() {
       const maxAttempts = 10;
       let attempts = 0;
@@ -183,11 +300,11 @@
         if (typeof config !== 'undefined' && typeof cardapio !== 'undefined') {
           clearInterval(interval);
           aplicarConfiguracoes();
-          initializeApp();
+          carregarCardapio();
         } else if (attempts >= maxAttempts) {
           clearInterval(interval);
           console.error('Erro: Não foi possível carregar config.js ou cardapio.js após várias tentativas.');
-          alert('Não foi possível carregar as configurações ou o cardápio. Verifique se os arquivos config.js e cardapio.js estão no mesmo diretório e se você está executando o projeto em um servidor local.');
+          mostrarNotificacao('Erro', 'Não foi possível carregar o cardápio. Verifique se os arquivos config.js e cardapio.js estão no mesmo diretório e se você está executando o projeto em um servidor local.');
         }
         attempts++;
       }, 500);
@@ -197,90 +314,69 @@
       checkConfigAndInitialize();
     });
 
-    async function carregarCardapio() {
-      const lista = document.getElementById('cardapio-lista');
-      const spinner = document.getElementById('spinner-cardapio');
-      spinner.classList.remove('hidden');
-      lista.innerHTML = '';
-      try {
-        pizzasCache = JSON.parse(localStorage.getItem('cardapio')) || cardapio;
-        if (!pizzasCache || pizzasCache.length === 0) {
-          lista.innerHTML = '<p class="text-center text-gray-600 col-span-full">Nenhuma pizza disponível.</p>';
-          return;
+    function carregarCardapio() {
+      const categoriasDiv = document.getElementById('categorias');
+      categoriasDiv.innerHTML = '';
+
+      const pizzasPorCategoria = {};
+      cardapio.forEach(pizza => {
+        if (!pizzasPorCategoria[pizza.categoria]) {
+          pizzasPorCategoria[pizza.categoria] = [];
         }
-        pizzasCache.forEach(pizza => {
-          const div = document.createElement('div');
-          div.className = 'card';
-          div.innerHTML = `
-            <img src="${pizza.imagem || config.imagemPadraoPizza}" alt="${pizza.nome}" class="pizza-img">
-            <div class="p-4">
-              <h3 class="text-xl font-semibold">${pizza.nome}</h3>
-              <p class="text-gray-600">${pizza.descrição}</p>
-              <p class="text-lg font-bold mt-2">R$ ${parseFloat(pizza.preço || 0).toFixed(2)}</p>
-              <p class="mt-1">Categoria: ${pizza.categoria || 'Salgadas'}</p>
-              <p class="text-[var(--cor-destaque)] font-medium">${pizza.emPromoção === 'true' || pizza.emPromoção === true ? 'Em Promoção!' : ''}</p>
-              <button onclick="adicionarAoCarrinho('${pizza.id}')" class="mt-4 custom-btn bg-[var(--cor-primaria)] text-white" aria-label="Adicionar ${pizza.nome} ao carrinho">
+        pizzasPorCategoria[pizza.categoria].push(pizza);
+      });
+
+      for (const categoria in pizzasPorCategoria) {
+        const categoriaDiv = document.createElement('div');
+        categoriaDiv.className = 'category-section';
+        categoriaDiv.innerHTML = `<h2>${categoria}</h2>`;
+        const gridDiv = document.createElement('div');
+        gridDiv.className = 'pizza-grid';
+
+        pizzasPorCategoria[categoria].forEach(pizza => {
+          const pizzaDiv = document.createElement('div');
+          pizzaDiv.className = 'pizza-card';
+          pizzaDiv.innerHTML = `
+            <img src="${pizza.imagem}" alt="${pizza.nome}">
+            <div class="pizza-card-content">
+              <h3>${pizza.nome}</h3>
+              <p>${pizza.descrição}</p>
+              <div class="price">R$ ${pizza.preço.toFixed(2)}</div>
+              <button class="add-btn" onclick="adicionarAoCarrinho(${pizza.id})" aria-label="Adicionar ${pizza.nome} ao carrinho">
                 Adicionar ao Carrinho
               </button>
             </div>
           `;
-          lista.appendChild(div);
+          gridDiv.appendChild(pizzaDiv);
         });
-      } catch (error) {
-        console.error('Erro ao carregar cardápio:', error);
-        lista.innerHTML = '<p class="text-center text-gray-600 col-span-full">Erro ao carregar o cardápio.</p>';
-        alert('Falha ao carregar o cardápio. Verifique sua conexão ou os arquivos.');
-      } finally {
-        spinner.classList.add('hidden');
-      }
-    }
 
-    function filtrarCardapio() {
-      const pesquisa = document.getElementById('pesquisa-cardapio').value.toLowerCase();
-      const categoria = document.getElementById('filtro-categoria').value;
-      const cards = document.querySelectorAll('#cardapio-lista .card');
-      cards.forEach(card => {
-        const nome = card.querySelector('h3').textContent.toLowerCase();
-        const cardCategoria = card.querySelector('p:nth-child(4)').textContent.split(': ')[1];
-        const matchesPesquisa = nome.includes(pesquisa);
-        const matchesCategoria = !categoria || cardCategoria === categoria;
-        card.style.display = matchesPesquisa && matchesCategoria ? 'block' : 'none';
-      });
+        categoriaDiv.appendChild(grid( gridDiv );
+        categoriasDiv.appendChild(categoriaDiv);
+      }
     }
 
     window.adicionarAoCarrinho = function(id) {
-      const pizza = pizzasCache.find(p => p.id === id);
-      if (!pizza) {
-        alert('Pizza não encontrada.');
-        return;
-      }
+      const pizza = cardapio.find(p => p.id === id);
       const itemExistente = carrinho.find(item => item.id === id);
+
       if (itemExistente) {
-        itemExistente.quantidade += 1;
+        itemExistente.quantidade++;
       } else {
-        carrinho.push({
-          id: pizza.id,
-          nome: pizza.nome,
-          preço: parseFloat(pizza.preço),
-          quantidade: 1
-        });
+        carrinho.push({ ...pizza, quantidade: 1 });
       }
+
       localStorage.setItem('carrinho', JSON.stringify(carrinho));
-      atualizarCarrinhoContador();
-      alert(`${pizza.nome} foi adicionado ao carrinho!`);
+      mostrarNotificacao('Sucesso', `${pizza.nome} adicionado ao carrinho!`);
     };
 
-    window.verCarrinho = function() {
-      if (carrinho.length === 0) {
-        alert('Seu carrinho está vazio.');
-        return;
-      }
-      window.location.href = 'checkout.html';
-    };
+    function mostrarNotificacao(titulo, mensagem) {
+      document.getElementById('notificacao-titulo').textContent = titulo;
+      document.getElementById('notificacao-mensagem').textContent = mensagem;
+      document.getElementById('modal-notificacao').classList.remove('hidden');
+    }
 
-    function atualizarCarrinhoContador() {
-      const totalItens = carrinho.reduce((sum, item) => sum + item.quantidade, 0);
-      document.getElementById('carrinho-contador').textContent = totalItens;
+    function fecharNotificacao() {
+      document.getElementById('modal-notificacao').classList.add('hidden');
     }
   </script>
 </body>
