@@ -1,4 +1,43 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -7,6 +46,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="config.js"></script>
   <script src="cardapio.js"></script>
+  <script src="login.js"></script>
   <style>
     body {
       background-color: var(--cor-fundo, #FFF8E7);
@@ -14,12 +54,41 @@
       font-family: 'Inter', sans-serif;
       margin: 0;
       padding: 0;
+      padding-bottom: 60px;
+    }
+    .promo-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #ef4444;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      z-index: 60;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+    .promo-banner button {
+      margin-left: 10px;
+      background: white;
+      color: #ef4444;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .promo-banner button:hover {
+      background: #f5f5f5;
     }
     header {
       background: var(--cor-primaria, #FF4500);
       color: white;
       padding: 1.5rem 0;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 40px;
+      z-index: 40;
     }
     header .container {
       max-width: 1200px;
@@ -37,6 +106,15 @@
       font-size: 1.75rem;
       font-weight: 700;
     }
+    .user-section {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .user-section .user-greeting {
+      font-size: 1rem;
+      font-weight: 500;
+    }
     .custom-btn {
       display: flex;
       align-items: center;
@@ -49,16 +127,74 @@
       transition: all 0.3s ease;
       border: none;
       cursor: pointer;
+      position: relative;
     }
     .custom-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       background: #f5f5f5;
     }
+    .cart-counter {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #ef4444;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 2rem 1rem;
+    }
+    .filter-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .filter-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: #e5e7eb;
+      color: #2D2D2D;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .filter-btn.active {
+      background: var(--cor-primaria, #FF4500);
+      color: white;
+    }
+    .filter-btn:hover {
+      background: #d1d5db;
+    }
+    .search-bar {
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+    .search-bar input {
+      width: 100%;
+      max-width: 500px;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    .search-bar input:focus {
+      border-color: var(--cor-primaria, #FF4500);
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(255, 69, 0, 0.1);
     }
     .category-section {
       margin-bottom: 3rem;
@@ -71,7 +207,7 @@
     }
     .pizza-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 1.5rem;
     }
     .pizza-card {
@@ -81,6 +217,19 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
       transition: all 0.3s ease;
       border: 1px solid #e5e7eb;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeIn 0.5s forwards;
+      cursor: pointer;
+    }
+    .pizza-card:nth-child(2) { animation-delay: 0.1s; }
+    .pizza-card:nth-child(3) { animation-delay: 0.2s; }
+    .pizza-card:nth-child(4) { animation-delay: 0.3s; }
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     .pizza-card:hover {
       transform: translateY(-5px);
@@ -88,7 +237,7 @@
     }
     .pizza-card img {
       width: 100%;
-      height: 180px;
+      height: 200px;
       object-fit: cover;
     }
     .pizza-card-content {
@@ -99,10 +248,22 @@
       font-weight: 600;
       margin-bottom: 0.5rem;
     }
+    .pizza-card .rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+      color: #f59e0b;
+    }
     .pizza-card p {
       font-size: 0.875rem;
       color: #6b7280;
       margin-bottom: 1rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     .pizza-card .price {
       font-size: 1.125rem;
@@ -131,11 +292,11 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
     /* Estilos do Carrossel de Promoções */
-    .promo-section {
+    .promo-section, .combos-section {
       margin-bottom: 3rem;
       position: relative;
     }
-    .promo-section h2 {
+    .promo-section h2, .combos-section h2 {
       font-size: 1.75rem;
       font-weight: 700;
       margin-bottom: 1.5rem;
@@ -159,21 +320,53 @@
       background: white;
       padding: 1.5rem;
       gap: 2rem;
+      animation: zoomIn 0.5s ease;
+    }
+    @keyframes zoomIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
     .carousel-item img {
-      width: 50%;
-      height: 250px;
+      width: 60%;
+      height: 300px;
       object-fit: cover;
       border-radius: 12px;
     }
     .carousel-content {
       flex: 1;
       text-align: left;
+      position: relative;
+    }
+    .carousel-content .badge {
+      position: absolute;
+      top: -10px;
+      left: 0;
+      background: #ef4444;
+      color: white;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
     .carousel-content h3 {
       font-size: 1.5rem;
       font-weight: 600;
       margin-bottom: 0.5rem;
+    }
+    .carousel-content .rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+      color: #f59e0b;
     }
     .carousel-content p {
       font-size: 0.875rem;
@@ -248,6 +441,166 @@
     }
     .carousel-dot.active {
       background: var(--cor-primaria, #FF4500);
+      transform: scale(1.2);
+    }
+    /* Modal de Detalhes */
+    .modal-details {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+    .modal-details-content {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .modal-details-content img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+    .modal-details-content .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .modal-details-content h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .modal-details-content .rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+      color: #f59e0b;
+    }
+    .modal-details-content .price {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--cor-primaria, #FF4500);
+      margin-bottom: 1rem;
+    }
+    .modal-details-content .size-select,
+    .modal-details-content .extra-ingredients,
+    .modal-details-content .border-select {
+      margin-bottom: 1rem;
+    }
+    .modal-details-content label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .modal-details-content select,
+    .modal-details-content input[type="checkbox"],
+    .modal-details-content input[type="text"],
+    .modal-details-content input[type="password"],
+    .modal-details-content input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      border-radius: 8px;
+      border: 2px solid #e5e7eb;
+    }
+    .modal-details-content .extra-ingredient {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    /* Carrinho Flutuante */
+    .floating-cart {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--cor-primaria, #FF4500);
+      color: white;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      z-index: 50;
+    }
+    .floating-cart:hover {
+      transform: scale(1.1);
+    }
+    .floating-cart .cart-counter {
+      top: -10px;
+      right: -10px;
+    }
+    .cart-preview {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      width: 300px;
+      max-height: 400px;
+      overflow-y: auto;
+      z-index: 50;
+      padding: 1rem;
+    }
+    .cart-preview h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .cart-preview .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .cart-preview .cart-item:last-child {
+      border-bottom: none;
+    }
+    .cart-preview .total {
+      font-weight: 600;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cart-preview .checkout-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      background: var(--cor-primaria, #FF4500);
+      color: white;
+      font-weight: 600;
+      text-align: center;
+      margin-top: 1rem;
+      transition: all 0.3s ease;
+    }
+    .cart-preview .checkout-btn:hover {
+      opacity: 0.9;
     }
     footer {
       background: var(--cor-primaria, #FF4500);
@@ -296,6 +649,20 @@
       width: 90%;
       text-align: center;
     }
+    .modal-content input {
+      margin-bottom: 1rem;
+      width: 100%;
+      padding: 8px;
+      border-radius: 8px;
+      border: 2px solid #e5e7eb;
+    }
+    .modal-content .toggle-link {
+      color: var(--cor-primaria, #FF4500);
+      cursor: pointer;
+      text-decoration: underline;
+      margin-top: 0.5rem;
+      display: inline-block;
+    }
     @media (max-width: 768px) {
       .carousel-item {
         flex-direction: column;
@@ -308,6 +675,14 @@
       .carousel-content .add-btn {
         width: 100%;
       }
+      .carousel-content .badge {
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .cart-preview {
+        width: 90%;
+        right: 5%;
+      }
     }
     @media (max-width: 640px) {
       .pizza-grid {
@@ -319,23 +694,41 @@
       header img {
         height: 40px;
       }
+      .promo-banner {
+        font-size: 0.75rem;
+        padding: 8px;
+      }
+      .user-section {
+        flex-direction: column;
+        align-items: flex-end;
+      }
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+  <!-- Banner Promocional -->
+  <div id="promo-banner" class="promo-banner">
+    Promoção: 2 pizzas pelo preço de 1! Use o cupom: 2POR1
+    <button onclick="this.parentElement.style.display='none'" aria-label="Fechar banner promocional">X</button>
+  </div>
+
   <header>
     <div class="container">
       <div class="flex items-center gap-4">
         <img id="logo" src="https://i.imgur.com/3wbh5W3.jpeg" alt="Logo">
         <h1 id="nome-pizzaria">La Casa de Pizzas</h1>
       </div>
-      <div class="flex gap-4">
+      <div class="flex gap-4 user-section">
+        <span id="user-greeting" class="user-greeting hidden"></span>
+        <button id="login-btn" onclick="abrirModalLogin()" class="custom-btn" aria-label="Fazer login">Login</button>
+        <button id="logout-btn" onclick="logout()" class="custom-btn hidden" aria-label="Sair">Sair</button>
         <button onclick="window.location.href='checkout.html'" class="custom-btn" aria-label="Ir para o checkout">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
           Carrinho
+          <span id="cart-counter" class="cart-counter hidden">0</span>
         </button>
       </div>
     </div>
@@ -343,10 +736,41 @@
 
   <section class="container">
     <h2 class="text-3xl font-bold mb-8 text-center">Nosso Cardápio</h2>
+    <!-- Barra de Pesquisa -->
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Pesquisar itens..." aria-label="Pesquisar itens">
+    </div>
+    <!-- Filtros por Categoria -->
+    <div class="filter-bar" id="filter-bar">
+      <button class="filter-btn active" data-category="Todas" aria-label="Mostrar todos os itens">Todas</button>
+      <button class="filter-btn" data-category="Salgadas" aria-label="Mostrar pizzas salgadas">Salgadas</button>
+      <button class="filter-btn" data-category="Doces" aria-label="Mostrar pizzas doces">Doces</button>
+      <button class="filter-btn" data-category="Vegetarianas" aria-label="Mostrar pizzas vegetarianas">Vegetarianas</button>
+      <button class="filter-btn" data-category="Bebidas" aria-label="Mostrar bebidas">Bebidas</button>
+      <button class="filter-btn" data-category="Combos" aria-label="Mostrar combos">Combos</button>
+    </div>
+    <!-- Seção de Combos -->
+    <div class="combos-section">
+      <h2>Combos Especiais 🥤🍕</h2>
+      <div class="carousel" id="combos-carousel">
+        <div class="carousel-inner" id="combos-carousel-inner"></div>
+        <button class="carousel-btn prev" onclick="moveCombosCarousel(-1)" aria-label="Combo anterior">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button class="carousel-btn next" onclick="moveCombosCarousel(1)" aria-label="Próximo combo">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+        <div class="carousel-dots" id="combos-carousel-dots" role="tablist"></div>
+      </div>
+    </div>
     <!-- Seção de Promoções -->
     <div class="promo-section">
       <h2>Promoções do Dia 🔥</h2>
-      <div class="carousel">
+      <div class="carousel" id="carousel">
         <div class="carousel-inner" id="carousel-inner"></div>
         <button class="carousel-btn prev" onclick="moveCarousel(-1)" aria-label="Promoção anterior">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -358,12 +782,26 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>
         </button>
-        <div class="carousel-dots" id="carousel-dots"></div>
+        <div class="carousel-dots" id="carousel-dots" role="tablist"></div>
       </div>
     </div>
-    <!-- Categorias de Pizzas -->
+    <!-- Categorias de Itens -->
     <div id="categorias"></div>
   </section>
+
+  <!-- Carrinho Flutuante -->
+  <div class="floating-cart" onclick="toggleCartPreview()" aria-label="Ver carrinho">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+    </svg>
+    <span id="floating-cart-counter" class="cart-counter hidden">0</span>
+  </div>
+  <div id="cart-preview" class="cart-preview hidden">
+    <h3>Seu Carrinho</h3>
+    <div id="cart-items"></div>
+    <div class="total" id="cart-total">Total: R$ 0.00</div>
+    <button onclick="abrirModalPagamento()" class="checkout-btn">Finalizar Pedido</button>
+  </div>
 
   <footer>
     <div class="container">
@@ -384,10 +822,72 @@
     </div>
   </div>
 
+  <!-- Modal de Login -->
+  <div id="modal-login" class="modal hidden">
+    <div class="modal-content">
+      <h3 class="text-xl font-semibold mb-4" id="modal-login-title">Login</h3>
+      <input type="text" id="login-nome" placeholder="Seu nome" aria-label="Digite seu nome">
+      <input type="password" id="login-senha" placeholder="Sua senha" aria-label="Digite sua senha">
+      <button id="login-action-btn" onclick="fazerLogin()" class="mt-4 custom-btn w-full" aria-label="Entrar">Entrar</button>
+      <button onclick="fecharModalLogin()" class="mt-2 custom-btn w-full" aria-label="Fechar modal de login">Cancelar</button>
+      <span class="toggle-link" onclick="toggleLoginRegister()"></span>
+    </div>
+  </div>
+
+  <!-- Modal de Pagamento -->
+  <div id="modal-pagamento" class="modal hidden">
+    <div class="modal-content">
+      <h3 class="text-xl font-semibold mb-4">Finalizar Pagamento</h3>
+      <p id="pagamento-total" class="mb-4"></p>
+      <input type="text" id="pagamento-nome" placeholder="Nome no cartão" aria-label="Digite o nome no cartão">
+      <input type="text" id="pagamento-cartao" placeholder="Número do cartão" aria-label="Digite o número do cartão">
+      <input type="text" id="pagamento-validade" placeholder="MM/AA" aria-label="Digite a validade do cartão">
+      <input type="text" id="pagamento-cvv" placeholder="CVV" aria-label="Digite o CVV do cartão">
+      <button onclick="processarPagamento()" class="mt-4 custom-btn w-full" aria-label="Confirmar pagamento">Confirmar Pagamento</button>
+      <button onclick="fecharModalPagamento()" class="mt-2 custom-btn w-full" aria-label="Cancelar pagamento">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Modal de Detalhes do Item -->
+  <div id="modal-details" class="modal-details hidden">
+    <div class="modal-details-content">
+      <button class="close-btn" onclick="fecharModalDetails()" aria-label="Fechar modal">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <img id="modal-img" src="" alt="">
+      <h3 id="modal-title"></h3>
+      <div class="rating" id="modal-rating"></div>
+      <p id="modal-description"></p>
+      <p id="modal-ingredients" class="text-sm text-gray-600"></p>
+      <div class="size-select">
+        <label for="modal-size">Tamanho:</label>
+        <select id="modal-size" aria-label="Selecionar tamanho do item"></select>
+      </div>
+      <div class="extra-ingredients" id="extra-ingredients-section">
+        <label>Ingredientes Extras:</label>
+        <div id="extra-ingredients-options"></div>
+      </div>
+      <div class="border-select" id="border-select-section">
+        <label for="modal-border">Tipo de Borda:</label>
+        <select id="modal-border" aria-label="Selecionar tipo de borda"></select>
+      </div>
+      <div class="price" id="modal-price"></div>
+      <button onclick="adicionarAoCarrinhoModal()" class="custom-btn w-full" aria-label="Adicionar ao carrinho">Adicionar ao Carrinho</button>
+    </div>
+  </div>
+
   <script>
     let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
     let currentSlide = 0;
+    let combosSlide = 0;
     let promoItems = [];
+    let combosItems = [];
+    let autoplayInterval;
+    let combosAutoplayInterval;
+    let selectedItem = null;
+    let isLoginMode = true;
 
     function aplicarConfiguracoes() {
       if (typeof config !== 'undefined') {
@@ -406,20 +906,170 @@
       }
     }
 
+    function atualizarContadorCarrinho() {
+      const cartCounter = document.getElementById('cart-counter');
+      const floatingCartCounter = document.getElementById('floating-cart-counter');
+      const totalItems = carrinho.reduce((sum, item) => sum + item.quantidade, 0);
+      cartCounter.textContent = totalItems;
+      floatingCartCounter.textContent = totalItems;
+      cartCounter.classList.toggle('hidden', totalItems === 0);
+      floatingCartCounter.classList.toggle('hidden', totalItems === 0);
+      atualizarCarrinhoPreview();
+    }
+
+    function atualizarCarrinhoPreview() {
+      const cartItemsDiv = document.getElementById('cart-items');
+      const cartTotalDiv = document.getElementById('cart-total');
+      cartItemsDiv.innerHTML = '';
+
+      if (carrinho.length === 0) {
+        cartItemsDiv.innerHTML = '<p class="text-gray-600">Seu carrinho está vazio.</p>';
+        cartTotalDiv.textContent = 'Total: R$ 0.00';
+        return;
+      }
+
+      let total = 0;
+      carrinho.forEach(item => {
+        const itemTotal = (item.preço + (item.extras || []).reduce((sum, extra) => sum + extra.preço, 0) + (item.borda?.preço || 0)) * item.quantidade;
+        total += itemTotal;
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'cart-item';
+        itemDiv.innerHTML = `
+          <span>${item.nome} (${item.tamanho}) x${item.quantidade}</span>
+          <span>R$ ${itemTotal.toFixed(2)}</span>
+        `;
+        cartItemsDiv.appendChild(itemDiv);
+      });
+
+      cartTotalDiv.textContent = `Total: R$ ${total.toFixed(2)}`;
+    }
+
+    function toggleCartPreview() {
+      const cartPreview = document.getElementById('cart-preview');
+      cartPreview.classList.toggle('hidden');
+    }
+
+    function atualizarUsuario() {
+      const userGreeting = document.getElementById('user-greeting');
+      const loginBtn = document.getElementById('login-btn');
+      const logoutBtn = document.getElementById('logout-btn');
+      const usuario = getUsuarioAtual();
+      if (usuario) {
+        userGreeting.textContent = `Olá, ${usuario.nome}!`;
+        userGreeting.classList.remove('hidden');
+        loginBtn.classList.add('hidden');
+        logoutBtn.classList.remove('hidden');
+      } else {
+        userGreeting.classList.add('hidden');
+        loginBtn.classList.remove('hidden');
+        logoutBtn.classList.add('hidden');
+      }
+    }
+
+    function abrirModalLogin() {
+      isLoginMode = true;
+      document.getElementById('modal-login-title').textContent = 'Login';
+      document.getElementById('login-action-btn').textContent = 'Entrar';
+      document.getElementById('login-action-btn').setAttribute('aria-label', 'Entrar');
+      document.querySelector('.toggle-link').textContent = 'Ainda não tem conta? Registre-se';
+      document.getElementById('modal-login').classList.remove('hidden');
+    }
+
+    function fecharModalLogin() {
+      document.getElementById('modal-login').classList.add('hidden');
+      document.getElementById('login-nome').value = '';
+      document.getElementById('login-senha').value = '';
+    }
+
+    function toggleLoginRegister() {
+      isLoginMode = !isLoginMode;
+      document.getElementById('modal-login-title').textContent = isLoginMode ? 'Login' : 'Registrar';
+      document.getElementById('login-action-btn').textContent = isLoginMode ? 'Entrar' : 'Registrar';
+      document.getElementById('login-action-btn').setAttribute('aria-label', isLoginMode ? 'Entrar' : 'Registrar');
+      document.querySelector('.toggle-link').textContent = isLoginMode ? 'Ainda não tem conta? Registre-se' : 'Já tem conta? Faça login';
+    }
+
+    function fazerLogin() {
+      const nome = document.getElementById('login-nome').value.trim();
+      const senha = document.getElementById('login-senha').value.trim();
+
+      if (isLoginMode) {
+        const resultado = verificarLogin(nome, senha);
+        mostrarNotificacao(resultado.sucesso ? 'Sucesso' : 'Erro', resultado.mensagem);
+        if (resultado.sucesso) {
+          atualizarUsuario();
+          fecharModalLogin();
+        }
+      } else {
+        const resultado = adicionarUsuario(nome, senha);
+        mostrarNotificacao(resultado.sucesso ? 'Sucesso' : 'Erro', resultado.mensagem);
+        if (resultado.sucesso) {
+          toggleLoginRegister();
+        }
+      }
+    }
+
+    function logout() {
+      const resultado = logout();
+      mostrarNotificacao('Sucesso', resultado.mensagem);
+      atualizarUsuario();
+    }
+
+    function abrirModalPagamento() {
+      if (carrinho.length === 0) {
+        mostrarNotificacao('Erro', 'Seu carrinho está vazio.');
+        return;
+      }
+      const total = carrinho.reduce((sum, item) => sum + (item.preço + (item.extras || []).reduce((s, extra) => s + extra.preço, 0) + (item.borda?.preço || 0)) * item.quantidade, 0);
+      document.getElementById('pagamento-total').textContent = `Total: R$ ${total.toFixed(2)}`;
+      document.getElementById('modal-pagamento').classList.remove('hidden');
+    }
+
+    function fecharModalPagamento() {
+      document.getElementById('modal-pagamento').classList.add('hidden');
+    }
+
+    function processarPagamento() {
+      const nome = document.getElementById('pagamento-nome').value.trim();
+      const cartao = document.getElementById('pagamento-cartao').value.trim();
+      const validade = document.getElementById('pagamento-validade').value.trim();
+      const cvv = document.getElementById('pagamento-cvv').value.trim();
+
+      if (!nome || !cartao || !validade || !cvv) {
+        mostrarNotificacao('Erro', 'Por favor, preencha todos os campos.');
+        return;
+      }
+
+      // Simulação de processamento de pagamento
+      setTimeout(() => {
+        carrinho = [];
+        localStorage.setItem('carrinho', JSON.stringify(carrinho));
+        atualizarContadorCarrinho();
+        fecharModalPagamento();
+        toggleCartPreview();
+        mostrarNotificacao('Sucesso', 'Pagamento realizado com sucesso! Seu pedido foi enviado.');
+      }, 1000);
+    }
+
     function checkConfigAndInitialize() {
       const maxAttempts = 10;
       let attempts = 0;
 
       const interval = setInterval(() => {
-        if (typeof config !== 'undefined' && typeof cardapio !== 'undefined') {
+        if (typeof config !== 'undefined' && typeof cardapio !== 'undefined' && typeof adicionarUsuario !== 'undefined') {
           clearInterval(interval);
           aplicarConfiguracoes();
+          atualizarContadorCarrinho();
+          atualizarUsuario();
+          carregarCombos();
           carregarPromocoes();
           carregarCardapio();
+          configurarPesquisa();
+          configurarFiltros();
         } else if (attempts >= maxAttempts) {
           clearInterval(interval);
-          console.error('Erro: Não foi possível carregar config.js ou cardapio.js após várias tentativas.');
-          mostrarNotificacao('Erro', 'Não foi possível carregar o cardápio. Verifique se os arquivos config.js e cardapio.js estão no mesmo diretório e se você está executando o projeto em um servidor local.');
+          console.error('Erro: Não foi possível carregar config.js, cardapio.js ou login.js após várias tentativas.');
+          mostrarNotificacao('Erro', 'Não foi possível carregar o cardápio. Verifique se os arquivos config.js, cardapio.js e login.js estão no mesmo diretório e se você está executando o projeto em um servidor local.');
         }
         attempts++;
       }, 500);
@@ -429,32 +1079,41 @@
       checkConfigAndInitialize();
     });
 
-    function carregarPromocoes() {
-      const carouselInner = document.getElementById('carousel-inner');
-      const carouselDots = document.getElementById('carousel-dots');
+    function carregarCombos() {
+      const carouselInner = document.getElementById('combos-carousel-inner');
+      const carouselDots = document.getElementById('combos-carousel-dots');
+      const carousel = document.getElementById('combos-carousel');
       carouselInner.innerHTML = '';
       carouselDots.innerHTML = '';
 
-      // Filtra pizzas em promoção (assumindo que o cardapio.js tem uma propriedade 'promocao')
-      promoItems = cardapio.filter(pizza => pizza.promocao && pizza.promocao.ativo);
-      if (promoItems.length === 0) {
-        // Caso não haja promoções, esconde a seção
-        document.querySelector('.promo-section').style.display = 'none';
+      combosItems = cardapio.filter(item => item.categoria === 'Combos');
+      if (combosItems.length === 0) {
+        document.querySelector('.combos-section').style.display = 'none';
         return;
       }
 
-      promoItems.forEach((pizza, index) => {
+      combosItems.forEach((combo, index) => {
+        const precoOriginal = combo.itens.reduce((sum, itemId) => {
+          const item = cardapio.find(i => i.id === itemId);
+          return sum + item.preço;
+        }, 0);
+        const desconto = Math.round(((precoOriginal - combo.preço) / precoOriginal) * 100);
         const itemDiv = document.createElement('div');
         itemDiv.className = 'carousel-item';
-        const precoOriginal = pizza.preço;
-        const precoPromocional = pizza.promocao.precoPromocional;
+        itemDiv.setAttribute('role', 'tabpanel');
+        itemDiv.setAttribute('aria-labelledby', `combos-carousel-dot-${index}`);
         itemDiv.innerHTML = `
-          <img src="${pizza.imagem}" alt="${pizza.nome}">
+          <img src="${combo.imagem}" alt="${combo.nome}" loading="lazy">
           <div class="carousel-content">
-            <h3>${pizza.nome}</h3>
-            <p>${pizza.descrição}</p>
-            <div class="price">R$ ${precoPromocional.toFixed(2)} <span class="original-price">R$ ${precoOriginal.toFixed(2)}</span></div>
-            <button class="add-btn" onclick="adicionarAoCarrinho(${pizza.id})" aria-label="Adicionar ${pizza.nome} ao carrinho">
+            <span class="badge">${desconto}% OFF</span>
+            <h3>${combo.nome}</h3>
+            <div class="rating">
+              ${renderStars(combo.avaliacao)}
+              <span>(${combo.numAvaliacoes})</span>
+            </div>
+            <p>${combo.descrição}</p>
+            <div class="price">R$ ${combo.preço.toFixed(2)} <span class="original-price">R$ ${precoOriginal.toFixed(2)}</span></div>
+            <button class="add-btn" onclick="adicionarAoCarrinho(${combo.id})" aria-label="Adicionar ${combo.nome} ao carrinho">
               Adicionar ao Carrinho
             </button>
           </div>
@@ -463,11 +1122,107 @@
 
         const dot = document.createElement('div');
         dot.className = 'carousel-dot';
+        dot.id = `combos-carousel-dot-${index}`;
+        dot.setAttribute('role', 'tab');
+        dot.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+        dot.setAttribute('tabindex', '0');
+        dot.addEventListener('click', () => moveCombosToSlide(index));
+        dot.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            moveCombosToSlide(index);
+          }
+        });
+        carouselDots.appendChild(dot);
+      });
+
+      updateCombosCarousel();
+
+      combosAutoplayInterval = setInterval(() => moveCombosCarousel(1), 5000);
+      carousel.addEventListener('mouseenter', () => clearInterval(combosAutoplayInterval));
+      carousel.addEventListener('mouseleave', () => combosAutoplayInterval = setInterval(() => moveCombosCarousel(1), 5000));
+    }
+
+    function moveCombosCarousel(direction) {
+      combosSlide += direction;
+      if (combosSlide < 0) combosSlide = combosItems.length - 1;
+      if (combosSlide >= combosItems.length) combosSlide = 0;
+      updateCombosCarousel();
+    }
+
+    function moveCombosToSlide(index) {
+      combosSlide = index;
+      updateCombosCarousel();
+    }
+
+    function updateCombosCarousel() {
+      const carouselInner = document.getElementById('combos-carousel-inner');
+      carouselInner.style.transform = `translateX(-${combosSlide * 100}%)`;
+      const dots = document.querySelectorAll('#combos-carousel-dots .carousel-dot');
+      dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === combosSlide);
+        dot.setAttribute('aria-selected', index === combosSlide ? 'true' : 'false');
+      });
+    }
+
+    function carregarPromocoes() {
+      const carouselInner = document.getElementById('carousel-inner');
+      const carouselDots = document.getElementById('carousel-dots');
+      const carousel = document.getElementById('carousel');
+      carouselInner.innerHTML = '';
+      carouselDots.innerHTML = '';
+
+      promoItems = cardapio.filter(item => item.promocao && item.promocao.ativo && item.categoria !== 'Combos');
+      if (promoItems.length === 0) {
+        document.querySelector('.promo-section').style.display = 'none';
+        return;
+      }
+
+      promoItems.forEach((item, index) => {
+        const precoOriginal = item.preço;
+        const precoPromocional = item.promocao.precoPromocional;
+        const desconto = Math.round(((precoOriginal - precoPromocional) / precoOriginal) * 100);
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'carousel-item';
+        itemDiv.setAttribute('role', 'tabpanel');
+        itemDiv.setAttribute('aria-labelledby', `carousel-dot-${index}`);
+        itemDiv.innerHTML = `
+          <img src="${item.imagem}" alt="${item.nome}" loading="lazy">
+          <div class="carousel-content">
+            <span class="badge">${desconto}% OFF</span>
+            <h3>${item.nome}</h3>
+            <div class="rating">
+              ${renderStars(item.avaliacao)}
+              <span>(${item.numAvaliacoes})</span>
+            </div>
+            <p>${item.descrição}</p>
+            <div class="price">R$ ${precoPromocional.toFixed(2)} <span class="original-price">R$ ${precoOriginal.toFixed(2)}</span></div>
+            <button class="add-btn" onclick="adicionarAoCarrinho(${item.id})" aria-label="Adicionar ${item.nome} ao carrinho">
+              Adicionar ao Carrinho
+            </button>
+          </div>
+        `;
+        carouselInner.appendChild(itemDiv);
+
+        const dot = document.createElement('div');
+        dot.className = 'carousel-dot';
+        dot.id = `carousel-dot-${index}`;
+        dot.setAttribute('role', 'tab');
+        dot.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+        dot.setAttribute('tabindex', '0');
         dot.addEventListener('click', () => moveToSlide(index));
+        dot.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            moveToSlide(index);
+          }
+        });
         carouselDots.appendChild(dot);
       });
 
       updateCarousel();
+
+      autoplayInterval = setInterval(() => moveCarousel(1), 5000);
+      carousel.addEventListener('mouseenter', () => clearInterval(autoplayInterval));
+      carousel.addEventListener('mouseleave', () => autoplayInterval = setInterval(() => moveCarousel(1), 5000));
     }
 
     function moveCarousel(direction) {
@@ -485,46 +1240,102 @@
     function updateCarousel() {
       const carouselInner = document.getElementById('carousel-inner');
       carouselInner.style.transform = `translateX(-${currentSlide * 100}%)`;
-      const dots = document.querySelectorAll('.carousel-dot');
+      const dots = document.querySelectorAll('#carousel-dots .carousel-dot');
       dots.forEach((dot, index) => {
         dot.classList.toggle('active', index === currentSlide);
+        dot.setAttribute('aria-selected', index === currentSlide ? 'true' : 'false');
       });
     }
 
-    function carregarCardapio() {
+    function configurarPesquisa() {
+      const searchInput = document.getElementById('search-input');
+      searchInput.addEventListener('input', () => {
+        const termo = searchInput.value.trim().toLowerCase();
+        const activeCategory = document.querySelector('.filter-btn.active').dataset.category;
+        carregarCardapio(termo, activeCategory);
+      });
+    }
+
+    function configurarFiltros() {
+      const filterButtons = document.querySelectorAll('.filter-btn');
+      filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          filterButtons.forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+          const termo = document.getElementById('search-input').value.trim().toLowerCase();
+          carregarCardapio(termo, button.dataset.category);
+        });
+      });
+    }
+
+    function renderStars(rating) {
+      const fullStars = Math.floor(rating);
+      const halfStar = rating % 1 >= 0.5 ? 1 : 0;
+      const emptyStars = 5 - fullStars - halfStar;
+      let stars = '';
+      for (let i = 0; i < fullStars; i++) stars += '★';
+      if (halfStar) stars += '☆';
+      for (let i = 0; i < emptyStars; i++) stars += '☆';
+      return stars;
+    }
+
+    function carregarCardapio(termo = '', categoriaSelecionada = 'Todas') {
       const categoriasDiv = document.getElementById('categorias');
       categoriasDiv.innerHTML = '';
 
-      const pizzasPorCategoria = {};
-      cardapio.forEach(pizza => {
-        if (!pizzasPorCategoria[pizza.categoria]) {
-          pizzasPorCategoria[pizza.categoria] = [];
+      const itensPorCategoria = {};
+      cardapio.forEach(item => {
+        if (termo && !item.nome.toLowerCase().includes(termo) && !item.descrição.toLowerCase().includes(termo)) {
+          return;
         }
-        pizzasPorCategoria[pizza.categoria].push(pizza);
+        if (categoriaSelecionada !== 'Todas' && item.categoria !== categoriaSelecionada) {
+          return;
+        }
+        if (!itensPorCategoria[item.categoria]) {
+          itensPorCategoria[item.categoria] = [];
+        }
+        itensPorCategoria[item.categoria].push(item);
       });
 
-      for (const categoria in pizzasPorCategoria) {
+      if (Object.keys(itensPorCategoria).length === 0) {
+        categoriasDiv.innerHTML = '<p class="text-center text-gray-600">Nenhum item encontrado.</p>';
+        return;
+      }
+
+      for (const categoria in itensPorCategoria) {
+        if (categoria === 'Combos') continue; // Combos já são exibidos no carrossel
         const categoriaDiv = document.createElement('div');
         categoriaDiv.className = 'category-section';
         categoriaDiv.innerHTML = `<h2>${categoria}</h2>`;
         const gridDiv = document.createElement('div');
         gridDiv.className = 'pizza-grid';
 
-        pizzasPorCategoria[categoria].forEach(pizza => {
-          const pizzaDiv = document.createElement('div');
-          pizzaDiv.className = 'pizza-card';
-          pizzaDiv.innerHTML = `
-            <img src="${pizza.imagem}" alt="${pizza.nome}">
+        itensPorCategoria[categoria].forEach(item => {
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'pizza-card';
+          itemDiv.setAttribute('tabindex', '0');
+          itemDiv.addEventListener('click', () => abrirModalDetails(item));
+          itemDiv.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              abrirModalDetails(item);
+            }
+          });
+          itemDiv.innerHTML = `
+            <img src="${item.imagem}" alt="${item.nome}" loading="lazy">
             <div class="pizza-card-content">
-              <h3>${pizza.nome}</h3>
-              <p>${pizza.descrição}</p>
-              <div class="price">R$ ${pizza.preço.toFixed(2)}</div>
-              <button class="add-btn" onclick="adicionarAoCarrinho(${pizza.id})" aria-label="Adicionar ${pizza.nome} ao carrinho">
+              <h3>${item.nome}</h3>
+              <div class="rating">
+                ${renderStars(item.avaliacao)}
+                <span>(${item.numAvaliacoes})</span>
+              </div>
+              <p>${item.descrição}</p>
+              <div class="price">R$ ${item.preço.toFixed(2)}</div>
+              <button class="add-btn" onclick="event.stopPropagation(); adicionarAoCarrinho(${item.id})" aria-label="Adicionar ${item.nome} ao carrinho">
                 Adicionar ao Carrinho
               </button>
             </div>
           `;
-          gridDiv.appendChild(pizzaDiv);
+          gridDiv.appendChild(itemDiv);
         });
 
         categoriaDiv.appendChild(gridDiv);
@@ -532,19 +1343,159 @@
       }
     }
 
+    function abrirModalDetails(item) {
+      selectedItem = item;
+      const modal = document.getElementById('modal-details');
+      document.getElementById('modal-img').src = item.imagem;
+      document.getElementById('modal-img').alt = item.nome;
+      document.getElementById('modal-title').textContent = item.nome;
+      document.getElementById('modal-rating').innerHTML = `${renderStars(item.avaliacao)} <span>(${item.numAvaliacoes})</span>`;
+      document.getElementById('modal-description').textContent = item.descrição;
+      document.getElementById('modal-ingredients').textContent = item.ingredientes.length > 0 ? `Ingredientes: ${item.ingredientes.join(', ')}` : '';
+      document.getElementById('modal-ingredients').style.display = item.ingredientes.length > 0 ? 'block' : 'none';
+
+      const sizeSelect = document.getElementById('modal-size');
+      sizeSelect.innerHTML = '';
+      item.tamanhos.forEach(tamanho => {
+        const option = document.createElement('option');
+        option.value = tamanho.nome;
+        option.textContent = `${tamanho.nome} - R$ ${tamanho.preço.toFixed(2)}`;
+        sizeSelect.appendChild(option);
+      });
+
+      const extraIngredientsSection = document.getElementById('extra-ingredients-section');
+      const extraIngredientsDiv = document.getElementById('extra-ingredients-options');
+      extraIngredientsDiv.innerHTML = '';
+      if (item.extrasDisponiveis && item.extrasDisponiveis.length > 0) {
+        extraIngredientsSection.style.display = 'block';
+        item.extrasDisponiveis.forEach(extra => {
+          const div = document.createElement('div');
+          div.className = 'extra-ingredient';
+          div.innerHTML = `
+            <input type="checkbox" id="extra-${extra.nome}" value="${extra.nome}" data-preço="${extra.preço}">
+            <label for="extra-${extra.nome}">${extra.nome} (+ R$ ${extra.preço.toFixed(2)})</label>
+          `;
+          extraIngredientsDiv.appendChild(div);
+        });
+      } else {
+        extraIngredientsSection.style.display = 'none';
+      }
+
+      const borderSelectSection = document.getElementById('border-select-section');
+      const borderSelect = document.getElementById('modal-border');
+      borderSelect.innerHTML = '';
+      if (item.bordasDisponiveis && item.bordasDisponiveis.length > 0) {
+        borderSelectSection.style.display = 'block';
+        item.bordasDisponiveis.forEach(borda => {
+          const option = document.createElement('option');
+          option.value = borda.nome;
+          option.textContent = borda.preço > 0 ? `${borda.nome} (+ R$ ${borda.preço.toFixed(2)})` : borda.nome;
+          borderSelect.appendChild(option);
+        });
+      } else {
+        borderSelectSection.style.display = 'none';
+      }
+
+      sizeSelect.addEventListener('change', updateModalPrice);
+      borderSelect.addEventListener('change', updateModalPrice);
+      extraIngredientsDiv.addEventListener('change', updateModalPrice);
+
+      updateModalPrice();
+      modal.classList.remove('hidden');
+    }
+
+    function updateModalPrice() {
+      if (!selectedItem) return;
+      const sizeSelect = document.getElementById('modal-size');
+      const borderSelect = document.getElementById('modal-border');
+      const extraCheckboxes = document.querySelectorAll('#extra-ingredients-options input:checked');
+
+      const selectedSize = selectedItem.tamanhos.find(t => t.nome === sizeSelect.value);
+      const selectedBorder = selectedItem.bordasDisponiveis?.find(b => b.nome === borderSelect.value) || { preço: 0 };
+      let extrasTotal = 0;
+      extraCheckboxes.forEach(checkbox => {
+        extrasTotal += parseFloat(checkbox.dataset.preço);
+      });
+
+      const totalPrice = selectedSize.preço + selectedBorder.preço + extrasTotal;
+      document.getElementById('modal-price').textContent = `R$ ${totalPrice.toFixed(2)}`;
+    }
+
+    function fecharModalDetails() {
+      document.getElementById('modal-details').classList.add('hidden');
+      selectedItem = null;
+    }
+
     window.adicionarAoCarrinho = function(id) {
-      const pizza = cardapio.find(p => p.id === id);
-      const itemExistente = carrinho.find(item => item.id === id);
+      const item = cardapio.find(p => p.id === id);
+      let itemToAdd = { ...item, quantidade: 1, tamanho: item.tamanhos[0].nome };
+
+      if (item.categoria === 'Combos') {
+        itemToAdd = { ...itemToAdd, itens: item.itens.map(itemId => {
+          const subItem = cardapio.find(i => i.id === itemId);
+          return { ...subItem, tamanho: subItem.tamanhos[0].nome };
+        }) };
+      }
+
+      const itemExistente = carrinho.find(i => i.id === id && i.tamanho === item.tamanhos[0].nome && !i.extras && !i.borda);
 
       if (itemExistente) {
         itemExistente.quantidade++;
       } else {
-        carrinho.push({ ...pizza, quantidade: 1 });
+        carrinho.push(itemToAdd);
       }
 
       localStorage.setItem('carrinho', JSON.stringify(carrinho));
-      mostrarNotificacao('Sucesso', `${pizza.nome} adicionado ao carrinho!`);
+      atualizarContadorCarrinho();
+      mostrarNotificacao('Sucesso', `${item.nome} adicionado ao carrinho!`);
     };
+
+    function adicionarAoCarrinhoModal() {
+      if (!selectedItem) return;
+      const sizeSelect = document.getElementById('modal-size');
+      const borderSelect = document.getElementById('modal-border');
+      const extraCheckboxes = document.querySelectorAll('#extra-ingredients-options input:checked');
+
+      const selectedSize = selectedItem.tamanhos.find(t => t.nome === sizeSelect.value);
+      const selectedBorder = selectedItem.bordasDisponiveis?.find(b => b.nome === borderSelect.value);
+      const extras = Array.from(extraCheckboxes).map(checkbox => ({
+        nome: checkbox.value,
+        preço: parseFloat(checkbox.dataset.preço)
+      }));
+
+      let itemToAdd = {
+        ...selectedItem,
+        preço: selectedSize.preço,
+        tamanho: selectedSize.nome,
+        borda: selectedBorder,
+        extras: extras
+      };
+
+      if (selectedItem.categoria === 'Combos') {
+        itemToAdd = { ...itemToAdd, itens: selectedItem.itens.map(itemId => {
+          const subItem = cardapio.find(i => i.id === itemId);
+          return { ...subItem, tamanho: subItem.tamanhos[0].nome };
+        }) };
+      }
+
+      const itemExistente = carrinho.find(item =>
+        item.id === itemToAdd.id &&
+        item.tamanho === itemToAdd.tamanho &&
+        JSON.stringify(item.extras) === JSON.stringify(itemToAdd.extras) &&
+        JSON.stringify(item.borda) === JSON.stringify(itemToAdd.borda)
+      );
+
+      if (itemExistente) {
+        itemExistente.quantidade++;
+      } else {
+        carrinho.push({ ...itemToAdd, quantidade: 1 });
+      }
+
+      localStorage.setItem('carrinho', JSON.stringify(carrinho));
+      atualizarContadorCarrinho();
+      mostrarNotificacao('Sucesso', `${itemToAdd.nome} (${itemToAdd.tamanho}) adicionado ao carrinho!`);
+      fecharModalDetails();
+    }
 
     function mostrarNotificacao(titulo, mensagem) {
       document.getElementById('notificacao-titulo').textContent = titulo;
