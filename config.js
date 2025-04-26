@@ -1,33 +1,81 @@
+/**
+ * Configurações globais da pizzaria.
+ * Define as configurações usadas pelo projeto, como cores, nome da pizzaria, logo e links sociais.
+ */
 const config = {
-  // Credenciais de administrador
-  adminUsername: "admin",
-  adminPassword: "senha123",
+  // Cores do tema (em formato hexadecimal)
+  primaryColor: validateColor('#FF4500'), // Cor primária (laranja)
+  secondaryColor: validateColor('#FFD700'), // Cor secundária (amarelo)
+  backgroundColor: validateColor('#FFF8E7'), // Cor de fundo (creme claro)
+  textColor: validateColor('#2D2D2D'), // Cor do texto (cinza escuro)
 
   // Informações da pizzaria
-  nomePizzaria: "La Casa de Pizzas",
-  logoUrl: "https://i.imgur.com/3wbh5W3.jpeg",
-  telefone: "(62) 99577-1104",
-  whatsapp: "(62) 99577-1104",
-  instagram: "@lacasadepizza2025",
-  whatsappLink: "https://api.whatsapp.com/send?phone=5562995771104&text=Olá,%20gostaria%20de%20fazer%20um%20pedido!",
+  pizzariaName: validateString('La Casa de Pizzas', 'Nome da pizzaria'), // Nome da pizzaria
+  logoUrl: validateUrl('https://via.placeholder.com/48', 'URL do logo'), // URL do logo
 
-  // Configurações visuais
-  corPrimaria: "#FF4500",    // Laranja queimado
-  corSecundaria: "#FFD700",  // Amarelo ouro
-  corFundo: "#FFF8E7",       // Creme claro
-  corTexto: "#2D2D2D",       // Cinza escuro
-  corDestaque: "#228B22",    // Verde para promoções
+  // Links de contato e redes sociais
+  whatsappNumber: validatePhone('(62) 99577-1104'), // Número de WhatsApp
+  whatsappLink: validateUrl('https://api.whatsapp.com/send?phone=5562995771104', 'Link do WhatsApp'),
+  instagramHandle: validateString('@lacasadepizza2025', 'Nome do Instagram'), // Nome do Instagram (com @)
+  instagramUrl: validateUrl('https://instagram.com/lacasadepizza2025', 'URL do Instagram'), // URL do Instagram
 
-  // Outras configurações
-  categoriasPizzas: [
-    "Salgadas",
-    "Doces",
-    "Vegetarianas",
-    "Especiais"
-  ],
-  imagemPadraoPizza: "https://via.placeholder.com/300x150.png?text=Pizza+Padrão",
-
-  // Configurações de pagamento
-  pixChave: "pix@lacasadepizzas.com",
-  linkCartao: "https://exemplo.com/pagamento-cartao"
+  // Configurações administrativas
+  adminPassword: validateString('admin123', 'Senha do administrador'), // Senha padrão para acesso ao admin
 };
+
+/**
+ * Valida uma cor no formato hexadecimal.
+ * @param {string} color - Cor a ser validada.
+ * @param {string} defaultColor - Cor padrão caso a validação falhe.
+ * @returns {string} Cor validada ou padrão.
+ */
+function validateColor(color, defaultColor = '#000000') {
+  const hexPattern = /^#([0-9A-F]{3}|[0-9A-F]{6})$/i;
+  return typeof color === 'string' && hexPattern.test(color) ? color : defaultColor;
+}
+
+/**
+ * Valida uma string não vazia.
+ * @param {string} value - Valor a ser validado.
+ * @param {string} fieldName - Nome do campo para mensagem de erro.
+ * @param {string} defaultValue - Valor padrão caso a validação falhe.
+ * @returns {string} String validada ou padrão.
+ */
+function validateString(value, fieldName, defaultValue = '') {
+  if (typeof value !== 'string' || value.trim() === '') {
+    console.warn(`[Config] ${fieldName} inválido. Usando valor padrão: ${defaultValue}`);
+    return defaultValue;
+  }
+  return value.trim();
+}
+
+/**
+ * Valida uma URL.
+ * @param {string} url - URL a ser validada.
+ * @param {string} fieldName - Nome do campo para mensagem de erro.
+ * @param {string} defaultUrl - URL padrão caso a validação falhe.
+ * @returns {string} URL validada ou padrão.
+ */
+function validateUrl(url, fieldName, defaultUrl = '#') {
+  try {
+    new URL(url);
+    return url;
+  } catch (e) {
+    console.warn(`[Config] ${fieldName} inválido: ${url}. Usando valor padrão: ${defaultUrl}`);
+    return defaultUrl;
+  }
+}
+
+/**
+ * Valida um número de telefone no formato (XX) XXXXX-XXXX.
+ * @param {string} phone - Número de telefone a ser validado.
+ * @param {string} defaultPhone - Número padrão caso a validação falhe.
+ * @returns {string} Número validado ou padrão.
+ */
+function validatePhone(phone, defaultPhone = 'Não informado') {
+  const phonePattern = /^\(\d{2}\)\s\d{5}-\d{4}$/;
+  return typeof phone === 'string' && phonePattern.test(phone) ? phone : defaultPhone;
+}
+
+// Exporta as configurações para uso global
+window.config = config;

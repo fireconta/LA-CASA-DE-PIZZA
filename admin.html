@@ -42,1003 +42,346 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="page-title">Admin - La Casa de Pizzas</title>
+  <title>Painel Administrativo - La Casa de Pizzas</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="config.js"></script>
-  <script src="cardapio.js"></script>
+  <script src="config.js" defer></script>
+  <script src="cardapio.js" defer></script>
   <style>
+    :root {
+      --cor-primaria: #FF4500;
+      --cor-secundaria: #FFD700;
+      --cor-fundo: #FFF8E7;
+      --cor-texto: #2D2D2D;
+    }
     body {
-      background-color: var(--cor-fundo, #FFF8E7);
-      color: var(--cor-texto, #2D2D2D);
-      font-family: 'Poppins', sans-serif;
+      background-color: var(--cor-fundo);
+      color: var(--cor-texto);
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .custom-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 20px;
-      border-radius: 25px;
       transition: all 0.3s ease;
     }
     .custom-btn:hover {
-      transform: scale(1.05);
+      transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
-    .card {
-      background-color: white;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
-    }
-    .card:hover {
-      transform: translateY(-5px);
-    }
-    .pizza-img {
-      width: 100%;
-      height: 150px;
-      object-fit: cover;
-      border-radius: 10px;
-    }
-    .preview-img {
-      width: 100%;
-      max-height: 200px;
-      object-fit: cover;
-      border-radius: 10px;
-      margin-top: 10px;
-    }
-    .spinner {
-      border: 4px solid rgba(0, 0, 0, 0.1);
-      border-left: 4px solid var(--cor-primaria, #FF4500);
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    .tab {
-      padding: 12px 24px;
-      border-bottom: 3px solid transparent;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .tab.active {
-      border-bottom: 3px solid var(--cor-primaria, #FF4500);
-      font-weight: bold;
-      color: var(--cor-primaria, #FF4500);
-    }
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 50;
-    }
     .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 15px;
-      max-width: 600px;
-      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
     }
-    .login-container {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, var(--cor-primaria, #FF4500) 0%, var(--cor-secundaria, #FFD700) 100%);
-      padding: 1rem;
-      animation: fadeIn 1s ease-in-out;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    .login-card {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      padding: 2.5rem;
-      width: 100%;
-      max-width: 400px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .login-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-    }
-    .input-wrapper {
-      position: relative;
-      margin-bottom: 1.5rem;
-    }
-    .input-wrapper input {
-      width: 100%;
-      padding: 0.75rem 1rem 0.75rem 2.5rem;
-      border: 2px solid #e5e7eb;
-      border-radius: 50px;
-      font-size: 1rem;
+    .item-card {
       transition: all 0.3s ease;
     }
-    .input-wrapper input:focus {
-      border-color: var(--cor-primaria, #FF4500);
-      box-shadow: 0 0 0 3px rgba(255, 69, 0, 0.1);
-      outline: none;
+    .item-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     }
-    .input-wrapper svg {
-      position: absolute;
-      left: 0.75rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #9ca3af;
-      transition: color 0.3s ease;
-    }
-    .input-wrapper input:focus + svg {
-      color: var(--cor-primaria, #FF4500);
-    }
-    .error-message {
-      background: #fee2e2;
-      color: #dc2626;
-      padding: 0.5rem 1rem;
-      border-radius: 10px;
-      margin-bottom: 1rem;
-      display: none;
-      animation: slideDown 0.3s ease;
-    }
-    @keyframes slideDown {
-      from { transform: translateY(-10px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    .login-btn:hover svg {
-      transform: translateX(5px);
+    @media (max-width: 640px) {
+      .modal-content {
+        width: 95%;
+        padding: 1rem;
+      }
+      .item-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Autenticação -->
-  <section id="login" class="login-container">
-    <div class="login-card">
-      <img id="logo" src="https://i.imgur.com/3wbh5W3.jpeg" alt="Logo La Casa de Pizzas" class="mx-auto h-20 mb-6">
-      <h2 class="text-2xl font-bold text-center mb-4 text-[var(--cor-texto)]">
-        Painel Administrador - <span id="nome-pizzaria">La Casa de Pizzas</span>
-      </h2>
-      <p class="text-center text-gray-600 mb-6">Faça login para gerenciar sua pizzaria</p>
-      <div id="error-message" class="error-message"></div>
-      <div class="space-y-4">
-        <div class="input-wrapper">
-          <input type="text" id="username" placeholder="Usuário" aria-label="Nome de usuário">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-          </svg>
-        </div>
-        <div class="input-wrapper">
-          <input type="password" id="password" placeholder="Senha" aria-label="Senha">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-          </svg>
-        </div>
-        <button onclick="logar()" class="w-full custom-btn login-btn bg-[var(--cor-primaria)] text-white font-semibold" aria-label="Entrar no painel de administração">
-          Entrar
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-          </svg>
-        </button>
-      </div>
+  <header class="bg-[var(--cor-primaria)] text-white p-4 shadow-lg sticky top-0 z-40">
+    <div class="container mx-auto px-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold">Painel Administrativo</h1>
+      <button onclick="logoutAdmin()" class="custom-btn bg-white text-[var(--cor-primaria)] px-4 py-2 rounded-lg" aria-label="Sair do painel administrativo">Sair</button>
+    </div>
+  </header>
+
+  <section id="login-section" class="container mx-auto px-4 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+      <h3 class="text-xl font-semibold mb-4 text-center">Acesso Administrativo</h3>
+      <p class="text-center mb-4">Digite a Senha</p>
+      <input type="password" id="admin-password" placeholder="Senha administrativa" class="w-full p-2 border rounded mb-4" aria-label="Senha administrativa">
+      <p id="login-error" class="text-red-500 text-sm text-center mb-4 hidden"></p>
+      <button onclick="loginAdmin()" class="custom-btn w-full bg-[var(--cor-primaria)] text-white p-2 rounded-lg" aria-label="Entrar no painel administrativo">Entrar</button>
     </div>
   </section>
 
-  <!-- Painel -->
-  <section id="painel" class="max-w-7xl mx-auto my-8 p-6 hidden">
-    <div class="flex justify-between items-center mb-8">
-      <h2 class="text-3xl font-bold">Painel Administrador - <span id="nome-pizzaria-painel"></span></h2>
-      <button onclick="deslogar()" class="custom-btn bg-red-500 text-white" aria-label="Sair do painel de administração">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
-        </svg>
-        Sair
-      </button>
-    </div>
-
-    <!-- Abas -->
-    <div class="flex flex-wrap border-b mb-8">
-      <div class="tab active" onclick="mostrarTab('dashboard')" aria-label="Aba Dashboard">Dashboard</div>
-      <div class="tab" onclick="mostrarTab('cardapio')" aria-label="Aba Cardápio">Cardápio</div>
-      <div class="tab" onclick="mostrarTab('vendas')" aria-label="Aba Vendas">Vendas</div>
-      <div class="tab" onclick="mostrarTab('relatorios')" aria-label="Aba Relatórios">Relatórios</div>
-    </div>
-
-    <!-- Dashboard -->
-    <div id="dashboard" class="tab-content">
-      <h3 class="text-3xl font-bold mb-8 text-center">Visão Geral</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="card">
-          <p class="text-lg font-semibold">Total de Vendas</p>
-          <p id="total-vendas-dash" class="text-2xl font-bold text-green-600"></p>
-        </div>
-        <div class="card">
-          <p class="text-lg font-semibold">Pedidos Hoje</p>
-          <p id="pedidos-hoje" class="text-2xl font-bold text-blue-600"></p>
-        </div>
-        <div class="card">
-          <p class="text-lg font-semibold">Pizza Mais Vendida</p>
-          <p id="pizza-mais-vendida" class="text-2xl font-bold text-purple-600"></p>
-        </div>
+  <section id="admin-content" class="container mx-auto px-4 py-8 hidden">
+    <div class="admin-section">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">Gerenciar Cardápio</h2>
+        <button onclick="abrirModalAdicionar()" class="custom-btn bg-[var(--cor-primaria)] text-white px-4 py-2 rounded-lg" aria-label="Adicionar novo item ao cardápio">Adicionar Item</button>
       </div>
-      <canvas id="vendas-chart" class="max-w-full h-96" aria-label="Gráfico de vendas por dia"></canvas>
-    </div>
-
-    <!-- Cardápio -->
-    <div id="cardapio" class="tab-content hidden">
-      <h3 class="text-3xl font-bold mb-8 text-center">Gerenciar Cardápio</h3>
-      <div class="flex flex-wrap gap-4 mb-8 justify-center">
-        <input type="text" id="pesquisa-cardapio" class="p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" placeholder="Pesquisar pizzas..." aria-label="Pesquisar pizzas no cardápio">
-        <select id="filtro-categoria-cardapio" class="p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" aria-label="Filtrar pizzas por categoria">
-          <option value="">Todas as Categorias</option>
+      <div class="mb-6 flex flex-col sm:flex-row gap-4">
+        <input type="text" id="search-input" placeholder="Pesquisar itens..." class="flex-1 p-2 border rounded-lg" aria-label="Pesquisar itens no cardápio">
+        <select id="sort-select" class="p-2 border rounded-lg" aria-label="Ordenar itens">
+          <option value="nome-asc">Nome (A-Z)</option>
+          <option value="nome-desc">Nome (Z-A)</option>
+          <option value="preco-asc">Preço (Crescente)</option>
+          <option value="preco-desc">Preço (Decrescente)</option>
         </select>
-        <button onclick="exportarDados('Cardápio')" class="custom-btn bg-[var(--cor-primaria)] text-white" aria-label="Exportar cardápio como CSV">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-          </svg>
-          Exportar Cardápio
-        </button>
       </div>
-      <div class="card mb-8">
-        <h4 class="text-xl font-semibold mb-4">Adicionar/Editar Pizza</h4>
-        <div class="space-y-4">
-          <input type="hidden" id="pizzaId">
-          <input type="text" id="nomePizza" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" placeholder="Nome da pizza" aria-label="Nome da pizza">
-          <textarea id="descricaoPizza" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" placeholder="Descrição" aria-label="Descrição da pizza"></textarea>
-          <input type="number" id="precoPizza" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" placeholder="Preço (R$)" step="0.01" aria-label="Preço da pizza">
-          <select id="categoriaPizza" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" aria-label="Categoria da pizza">
-            <option value="">Selecione a Categoria</option>
-          </select>
-          <div class="flex items-center">
-            <input type="checkbox" id="emPromocao" class="mr-2" aria-label="Marcar pizza como em promoção">
-            <label for="emPromocao">Em Promoção</label>
-          </div>
-          <div>
-            <label class="block text-lg font-medium mb-2">Imagem da Pizza</label>
-            <input type="file" id="imagemPizza" accept="image/*" class="w-full p-2 border rounded-lg" aria-label="Selecionar imagem da pizza">
-            <img id="previewImagem" class="preview-img hidden" alt="Pré-visualização da imagem">
-            <button id="removerImagem" class="custom-btn bg-red-500 text-white mt-2 hidden" onclick="removerImagemSelecionada()" aria-label="Remover imagem selecionada">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-              </svg>
-              Remover Imagem
-            </button>
-          </div>
-          <button onclick="salvarPizza()" class="w-full custom-btn bg-[var(--cor-primaria)] text-white font-semibold" aria-label="Salvar pizza">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h-1v5.586l-1.293-1.293zM3 3a1 1 0 011-1h12a1 1 0 011 1v14a1 1 0 01-1 1H4a1 1 0 01-1-1V3zm2 2v10h10V5H5z" />
-            </svg>
-            Salvar Pizza
-          </button>
-        </div>
-      </div>
-      <div id="cardapio-lista" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-      <div id="spinner-cardapio" class="spinner hidden"></div>
-    </div>
-
-    <!-- Vendas -->
-    <div id="vendas" class="tab-content hidden">
-      <h3 class="text-3xl font-bold mb-8 text-center">Gerenciar Vendas</h3>
-      <div class="flex flex-wrap gap-4 mb-8 justify-center">
-        <input type="text" id="pesquisa-vendas" class="p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" placeholder="Pesquisar por cliente..." aria-label="Pesquisar vendas por cliente">
-        <input type="date" id="filtro-data-vendas" class="p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" aria-label="Filtrar vendas por data">
-        <button onclick="exportarDados('Pedidos')" class="custom-btn bg-[var(--cor-primaria)] text-white" aria-label="Exportar vendas como CSV">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-          </svg>
-          Exportar Vendas
-        </button>
-      </div>
-      <div id="vendas-lista" class="space-y-4"></div>
-      <div id="spinner-vendas" class="spinner hidden"></div>
-    </div>
-
-    <!-- Relatórios -->
-    <div id="relatorios" class="tab-content hidden">
-      <h3 class="text-3xl font-bold mb-8 text-center">Relatórios</h3>
-      <div class="card mb-8">
-        <h4 class="text-xl font-semibold mb-4">Gerar Relatório</h4>
-        <div class="space-y-4">
-          <select id="tipo-relatorio" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" aria-label="Tipo de relatório">
-            <option value="vendas">Vendas por Período</option>
-            <option value="pizzas">Pizzas Mais Vendidas</option>
-            <option value="clientes">Atividade de Clientes</option>
-          </select>
-          <input type="date" id="data-inicio" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" aria-label="Data de início">
-          <input type="date" id="data-fim" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" aria-label="Data de fim">
-          <button onclick="gerarRelatorio()" class="w-full custom-btn bg-[var(--cor-primaria)] text-white font-semibold" aria-label="Gerar relatório">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-            </svg>
-            Gerar e Exportar
-          </button>
-        </div>
-      </div>
-      <div id="relatorios-resultado" class="card hidden">
-        <h4 class="text-xl font-semibold mb-4">Resultado do Relatório</h4>
-        <div id="relatorio-conteudo"></div>
-      </div>
-    </div>
-
-    <!-- Modal de Confirmação -->
-    <div id="modal-confirmacao" class="modal hidden">
-      <div class="modal-content">
-        <h3 class="text-xl font-semibold mb-4" id="modal-titulo"></h3>
-        <p id="modal-mensagem"></p>
-        <div class="flex gap-4 mt-4">
-          <button id="modal-confirmar" class="custom-btn bg-[var(--cor-primaria)] text-white" aria-label="Confirmar ação">Confirmar</button>
-          <button onclick="fecharModal()" class="custom-btn bg-gray-500 text-white" aria-label="Cancelar ação">Cancelar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal de Notificação -->
-    <div id="modal-notificacao" class="modal hidden">
-      <div class="modal-content">
-        <h3 class="text-xl font-semibold mb-4" id="notificacao-titulo"></h3>
-        <p id="notificacao-mensagem"></p>
-        <button onclick="fecharNotificacao()" class="mt-4 custom-btn bg-[var(--cor-primaria)] text-white w-full" aria-label="Fechar notificação">Ok</button>
-      </div>
+      <div id="item-grid" class="item-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </div>
   </section>
+
+  <div id="modal-item" class="modal hidden" role="dialog" aria-labelledby="modal-title">
+    <div class="modal-content bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
+      <button class="close-btn bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center absolute top-4 right-4" onclick="fecharModalItem()" aria-label="Fechar modal">X</button>
+      <h3 id="modal-title" class="text-xl font-semibold mb-4 text-center"></h3>
+      <p id="modal-error" class="text-red-500 text-sm text-center mb-4 hidden"></p>
+      <div class="space-y-4">
+        <div>
+          <label for="item-nome" class="block font-medium">Nome:</label>
+          <input type="text" id="item-nome" placeholder="Nome do item" class="w-full p-2 border rounded-lg" aria-label="Nome do item">
+        </div>
+        <div>
+          <label for="item-categoria" class="block font-medium">Categoria:</label>
+          <select id="item-categoria" class="w-full p-2 border rounded-lg" aria-label="Categoria do item">
+            <option value="Salgadas">Salgadas</option>
+            <option value="Doces">Doces</option>
+            <option value="Vegetarianas">Vegetarianas</option>
+            <option value="Bebidas">Bebidas</option>
+            <option value="Combos">Combos</option>
+          </select>
+        </div>
+        <div>
+          <label for="item-preco" class="block font-medium">Preço (R$):</label>
+          <input type="number" id="item-preco" step="0.01" placeholder="Preço" class="w-full p-2 border rounded-lg" aria-label="Preço do item">
+        </div>
+        <div>
+          <label for="item-imagem" class="block font-medium">URL da Imagem:</label>
+          <input type="text" id="item-imagem" placeholder="URL da imagem" class="w-full p-2 border rounded-lg mb-2" aria-label="URL da imagem do item">
+          <img id="image-preview" src="" alt="Pré-visualização da imagem" class="w-full h-32 object-cover rounded-lg hidden">
+        </div>
+        <div>
+          <label for="item-descricao" class="block font-medium">Descrição:</label>
+          <textarea id="item-descricao" placeholder="Descrição do item" rows="3" class="w-full p-2 border rounded-lg" aria-label="Descrição do item"></textarea>
+        </div>
+        <div class="ingredient-list">
+          <label for="item-ingredientes" class="block font-medium">Ingredientes (separados por vírgula):</label>
+          <input type="text" id="item-ingredientes" placeholder="Ex: molho de tomate, muçarela" class="w-full p-2 border rounded-lg" aria-label="Ingredientes do item">
+        </div>
+        <div class="size-list">
+          <label class="block font-medium">Tamanhos:</label>
+          <div id="item-tamanhos" class="space-y-2"></div>
+          <button onclick="adicionarTamanho()" class="custom-btn bg-[var(--cor-primaria)] text-white px-4 py-2 rounded-lg mt-2" aria-label="Adicionar outro tamanho">Adicionar Tamanho</button>
+        </div>
+        <div class="extra-list">
+          <label class="block font-medium">Extras Disponíveis:</label>
+          <div id="item-extras" class="space-y-2"></div>
+          <button onclick="adicionarExtra()" class="custom-btn bg-[var(--cor-primaria)] text-white px-4 py-2 rounded-lg mt-2" aria-label="Adicionar outro extra">Adicionar Extra</button>
+        </div>
+        <div class="border-list">
+          <label class="block font-medium">Bordas Disponíveis:</label>
+          <div id="item-bordas" class="space-y-2"></div>
+          <button onclick="adicionarBorda()" class="custom-btn bg-[var(--cor-primaria)] text-white px-4 py-2 rounded-lg mt-2" aria-label="Adicionar outra borda">Adicionar Borda</button>
+        </div>
+        <div id="combo-itens-section" class="hidden">
+          <label class="block font-medium">Itens do Combo:</label>
+          <div id="item-combo-itens" class="space-y-2"></div>
+        </div>
+        <div>
+          <label class="block font-medium">Promoção:</label>
+          <div class="flex items-center gap-2 mb-2">
+            <input type="checkbox" id="item-promocao-ativo" aria-label="Ativar promoção">
+            <label for="item-promocao-ativo">Ativar Promoção</label>
+          </div>
+          <input type="number" id="item-promocao-preco" step="0.01" placeholder="Preço Promocional" class="w-full p-2 border rounded-lg hidden" aria-label="Preço promocional">
+        </div>
+      </div>
+      <button id="modal-submit-btn" onclick="salvarItem()" class="custom-btn w-full bg-[var(--cor-primaria)] text-white p-2 rounded-lg mt-4" aria-label="Salvar item">Salvar</button>
+    </div>
+  </div>
 
   <script>
-    let pizzasCache = [];
-    let vendasCache = [];
-    let sessionTimeout;
-    let sessionActive = false;
-    const SESSION_DURATION = 30 * 60 * 1000;
+    let editingItemId = null;
+    let searchTimeout;
 
-    function aplicarConfiguracoes() {
-      if (typeof config !== 'undefined') {
-        document.documentElement.style.setProperty('--cor-primaria', config.corPrimaria);
-        document.documentElement.style.setProperty('--cor-secundaria', config.corSecundaria);
-        document.documentElement.style.setProperty('--cor-fundo', config.corFundo);
-        document.documentElement.style.setProperty('--cor-texto', config.corTexto);
-        document.getElementById('page-title').textContent = `Admin - ${config.nomePizzaria}`;
-        document.getElementById('logo').src = config.logoUrl;
-        document.getElementById('nome-pizzaria').textContent = config.nomePizzaria;
-        document.getElementById('nome-pizzaria-painel').textContent = config.nomePizzaria;
+    // Função para gerar hash simples
+    function simpleHash(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
       }
+      return hash.toString(16);
     }
 
-    async function initializeApp() {
-      if (localStorage.getItem('adminLoggedIn') === 'true') {
-        document.getElementById('login').classList.add('hidden');
-        document.getElementById('painel').classList.remove('hidden');
-        iniciarSessao();
-        await carregarDadosIniciais();
-      } else {
-        document.getElementById('login').classList.remove('hidden');
-      }
-
-      const categoriaPizza = document.getElementById('categoriaPizza');
-      const filtroCategoria = document.getElementById('filtro-categoria-cardapio');
-      if (typeof config !== 'undefined' && config.categoriasPizzas) {
-        config.categoriasPizzas.forEach(categoria => {
-          const option1 = document.createElement('option');
-          option1.value = categoria;
-          option1.textContent = categoria;
-          categoriaPizza.appendChild(option1);
-          const option2 = document.createElement('option');
-          option2.value = categoria;
-          option2.textContent = categoria;
-          filtroCategoria.appendChild(option2);
-        });
-      } else {
-        console.error('Erro: Categorias não encontradas no config.js.');
-        mostrarNotificacao('Erro', 'Categorias não encontradas. Verifique o arquivo config.js.');
-      }
-
-      document.getElementById('pesquisa-cardapio').addEventListener('input', filtrarCardapio);
-      document.getElementById('filtro-categoria-cardapio').addEventListener('change', filtrarCardapio);
-      document.getElementById('pesquisa-vendas').addEventListener('input', filtrarVendas);
-      document.getElementById('filtro-data-vendas').addEventListener('change', filtrarVendas);
-
-      document.getElementById('imagemPizza').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          if (!file.type.startsWith('image/')) {
-            mostrarNotificacao('Erro', 'Por favor, selecione um arquivo de imagem válido.');
-            e.target.value = '';
-            return;
-          }
-          const reader = new FileReader();
-          reader.onload = () => {
-            const preview = document.getElementById('previewImagem');
-            preview.src = reader.result;
-            preview.classList.remove('hidden');
-            document.getElementById('removerImagem').classList.remove('hidden');
-          };
-          reader.onerror = () => {
-            mostrarNotificacao('Erro', 'Erro ao carregar a imagem para pré-visualização.');
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-    }
-
-    function checkConfigAndInitialize() {
-      const maxAttempts = 10;
-      let attempts = 0;
-
-      const interval = setInterval(() => {
-        if (typeof config !== 'undefined' && typeof cardapio !== 'undefined') {
-          clearInterval(interval);
-          aplicarConfiguracoes();
-          initializeApp();
-        } else if (attempts >= maxAttempts) {
-          clearInterval(interval);
-          console.error('Erro: Não foi possível carregar config.js ou cardapio.js após várias tentativas.');
-          mostrarNotificacao('Erro', 'Não foi possível carregar as configurações ou o cardápio. Verifique se os arquivos config.js e cardapio.js estão no mesmo diretório e se você está executando o projeto em um servidor local.');
-          document.getElementById('login').classList.remove('hidden');
-        }
-        attempts++;
-      }, 500);
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      checkConfigAndInitialize();
-    });
-
-    function iniciarSessao() {
-      sessionActive = true;
-      sessionTimeout = setTimeout(() => {
-        deslogar();
-        mostrarNotificacao('Sessão Expirada', 'Sua sessão expirou. Por favor, faça login novamente.');
-      }, SESSION_DURATION);
-      document.addEventListener('mousemove', resetarSessao);
-      document.addEventListener('keypress', resetarSessao);
-    }
-
-    function resetarSessao() {
-      if (!sessionActive) return;
-      clearTimeout(sessionTimeout);
-      sessionTimeout = setTimeout(() => {
-        deslogar();
-        mostrarNotificacao('Sessão Expirada', 'Sua sessão expirou. Por favor, faça login novamente.');
-      }, SESSION_DURATION);
-    }
-
-    window.deslogar = function() {
-      localStorage.removeItem('adminLoggedIn');
-      sessionActive = false;
-      document.getElementById('login').classList.add('hidden');
-      document.getElementById('painel').classList.add('hidden');
-      clearTimeout(sessionTimeout);
-      document.removeEventListener('mousemove', resetarSessao);
-      document.removeEventListener('keypress', resetarSessao);
-    };
-
-    function verificarSessao() {
-      if (!sessionActive || localStorage.getItem('adminLoggedIn') !== 'true') {
-        mostrarNotificacao('Erro', 'Sessão não ativa. Por favor, faça login novamente.');
-        deslogar();
-        return false;
-      }
-      return true;
-    }
-
-    window.logar = async function() {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const errorMessage = document.getElementById('error-message');
-
-      errorMessage.style.display = 'none';
-      errorMessage.textContent = '';
-
-      if (!username || !password) {
-        errorMessage.textContent = 'Preencha usuário e senha.';
-        errorMessage.style.display = 'block';
-        return;
-      }
-      if (typeof config === 'undefined') {
-        errorMessage.textContent = 'Configurações não carregadas. Verifique o arquivo config.js.';
-        errorMessage.style.display = 'block';
-        return;
-      }
-      if (username === config.adminUsername && password === config.adminPassword) {
-        localStorage.setItem('adminLoggedIn', 'true');
-        document.getElementById('login').classList.add('hidden');
-        document.getElementById('painel').classList.remove('hidden');
-        iniciarSessao();
-        await carregarDadosIniciais();
-      } else {
-        errorMessage.textContent = 'Usuário ou senha incorretos.';
-        errorMessage.style.display = 'block';
-      }
-    };
-
-    async function carregarDadosIniciais() {
-      if (!verificarSessao()) return;
-      try {
-        await Promise.all([
-          carregarCardapio(),
-          carregarVendas()
-        ]);
-        atualizarDashboard();
-      } catch (error) {
-        console.error('Erro ao carregar dados iniciais:', error);
-        mostrarNotificacao('Erro', 'Falha ao carregar os dados.');
-      }
-    }
-
-    window.mostrarTab = function(tabId) {
-      if (!verificarSessao()) return;
-      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
-      document.querySelector(`[onclick="mostrarTab('${tabId}')"]`).classList.add('active');
-      document.getElementById(tabId).classList.remove('hidden');
-    };
-
-    async function atualizarDashboard() {
-      if (!verificarSessao()) return;
-      const totalVendas = vendasCache.reduce((sum, venda) => sum + parseFloat(venda.total || 0), 0);
-      document.getElementById('total-vendas-dash').textContent = `R$ ${totalVendas.toFixed(2)}`;
-
-      const hoje = new Date().toISOString().split('T')[0];
-      const pedidosHoje = vendasCache.filter(venda => {
-        const vendaData = venda.data ? venda.data.split('T')[0] : '';
-        return vendaData === hoje;
-      }).length;
-      document.getElementById('pedidos-hoje').textContent = pedidosHoje;
-
-      const pizzasVendidas = {};
-      vendasCache.forEach(venda => {
-        try {
-          const itens = typeof venda.itens === 'string' ? JSON.parse(venda.itens || '[]') : venda.itens || [];
-          itens.forEach(item => {
-            if (item && item.nome) {
-              pizzasVendidas[item.nome] = (pizzasVendidas[item.nome] || 0) + (item.quantidade || 0);
-            }
-          });
-        } catch (error) {
-          console.error('Erro ao parsear itens da venda:', venda, error);
-        }
-      });
-      const pizzaMaisVendida = Object.keys(pizzasVendidas).reduce((a, b) => pizzasVendidas[a] > pizzasVendidas[b] ? a : b, '');
-      document.getElementById('pizza-mais-vendida').textContent = pizzaMaisVendida || 'Nenhuma';
-
-      const vendasPorDia = {};
-      vendasCache.forEach(venda => {
-        const data = venda.data ? venda.data.split('T')[0] : '';
-        if (data) {
-          vendasPorDia[data] = (vendasPorDia[data] || 0) + parseFloat(venda.total || 0);
-        }
-      });
-      const labels = Object.keys(vendasPorDia).sort();
-      const dados = labels.map(data => vendasPorDia[data]);
-      const ctx = document.getElementById('vendas-chart').getContext('2d');
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Vendas por Dia (R$)',
-            data: dados,
-            borderColor: config.corPrimaria,
-            backgroundColor: 'rgba(255, 69, 0, 0.2)',
-            fill: true,
-            tension: 0.4
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: { display: true, text: 'Valor (R$)' }
-            },
-            x: {
-              title: { display: true, text: 'Data' }
-            }
-          }
-        }
-      });
-    }
-
-    async function carregarCardapio() {
-      const lista = document.getElementById('cardapio-lista');
-      const spinner = document.getElementById('spinner-cardapio');
-      spinner.classList.remove('hidden');
-      lista.innerHTML = '';
-      try {
-        pizzasCache = JSON.parse(localStorage.getItem('cardapio')) || cardapio;
-        if (!pizzasCache || pizzasCache.length === 0) {
-          lista.innerHTML = '<p class="text-center text-gray-600 col-span-full">Nenhuma pizza disponível.</p>';
-          return;
-        }
-        pizzasCache.forEach(pizza => {
-          const div = document.createElement('div');
-          div.className = 'card';
-          div.innerHTML = `
-            <img src="${pizza.imagem || config.imagemPadraoPizza}" alt="${pizza.nome}" class="pizza-img">
-            <div class="p-4">
-              <h3 class="text-xl font-semibold">${pizza.nome}</h3>
-              <p class="text-gray-600">${pizza.descrição}</p>
-              <p class="text-lg font-bold mt-2">R$ ${parseFloat(pizza.preço || 0).toFixed(2)}</p>
-              <p class="mt-1">Categoria: ${pizza.categoria || 'Salgadas'}</p>
-              <p class="text-[var(--cor-destaque)] font-medium">${pizza.emPromoção === 'true' || pizza.emPromoção === true ? 'Em Promoção!' : ''}</p>
-              <div class="flex gap-2 mt-4">
-                <button onclick="editarPizza('${pizza.id}')" class="custom-btn bg-[var(--cor-primaria)] text-white" aria-label="Editar pizza">Editar</button>
-                <button onclick="confirmarExclusao('${pizza.id}', 'cardapio')" class="custom-btn bg-red-500 text-white" aria-label="Excluir pizza">Excluir</button>
-              </div>
+    // Função para renderizar itens no grid
+    function renderItens(items) {
+      const grid = document.getElementById('item-grid');
+      grid.innerHTML = '';
+      items.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'item-card bg-white rounded-lg shadow-md fade-in';
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.innerHTML = `
+          <img src="${item.imagem}" alt="${item.nome}" class="w-full h-48 object-cover rounded-t-lg">
+          <div class="p-4">
+            <h3 class="text-lg font-semibold">${item.nome}</h3>
+            <p class="text-gray-600 text-sm">Categoria: ${item.categoria}</p>
+            <p class="text-[var(--cor-primaria)] font-bold mt-2">R$ ${item.preço.toFixed(2)}</p>
+            <div class="flex gap-2 mt-4">
+              <button onclick="editarItem(${item.id})" class="custom-btn bg-[var(--cor-primaria)] text-white px-4 py-2 rounded-lg" aria-label="Editar item ${item.nome}">Editar</button>
+              <button onclick="removerItem(${item.id})" class="custom-btn bg-red-500 text-white px-4 py-2 rounded-lg" aria-label="Remover item ${item.nome}">Remover</button>
             </div>
-          `;
-          lista.appendChild(div);
-        });
-      } catch (error) {
-        console.error('Erro ao carregar cardápio:', error);
-        lista.innerHTML = '<p class="text-center text-gray-600 col-span-full">Erro ao carregar o cardápio.</p>';
-        mostrarNotificacao('Erro', 'Falha ao carregar o cardápio.');
-      } finally {
-        spinner.classList.add('hidden');
-      }
-    }
-
-    async function carregarVendas() {
-      const lista = document.getElementById('vendas-lista');
-      const spinner = document.getElementById('spinner-vendas');
-      spinner.classList.remove('hidden');
-      lista.innerHTML = '';
-      try {
-        vendasCache = JSON.parse(localStorage.getItem('vendas')) || [];
-        if (!vendasCache || vendasCache.length === 0) {
-          lista.innerHTML = '<p class="text-center text-gray-600">Nenhuma venda registrada.</p>';
-          return;
-        }
-        vendasCache.forEach(venda => {
-          let itens = [];
-          try {
-            itens = typeof venda.itens === 'string' ? JSON.parse(venda.itens || '[]') : venda.itens || [];
-          } catch (error) {
-            console.error('Erro ao parsear itens da venda:', venda, error);
-            mostrarNotificacao('Aviso', `Erro ao processar os itens da venda ID ${venda.id}. Verifique os dados.`);
-            itens = [];
-          }
-          const div = document.createElement('div');
-          div.className = 'card';
-          div.innerHTML = `
-            <div class="p-4">
-              <p class="text-lg font-semibold">Cliente: ${venda.cliente || 'Desconhecido'}</p>
-              <p>Data: ${new Date(venda.data).toLocaleString()}</p>
-              <p>Total: R$ ${parseFloat(venda.total || 0).toFixed(2)}</p>
-              <p>Itens:</p>
-              <ul class="list-disc pl-5">
-                ${itens.map(item => `<li>${item.nome} (x${item.quantidade})</li>`).join('')}
-              </ul>
-              <button onclick="confirmarExclusao('${venda.id}', 'pedidos')" class="mt-4 custom-btn bg-red-500 text-white" aria-label="Excluir venda">Excluir</button>
-            </div>
-          `;
-          lista.appendChild(div);
-        });
-      } catch (error) {
-        console.error('Erro ao carregar vendas:', error);
-        lista.innerHTML = '<p class="text-center text-gray-600">Erro ao carregar as vendas.</p>';
-        mostrarNotificacao('Erro', 'Falha ao carregar as vendas.');
-      } finally {
-        spinner.classList.add('hidden');
-      }
-    }
-
-    function filtrarCardapio() {
-      const pesquisa = document.getElementById('pesquisa-cardapio').value.toLowerCase();
-      const categoria = document.getElementById('filtro-categoria-cardapio').value;
-      const cards = document.querySelectorAll('#cardapio-lista .card');
-      cards.forEach(card => {
-        const nome = card.querySelector('h3').textContent.toLowerCase();
-        const cardCategoria = card.querySelector('p:nth-child(4)').textContent.split(': ')[1];
-        const matchesPesquisa = nome.includes(pesquisa);
-        const matchesCategoria = !categoria || cardCategoria === categoria;
-        card.style.display = matchesPesquisa && matchesCategoria ? 'block' : 'none';
+          </div>
+        `;
+        grid.appendChild(card);
       });
     }
 
-    function filtrarVendas() {
-      const pesquisa = document.getElementById('pesquisa-vendas').value.toLowerCase();
-      const dataFiltro = document.getElementById('filtro-data-vendas').value;
-      const cards = document.querySelectorAll('#vendas-lista .card');
-      cards.forEach(card => {
-        const cliente = card.querySelector('p:nth-child(1)').textContent.toLowerCase();
-        const dataVenda = card.querySelector('p:nth-child(2)').textContent.split(': ')[1].split(',')[0];
-        const matchesPesquisa = cliente.includes(pesquisa);
-        const matchesData = !dataFiltro || new Date(dataVenda).toISOString().split('T')[0] === dataFiltro;
-        card.style.display = matchesPesquisa && matchesData ? 'block' : 'none';
-      });
+    // Função para carregar itens
+    function carregarItens() {
+      renderItens(window.cardapio);
     }
 
-    window.editarPizza = function(id) {
-      if (!verificarSessao()) return;
-      const pizza = pizzasCache.find(p => p.id === id);
-      if (!pizza) {
-        mostrarNotificacao('Erro', 'Pizza não encontrada.');
-        return;
-      }
-      document.getElementById('pizzaId').value = pizza.id;
-      document.getElementById('nomePizza').value = pizza.nome;
-      document.getElementById('descricaoPizza').value = pizza.descrição;
-      document.getElementById('precoPizza').value = pizza.preço;
-      document.getElementById('categoriaPizza').value = pizza.categoria || '';
-      document.getElementById('emPromocao').checked = pizza.emPromoção === 'true' || pizza.emPromoção === true;
-      const preview = document.getElementById('previewImagem');
-      if (pizza.imagem) {
-        preview.src = pizza.imagem;
-        preview.classList.remove('hidden');
-        document.getElementById('removerImagem').classList.remove('hidden');
-      } else {
-        preview.classList.add('hidden');
-        document.getElementById('removerImagem').classList.add('hidden');
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+    // Função para filtrar e ordenar itens
+    function filtrarItens() {
+      const searchTerm = document.getElementById('search-input').value.toLowerCase();
+      const sortOption = document.getElementById('sort-select').value;
+      let filtered = window.cardapio.filter(item => 
+        item.nome.toLowerCase().includes(searchTerm) || 
+        item.categoria.toLowerCase().includes(searchTerm)
+      );
 
-    window.removerImagemSelecionada = function() {
-      document.getElementById('imagemPizza').value = '';
-      document.getElementById('previewImagem').classList.add('hidden');
-      document.getElementById('removerImagem').classList.add('hidden');
-    };
-
-    window.salvarPizza = async function() {
-      if (!verificarSessao()) return;
-      const id = document.getElementById('pizzaId').value;
-      const nome = document.getElementById('nomePizza').value.trim();
-      const descrição = document.getElementById('descricaoPizza').value.trim();
-      const preço = document.getElementById('precoPizza').value;
-      const categoria = document.getElementById('categoriaPizza').value;
-      const emPromoção = document.getElementById('emPromocao').checked;
-      const imagemFile = document.getElementById('imagemPizza').files[0];
-      let imagem = document.getElementById('previewImagem').src;
-
-      if (!nome || !descrição || !preço || !categoria) {
-        mostrarNotificacao('Erro', 'Preencha todos os campos obrigatórios.');
-        return;
+      if (sortOption === 'nome-asc') {
+        filtered.sort((a, b) => a.nome.localeCompare(b.nome));
+      } else if (sortOption === 'nome-desc') {
+        filtered.sort((a, b) => b.nome.localeCompare(a.nome));
+      } else if (sortOption === 'preco-asc') {
+        filtered.sort((a, b) => a.preço - b.preço);
+      } else if (sortOption === 'preco-desc') {
+        filtered.sort((a, b) => b.preço - a.preço);
       }
 
-      if (parseFloat(preço) <= 0) {
-        mostrarNotificacao('Erro', 'O preço deve ser maior que zero.');
-        return;
-      }
-
-      if (imagemFile) {
-        const reader = new FileReader();
-        imagem = await new Promise((resolve) => {
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = () => {
-            mostrarNotificacao('Erro', 'Erro ao processar a imagem.');
-            resolve(null);
-          };
-          reader.readAsDataURL(imagemFile);
-        });
-      } else if (!id && !imagem) {
-        imagem = config.imagemPadraoPizza;
-      }
-
-      const pizza = {
-        id: id || Date.now().toString(),
-        nome: nome,
-        descrição: descrição,
-        preço: parseFloat(preço).toFixed(2),
-        categoria: categoria,
-        emPromoção: emPromoção,
-        imagem: imagem
-      };
-
-      try {
-        if (id) {
-          const index = pizzasCache.findIndex(p => p.id === id);
-          if (index !== -1) {
-            pizzasCache[index] = pizza;
-          }
-        } else {
-          pizzasCache.push(pizza);
-        }
-        salvarCardapio(pizzasCache);
-        mostrarNotificacao('Sucesso', 'Pizza salva com sucesso!');
-        document.getElementById('pizzaId').value = '';
-        document.getElementById('nomePizza').value = '';
-        document.getElementById('descricaoPizza').value = '';
-        document.getElementById('precoPizza').value = '';
-        document.getElementById('categoriaPizza').value = '';
-        document.getElementById('emPromocao').checked = false;
-        document.getElementById('imagemPizza').value = '';
-        document.getElementById('previewImagem').classList.add('hidden');
-        document.getElementById('removerImagem').classList.add('hidden');
-        await carregarCardapio();
-      } catch (error) {
-        console.error('Erro ao salvar pizza:', error);
-        mostrarNotificacao('Erro', 'Falha ao salvar a pizza.');
-      }
-    };
-
-    window.confirmarExclusao = function(id, sheet) {
-      if (!verificarSessao()) return;
-      document.getElementById('modal-titulo').textContent = 'Confirmar Exclusão';
-      document.getElementById('modal-mensagem').textContent = `Tem certeza que deseja excluir este item da aba ${sheet}?`;
-      document.getElementById('modal-confirmacao').classList.remove('hidden');
-      document.getElementById('modal-confirmar').onclick = async () => {
-        try {
-          if (sheet === 'Cardápio') {
-            pizzasCache = pizzasCache.filter(p => p.id !== id);
-            salvarCardapio(pizzasCache);
-            await carregarCardapio();
-          } else if (sheet === 'Pedidos') {
-            vendasCache = vendasCache.filter(v => v.id !== id);
-            localStorage.setItem('vendas', JSON.stringify(vendasCache));
-            await carregarVendas();
-          }
-          mostrarNotificacao('Sucesso', 'Item excluído com sucesso!');
-          await atualizarDashboard();
-        } catch (error) {
-          console.error('Erro ao excluir item:', error);
-          mostrarNotificacao('Erro', `Falha ao excluir o item da aba ${sheet}.`);
-        }
-        fecharModal();
-      };
-    };
-
-    window.fecharModal = function() {
-      document.getElementById('modal-confirmacao').classList.add('hidden');
-    };
-
-    window.fecharNotificacao = function() {
-      document.getElementById('modal-notificacao').classList.add('hidden');
-    };
-
-    function mostrarNotificacao(titulo, mensagem) {
-      document.getElementById('notificacao-titulo').textContent = titulo;
-      document.getElementById('notificacao-mensagem').textContent = mensagem;
-      document.getElementById('modal-notificacao').classList.remove('hidden');
+      renderItens(filtered);
     }
 
-    window.exportarDados = function(sheet) {
-      if (!verificarSessao()) return;
-      let data = [];
-      if (sheet === 'Cardápio') data = pizzasCache;
-      else if (sheet === 'Pedidos') data = vendasCache;
+    // Função para abrir modal de adição
+    function abrirModalAdicionar() {
+      editingItemId = null;
+      document.getElementById('modal-title').textContent = 'Adicionar Novo Item';
+      document.getElementById('modal-submit-btn').textContent = 'Adicionar';
+      limparModal();
+      document.getElementById('modal-item').classList.remove('hidden');
+    }
 
-      if (!data.length) {
-        mostrarNotificacao('Erro', `Nenhum dado disponível para exportar na aba ${sheet}.`);
-        return;
-      }
+    // Função para editar item
+    function editarItem(id) {
+      const item = window.cardapio.find(i => i.id === id);
+      if (!item) return;
 
-      const csv = [
-        Object.keys(data[0]).join(','),
-        ...data.map(row => Object.values(row).map(val => {
-          if (typeof val === 'object') return `"${JSON.stringify(val).replace(/"/g, '""')}"`;
-          return `"${val}"`;
-        }).join(','))
-      ].join('\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `${sheet}.csv`;
-      link.click();
-    };
+      editingItemId = id;
+      document.getElementById('modal-title').textContent = 'Editar Item';
+      document.getElementById('modal-submit-btn').textContent = 'Salvar Alterações';
+      limparModal();
 
-    window.gerarRelatorio = function() {
-      if (!verificarSessao()) return;
-      const tipo = document.getElementById('tipo-relatorio').value;
-      const dataInicio = document.getElementById('data-inicio').value;
-      const dataFim = document.getElementById('data-fim').value;
+      document.getElementById('item-nome').value = item.nome;
+      document.getElementById('item-categoria').value = item.categoria;
+      document.getElementById('item-preco').value = item.preço;
+      document.getElementById('item-imagem').value = item.imagem;
+      document.getElementById('image-preview').src = item.imagem;
+      document.getElementById('image-preview').classList.remove('hidden');
+      document.getElementById('item-descricao').value = item.descrição;
+      document.getElementById('item-ingredientes').value = item.ingredientes.join(', ');
 
-      if (!dataInicio || !dataFim) {
-        mostrarNotificacao('Erro', 'Por favor, selecione as datas de início e fim.');
-        return;
-      }
+      const tamanhosContainer = document.getElementById('item-tamanhos');
+      tamanhosContainer.innerHTML = '';
+      item.tamanhos.forEach(tamanho => {
+        const div = document.createElement('div');
+        div.className = 'size-item flex gap-2 items-center';
+        div.innerHTML = `
+          <input type="text" value="${tamanho.nome}" class="size-nome flex-1 p-2 border rounded" aria-label="Nome do tamanho">
+          <input type="number" step="0.01" value="${tamanho.preço}" class="size-preco w-24 p-2 border rounded" aria-label="Preço do tamanho">
+          <button onclick="removerCampo(this)" class="bg-red-500 text-white px-2 py-1 rounded" aria-label="Remover tamanho">X</button>
+        `;
+        tamanhosContainer.appendChild(div);
+      });
 
-      const inicio = new Date(dataInicio);
-      const fim = new Date(dataFim);
-      if (inicio > fim) {
-        mostrarNotificacao('Erro', 'A data de início não pode ser maior que a data de fim.');
-        return;
-      }
+      const extrasContainer = document.getElementById('item-extras');
+      extrasContainer.innerHTML = '';
+      item.extrasDisponiveis.forEach(extra => {
+        const div = document.createElement('div');
+        div.className = 'extra-item flex gap-2 items-center';
+        div.innerHTML = `
+          <input type="text" value="${extra.nome}" class="extra-nome flex-1 p-2 border rounded" aria-label="Nome do extra">
+          <input type="number" step="0.01" value="${extra.preço}" class="extra-preco w-24 p-2 border rounded" aria-label="Preço do extra">
+          <button onclick="removerCampo(this)" class="bg-red-500 text-white px-2 py-1 rounded" aria-label="Remover extra">X</button>
+        `;
+        extrasContainer.appendChild(div);
+      });
 
-      let dados = [];
-      let cabecalho = [];
-      let nomeArquivo = '';
+      const bordasContainer = document.getElementById('item-bordas');
+      bordasContainer.innerHTML = '';
+      item.bordasDisponiveis.forEach(borda => {
+        const div = document.createElement('div');
+        div.className = 'border-item flex gap-2 items-center';
+        div.innerHTML = `
+          <input type="text" value="${borda.nome}" class="border-nome flex-1 p-2 border rounded" aria-label="Nome da borda">
+          <input type="number" step="0.01" value="${borda.preço}" class="border-preco w-24 p-2 border rounded" aria-label="Preço da borda">
+          <button onclick="removerCampo(this)" class="bg-red-500 text-white px-2 py-1 rounded" aria-label="Remover borda">X</button>
+        `;
+        bordasContainer.appendChild(div);
+      });
 
-      if (tipo === 'vendas') {
-        dados = vendasCache.filter(venda => {
-          const dataVenda = new Date(venda.data);
-          return dataVenda >= inicio && dataVenda <= fim;
-        });
-        cabecalho = ['id', 'cliente', 'data', 'total', 'itens'];
-        nomeArquivo = 'relatorio_vendas.csv';
-      } else if (tipo === 'pizzas') {
-        const pizzasVendidas = {};
-        vendasCache.forEach(venda => {
-          const dataVenda = new Date(venda.data);
-          if (dataVenda >= inicio && dataVenda <= fim) {
-            let itens = [];
-            try {
-              itens = typeof venda.itens === 'string' ? JSON.parse(venda.itens || '[]') : venda.itens || [];
-              itens.forEach(item => {
-                if (item && item.nome) {
-                  pizzasVendidas[item.nome] = (pizzasVendidas[item.nome] || 0) + (item.quantidade || 0);
-                }
-              });
-            } catch (error) {
-              console.error('Erro ao parsear itens para relatório:', venda, error);
-              mostrarNotificacao('Aviso', `Erro ao processar itens da venda ID ${venda.id} para o relatório.`);
-            }
+      if (item.categoria === 'Combos') {
+        const comboItensContainer = document.getElementById('item-combo-itens');
+        comboItensContainer.innerHTML = '';
+        window.cardapio.forEach(i => {
+          if (i.categoria !== 'Combos') {
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-2';
+            div.innerHTML = `
+              <input type="checkbox" id="combo-item-${i.id}" value="${i.id}" ${item.itens.includes(i.id) ? 'checked' : ''} aria-label="Incluir ${i.nome} no combo">
+              <label for="combo-item-${i.id}">${i.nome}</label>
+            `;
+            comboItensContainer.appendChild(div);
           }
         });
-        dados = Object.entries(pizzasVendidas).map(([nome, quantidade]) => ({ Nome: nome, Quantidade: quantidade }));
-        cabecalho = ['Nome', 'Quantidade'];
-        nomeArquivo = 'relatorio_pizzas_mais_vendidas.csv';
-      } else if (tipo === 'clientes') {
-        const clientesAtividade = {};
-        vendasCache.forEach(venda => {
-          const dataVenda = new Date(venda.data);
-          if (dataVenda >= inicio && dataVenda <= fim) {
-            const cliente = venda.cliente || 'Desconhecido';
-            clientesAtividade[cliente] = (clientesAtividade[cliente] || 0) + 1;
-          }
-        });
-        dados = Object.entries(clientesAtividade).map(([cliente, pedidos]) => ({ Cliente: cliente, Pedidos: pedidos }));
-        cabecalho = ['Cliente', 'Pedidos'];
-        nomeArquivo = 'relatorio_atividade_clientes.csv';
+        document.getElementById('combo-itens-section').classList.remove('hidden');
       }
 
-      if (!dados.length) {
-        mostrarNotificacao('Aviso', 'Nenhum dado encontrado para o período selecionado.');
-        return;
+      if (item.promocao && item.promocao.ativo) {
+        document.getElementById('item-promocao-ativo').checked = true;
+        document.getElementById('item-promocao-preco').classList.remove('hidden');
+        document.getElementById('item-promocao-preco').value = item.promocao.precoPromocional;
       }
 
-      const resultado = document.getElementById('relatorios-resultado');
-      const conteudo = document.getElementById('relatorio-conteudo');
-      conteudo.innerHTML = '';
-      const tabela = document.createElement('table');
-      tabela.className = 'w-full text-left';
-      const thead = document.createElement('thead');
-      const trHead = document.createElement('tr');
-      cabecalho.forEach(col => {
-        const th = document.createElement('th');
-        th.className = 'p-2 border-b';
-        th.textContent = col;
-        trHead.appendChild(th);
-      });
-      thead.appendChild(trHead);
-      tabela.appendChild(thead);
-      const tbody = document.createElement('tbody');
-      dados.forEach(row => {
-        const tr = document.createElement('tr');
-        cabecalho.forEach(col => {
-          const td = document.createElement('td');
-          td.className = 'p-2 border-b';
-          td.textContent = row[col] || '';
-          tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-      });
-      tabela.appendChild(tbody);
-      conteudo.appendChild(tabela);
-      resultado.classList.remove('hidden');
+      document.getElementById('modal-item').classList.remove('hidden');
+    }
 
-      const csv = [
-        cabecalho.join(','),
-        ...dados.map(row => cabecalho.map(col => {
-          let val = row[col] || '';
-          if (typeof val === 'object') val = JSON.stringify(val).replace(/"/g, '""');
-          return `"${val}"`;
-        }).join(','))
-      ].join('\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = nomeArquivo;
-      link.click();
-    };
-  </script>
-</body>
-</html>
+    // Função para remover item
+    function removerItem(id) {
+      if (confirm('Tem certeza que deseja remover este item?')) {
+        window.cardapio = window.cardapio.filter(i => i.id !== id);
+        localStorage.setItem('cardapio', JSON.stringify(window.cardapio));
+        carregarItens();
+      }
+    }
+
+    // Função para limpar modal
+    function limparModal() {
+      document.getElementById('modal-error').classList.add('hidden');
+      document.getElementById('item-nome').value = '';
+      document.getElementById('item-categoria').value = 'Salgadas';
+      document.getElementById('item-preco').value = '';
+      document.getElementById('item-imagem').value = '';
+      document.getElementById('image-preview').src = '';
+      document.getElementById('image-preview').classList.add('hidden');
+      document.getElementById('item-descricao').value = '';
+      document.getElementById('item-ingredientes').value = '';
+      document.getElementById('item-tamanhos').innerHTML = `
+        <div class="size-item flex gap-2 items-center">
+          <input type="text" placeholder="Nome (ex: Pequena)" class="size-nome flex-1 p-2 border rounded" aria-label="Nome do tamanho">
+          <input type="number" step="0.01" placeholder="Preço" class="size-preco w-24 p
