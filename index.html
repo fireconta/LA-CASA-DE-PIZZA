@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -169,6 +130,125 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
+    /* Estilos do Carrossel de Promoções */
+    .promo-section {
+      margin-bottom: 3rem;
+      position: relative;
+    }
+    .promo-section h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--cor-texto, #2D2D2D);
+      text-align: center;
+    }
+    .carousel {
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .carousel-inner {
+      display: flex;
+      transition: transform 0.5s ease;
+    }
+    .carousel-item {
+      min-width: 100%;
+      display: flex;
+      align-items: center;
+      background: white;
+      padding: 1.5rem;
+      gap: 2rem;
+    }
+    .carousel-item img {
+      width: 50%;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+    .carousel-content {
+      flex: 1;
+      text-align: left;
+    }
+    .carousel-content h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .carousel-content p {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-bottom: 1rem;
+    }
+    .carousel-content .price {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--cor-primaria, #FF4500);
+      margin-bottom: 1rem;
+    }
+    .carousel-content .original-price {
+      font-size: 0.875rem;
+      color: #9ca3af;
+      text-decoration: line-through;
+      margin-left: 0.5rem;
+    }
+    .carousel-content .add-btn {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px 20px;
+      border-radius: 8px;
+      background: var(--cor-primaria, #FF4500);
+      color: white;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+    .carousel-content .add-btn:hover {
+      background: var(--cor-primaria, #FF4500);
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+    .carousel-btn:hover {
+      background: rgba(0, 0, 0, 0.7);
+    }
+    .carousel-btn.prev {
+      left: 10px;
+    }
+    .carousel-btn.next {
+      right: 10px;
+    }
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 1rem;
+    }
+    .carousel-dot {
+      width: 10px;
+      height: 10px;
+      background: #d1d5db;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .carousel-dot.active {
+      background: var(--cor-primaria, #FF4500);
+    }
     footer {
       background: var(--cor-primaria, #FF4500);
       color: white;
@@ -216,6 +296,19 @@
       width: 90%;
       text-align: center;
     }
+    @media (max-width: 768px) {
+      .carousel-item {
+        flex-direction: column;
+        text-align: center;
+      }
+      .carousel-item img {
+        width: 100%;
+        height: 200px;
+      }
+      .carousel-content .add-btn {
+        width: 100%;
+      }
+    }
     @media (max-width: 640px) {
       .pizza-grid {
         grid-template-columns: 1fr;
@@ -250,6 +343,25 @@
 
   <section class="container">
     <h2 class="text-3xl font-bold mb-8 text-center">Nosso Cardápio</h2>
+    <!-- Seção de Promoções -->
+    <div class="promo-section">
+      <h2>Promoções do Dia 🔥</h2>
+      <div class="carousel">
+        <div class="carousel-inner" id="carousel-inner"></div>
+        <button class="carousel-btn prev" onclick="moveCarousel(-1)" aria-label="Promoção anterior">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button class="carousel-btn next" onclick="moveCarousel(1)" aria-label="Próxima promoção">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+        <div class="carousel-dots" id="carousel-dots"></div>
+      </div>
+    </div>
+    <!-- Categorias de Pizzas -->
     <div id="categorias"></div>
   </section>
 
@@ -274,6 +386,8 @@
 
   <script>
     let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+    let currentSlide = 0;
+    let promoItems = [];
 
     function aplicarConfiguracoes() {
       if (typeof config !== 'undefined') {
@@ -300,6 +414,7 @@
         if (typeof config !== 'undefined' && typeof cardapio !== 'undefined') {
           clearInterval(interval);
           aplicarConfiguracoes();
+          carregarPromocoes();
           carregarCardapio();
         } else if (attempts >= maxAttempts) {
           clearInterval(interval);
@@ -313,6 +428,68 @@
     document.addEventListener('DOMContentLoaded', () => {
       checkConfigAndInitialize();
     });
+
+    function carregarPromocoes() {
+      const carouselInner = document.getElementById('carousel-inner');
+      const carouselDots = document.getElementById('carousel-dots');
+      carouselInner.innerHTML = '';
+      carouselDots.innerHTML = '';
+
+      // Filtra pizzas em promoção (assumindo que o cardapio.js tem uma propriedade 'promocao')
+      promoItems = cardapio.filter(pizza => pizza.promocao && pizza.promocao.ativo);
+      if (promoItems.length === 0) {
+        // Caso não haja promoções, esconde a seção
+        document.querySelector('.promo-section').style.display = 'none';
+        return;
+      }
+
+      promoItems.forEach((pizza, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'carousel-item';
+        const precoOriginal = pizza.preço;
+        const precoPromocional = pizza.promocao.precoPromocional;
+        itemDiv.innerHTML = `
+          <img src="${pizza.imagem}" alt="${pizza.nome}">
+          <div class="carousel-content">
+            <h3>${pizza.nome}</h3>
+            <p>${pizza.descrição}</p>
+            <div class="price">R$ ${precoPromocional.toFixed(2)} <span class="original-price">R$ ${precoOriginal.toFixed(2)}</span></div>
+            <button class="add-btn" onclick="adicionarAoCarrinho(${pizza.id})" aria-label="Adicionar ${pizza.nome} ao carrinho">
+              Adicionar ao Carrinho
+            </button>
+          </div>
+        `;
+        carouselInner.appendChild(itemDiv);
+
+        const dot = document.createElement('div');
+        dot.className = 'carousel-dot';
+        dot.addEventListener('click', () => moveToSlide(index));
+        carouselDots.appendChild(dot);
+      });
+
+      updateCarousel();
+    }
+
+    function moveCarousel(direction) {
+      currentSlide += direction;
+      if (currentSlide < 0) currentSlide = promoItems.length - 1;
+      if (currentSlide >= promoItems.length) currentSlide = 0;
+      updateCarousel();
+    }
+
+    function moveToSlide(index) {
+      currentSlide = index;
+      updateCarousel();
+    }
+
+    function updateCarousel() {
+      const carouselInner = document.getElementById('carousel-inner');
+      carouselInner.style.transform = `translateX(-${currentSlide * 100}%)`;
+      const dots = document.querySelectorAll('.carousel-dot');
+      dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentSlide);
+      });
+    }
 
     function carregarCardapio() {
       const categoriasDiv = document.getElementById('categorias');
@@ -350,7 +527,7 @@
           gridDiv.appendChild(pizzaDiv);
         });
 
-        categoriaDiv.appendChild(grid( gridDiv );
+        categoriaDiv.appendChild(gridDiv);
         categoriasDiv.appendChild(categoriaDiv);
       }
     }
