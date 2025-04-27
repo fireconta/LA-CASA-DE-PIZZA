@@ -2,7 +2,7 @@
  * Configurações globais da pizzaria.
  * Define as configurações usadas pelo projeto, como cores, nome da pizzaria, logo e links sociais.
  */
-const config = {
+window.config = {
   // Cores do tema (em formato hexadecimal)
   primaryColor: validateColor('#FF4500'), // Cor primária (laranja)
   secondaryColor: validateColor('#FFD700'), // Cor secundária (amarelo)
@@ -20,9 +20,9 @@ const config = {
   instagramUrl: validateUrl('https://instagram.com/lacasadepizza2025', 'URL do Instagram'), // URL do Instagram
 
   // Configurações administrativas
-  adminPassword: validateString('', 'f4b2b6f2d4e8b2b2d2d2d2d2d2d2d2d2', // Hash MD5 de "LVz"
-  
+  adminPassword: validateString('', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27e', // Hash MD5 de "LVz"
 
+                                
 /**
  * Valida uma cor no formato hexadecimal.
  * @param {string} color - Cor a ser validada.
