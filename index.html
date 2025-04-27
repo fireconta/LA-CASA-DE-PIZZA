@@ -45,138 +45,10 @@
   <title>La Casa de Pizzas - Cardápio</title>
   <script src="https://kit.fontawesome.com/1f7a5fcea1.js" crossorigin="anonymous"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-    }
-    /* Animações personalizadas */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-    @keyframes glow {
-      0% { box-shadow: 0 0 5px rgba(255, 111, 0, 0.5); }
-      50% { box-shadow: 0 0 20px rgba(255, 111, 0, 0.8); }
-      100% { box-shadow: 0 0 5px rgba(255, 111, 0, 0.5); }
-    }
-    .fade-in {
-      animation: fadeIn 0.5s ease-in-out;
-    }
-    .pulse {
-      animation: pulse 2s infinite;
-    }
-    .spin {
-      animation: spin 2s linear infinite;
-    }
-    .bounce {
-      animation: bounce 0.5s;
-    }
-    .glow {
-      animation: glow 1.5s infinite;
-    }
-    /* Efeito de hover nos cards */
-    .card-hover:hover {
-      transform: scale(1.05);
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-    }
-    /* Estilo para imagens indisponíveis */
-    img[alt="Imagem indisponível"] {
-      background-color: #f1f5f9;
-      color: #6b7280;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
-    /* Banner promocional */
-    .promo-banner {
-      background: linear-gradient(90deg, #FF6F00, #FFCA28);
-      animation: pulse 3s infinite;
-    }
-    /* Loader */
-    .loader {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #FF6F00;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 20px auto;
-    }
-    /* Ajuste para modo escuro */
-    .dark .card-bg {
-      background-color: #2D2D2D !important;
-    }
-    .dark .text-dark-mode {
-      color: #E5E7EB !important;
-    }
-    .dark .bg-dark-mode {
-      background-color: #1F2937 !important;
-    }
-    /* Estilo do botão modo escuro */
-    #dark-mode-toggle {
-      padding: 0.5rem;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    #dark-mode-toggle i {
-      font-size: 1.25rem;
-    }
-    /* Botão Voltar ao Topo */
-    #back-to-top {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background-color: #FF6F00;
-      color: white;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      transition: opacity 0.3s, transform 0.3s;
-    }
-    #back-to-top:hover {
-      transform: scale(1.1);
-    }
-    /* Toast */
-    #toast {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background-color: #34D399;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 8px;
-      display: none;
-      z-index: 100;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    }
-  </style>
 </head>
-<body class="bg-gradient-to-br from-orange-200 via-amber-300 to-red-300 min-h-screen text-gray-800">
+<body>
   <!-- Loader -->
-  <div id="loader" class="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
+  <div id="loader" class="fixed inset-0 bg-opacity-80 flex items-center justify-center z-50">
     <div class="loader"></div>
   </div>
 
@@ -184,20 +56,20 @@
   <div id="toast" role="alert"></div>
 
   <!-- Cabeçalho -->
-  <header class="bg-gradient-to-r from-orange-600 via-amber-500 to-red-500 text-white shadow-2xl sticky top-0 z-10">
+  <header class="text-white shadow-2xl sticky top-0 z-10">
     <div class="container mx-auto px-4 py-4 flex justify-between items-center">
       <div class="flex items-center gap-4">
         <a href="admin.html" title="Acessar área administrativa">
-          <img id="logo" src="https://via.placeholder.com/140x50.png?text=La+Casa+de+Pizzas" alt="Logo da La Casa de Pizzas" class="h-14 rounded-lg hover:scale-110 transition-transform duration-300 cursor-pointer" loading="lazy">
+          <img id="logo" src="" alt="Logo da La Casa de Pizzas" class="rounded-lg hover:scale-110 transition-transform duration-300 cursor-pointer" loading="lazy">
         </a>
-        <h1 class="text-3xl font-extrabold tracking-tight drop-shadow-lg">La Casa de Pizzas</h1>
+        <h1 class="font-extrabold tracking-tight drop-shadow-lg"></h1>
       </div>
       <div class="flex items-center gap-4">
-        <button id="cart-button" class="relative bg-amber-400 text-gray-800 rounded-full font-semibold hover:bg-amber-500 transition-all duration-300 flex items-center justify-center shadow-md p-2" title="Ver carrinho" aria-label="Ver carrinho de compras">
+        <button id="cart-button" class="relative rounded-full font-semibold hover:bg-opacity-80 transition-all duration-300 flex items-center justify-center shadow-md p-2" title="Ver carrinho" aria-label="Ver carrinho de compras">
           <i class="fas fa-shopping-cart text-xl"></i>
           <span id="cart-count" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">0</span>
         </button>
-        <button id="dark-mode-toggle" class="bg-amber-400 text-gray-800 rounded-full font-semibold hover:bg-amber-500 transition-all duration-300 flex items-center justify-center shadow-md" title="Alternar modo escuro" aria-label="Alternar modo escuro">
+        <button id="dark-mode-toggle" class="rounded-full font-semibold hover:bg-opacity-80 transition-all duration-300 flex items-center justify-center shadow-md" title="Alternar modo escuro" aria-label="Alternar modo escuro">
           <i class="fas fa-moon"></i>
         </button>
       </div>
@@ -206,7 +78,7 @@
 
   <!-- Banner Promocional -->
   <section class="promo-banner text-center py-4 text-white shadow-lg">
-    <p class="text-lg font-bold flex items-center justify-center gap-3">
+    <p class="font-bold flex items-center justify-center gap-3">
       <i class="fas fa-star spin"></i>
       Aproveite nossas promoções! Descontos em pizzas e combos hoje!
       <i class="fas fa-star spin"></i>
@@ -216,13 +88,13 @@
   <!-- Seção Principal -->
   <main class="container mx-auto px-4 py-8">
     <!-- Filtros -->
-    <section class="bg-white rounded-2xl shadow-xl p-6 mb-8 border-t-4 border-orange-600">
-      <h2 class="text-2xl font-bold text-orange-600 mb-4 flex items-center gap-3">
+    <section class="rounded-2xl shadow-xl p-6 mb-8 border-t-4">
+      <h2 class="font-bold mb-4 flex items-center gap-3">
         <i class="fas fa-filter"></i> Filtrar Cardápio
       </h2>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <input type="text" id="search-input" placeholder="Pesquisar por nome..." class="border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-orange-600 shadow-sm transition-all duration-300" aria-label="Pesquisar por nome">
-        <select id="category-filter" class="border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-orange-600 shadow-sm transition-all duration-300" aria-label="Filtrar por categoria">
+        <input type="text" id="search-input" placeholder="Pesquisar por nome..." class="border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" aria-label="Pesquisar por nome">
+        <select id="category-filter" class="border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" aria-label="Filtrar por categoria">
           <option value="">Todas as Categorias</option>
           <option value="Salgadas">Salgadas</option>
           <option value="Doces">Doces</option>
@@ -230,7 +102,7 @@
           <option value="Bebidas">Bebidas</option>
           <option value="Combos">Combos</option>
         </select>
-        <button onclick="resetFilters()" class="bg-orange-600 text-white px-4 py-3 rounded-lg hover:bg-orange-700 transition-all duration-300 flex items-center gap-2 shadow-sm glow">
+        <button onclick="resetFilters()" class="text-white rounded-lg hover:bg-opacity-80 transition-all duration-300 flex items-center gap-2 shadow-sm glow" aria-label="Limpar filtros">
           <i class="fas fa-sync-alt"></i> Limpar Filtros
         </button>
       </div>
@@ -243,11 +115,11 @@
 
     <!-- Paginação -->
     <div class="flex justify-center gap-4 mt-8">
-      <button onclick="changePage(-1)" id="prev-page" class="bg-orange-600 text-white px-5 py-3 rounded-full hover:bg-orange-700 transition-all duration-300 flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md glow" aria-label="Página anterior">
+      <button onclick="changePage(-1)" id="prev-page" class="text-white rounded-full hover:bg-opacity-80 transition-all duration-300 flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md glow" aria-label="Página anterior">
         <i class="fas fa-chevron-left"></i> Anterior
       </button>
-      <span id="page-info" class="self-center text-xl font-medium bg-white px-4 py-2 rounded-full shadow-md dark:bg-dark-mode dark:text-dark-mode">Página 1</span>
-      <button onclick="changePage(1)" id="next-page" class="bg-orange-600 text-white px-5 py-3 rounded-full hover:bg-orange-700 transition-all duration-300 flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md glow" aria-label="Próxima página">
+      <span id="page-info" class="self-center font-medium px-4 py-2 rounded-full shadow-md">Página 1</span>
+      <button onclick="changePage(1)" id="next-page" class="text-white rounded-full hover:bg-opacity-80 transition-all duration-300 flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md glow" aria-label="Próxima página">
         Próxima <i class="fas fa-chevron-right"></i>
       </button>
     </div>
@@ -255,29 +127,29 @@
 
   <!-- Modal de Detalhes do Item -->
   <div id="item-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-20 transition-opacity duration-300">
-    <div class="bg-white rounded-2xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto relative shadow-2xl border-t-4 border-orange-600 transform transition-all duration-300 scale-95">
+    <div class="rounded-2xl p-8 w-full max-h-[90vh] overflow-y-auto relative shadow-2xl border-t-4 transform transition-all duration-300 scale-95">
       <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-600 hover:text-gray-800 transition-all duration-300" aria-label="Fechar modal">
         <i class="fas fa-times text-2xl"></i>
       </button>
-      <img id="modal-image" src="" alt="Imagem do item" class="w-full h-56 object-cover rounded-lg mb-4 shadow-md" loading="lazy">
-      <h2 id="modal-name" class="text-3xl font-bold text-orange-600 mb-2"></h2>
-      <p id="modal-description" class="text-gray-600 mb-4 leading-relaxed dark:text-dark-mode"></p>
-      <p id="modal-price" class="text-xl font-semibold text-gray-800 mb-3 bg-amber-100 inline-block px-4 py-1 rounded-full dark:bg-dark-mode dark:text-dark-mode"></p>
-      <p class="text-sm text-gray-600 mb-2 dark:text-dark-mode"><strong>Categoria:</strong> <span id="modal-category"></span></p>
-      <p class="text-sm text-gray-600 mb-2 dark:text-dark-mode"><strong>Ingredientes:</strong> <span id="modal-ingredients"></span></p>
-      <p class="text-sm text-gray-600 mb-4 dark:text-dark-mode"><strong>Avaliação:</strong> <span id="modal-rating"></span> (<span id="modal-num-ratings"></span> avaliações)</p>
+      <img id="modal-image" src="" alt="Imagem do item" class="w-full object-cover rounded-lg mb-4 shadow-md" loading="lazy">
+      <h2 id="modal-name" class="font-bold mb-2"></h2>
+      <p id="modal-description" class="mb-4 leading-relaxed"></p>
+      <p id="modal-price" class="font-semibold mb-3 inline-block px-4 py-1 rounded-full"></p>
+      <p class="mb-2"><strong>Categoria:</strong> <span id="modal-category"></span></p>
+      <p class="mb-2"><strong>Ingredientes:</strong> <span id="modal-ingredients"></span></p>
+      <p class="mb-4"><strong>Avaliação:</strong> <span id="modal-rating"></span> (<span id="modal-num-ratings"></span> avaliações)</p>
       <!-- Tamanhos -->
       <div class="mb-4">
-        <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center gap-2 dark:text-dark-mode">
+        <h3 class="font-semibold mb-2 flex items-center gap-2">
           <i class="fas fa-ruler"></i> Tamanhos
         </h3>
-        <select id="modal-sizes" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-600 shadow-sm transition-all duration-300" onchange="updateModalPrice()" aria-label="Selecionar tamanho">
+        <select id="modal-sizes" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" onchange="updateModalPrice()" aria-label="Selecionar tamanho">
           <!-- Opções serão preenchidas via JavaScript -->
         </select>
       </div>
       <!-- Extras -->
       <div class="mb-4">
-        <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center gap-2 dark:text-dark-mode">
+        <h3 class="font-semibold mb-2 flex items-center gap-2">
           <i class="fas fa-plus-circle"></i> Extras
         </h3>
         <div id="modal-extras" class="space-y-3">
@@ -286,22 +158,22 @@
       </div>
       <!-- Bordas -->
       <div class="mb-4">
-        <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center gap-2 dark:text-dark-mode">
+        <h3 class="font-semibold mb-2 flex items-center gap-2">
           <i class="fas fa-border-all"></i> Bordas
         </h3>
-        <select id="modal-borders" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-600 shadow-sm transition-all duration-300" onchange="updateModalPrice()" aria-label="Selecionar borda">
+        <select id="modal-borders" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" onchange="updateModalPrice()" aria-label="Selecionar borda">
           <!-- Opções serão preenchidas via JavaScript -->
         </select>
       </div>
       <!-- Itens do Combo (se aplicável) -->
       <div id="modal-combo-items" class="mb-4 hidden">
-        <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center gap-2 dark:text-dark-mode">
+        <h3 class="font-semibold mb-2 flex items-center gap-2">
           <i class="fas fa-box-open"></i> Itens do Combo
         </h3>
-        <ul id="modal-combo-items-list" class="list-disc list-inside text-gray-600 space-y-1 dark:text-dark-mode"></ul>
+        <ul id="modal-combo-items-list" class="list-disc list-inside space-y-1"></ul>
       </div>
       <!-- Botão de Pedido -->
-      <button onclick="addToCart()" class="bg-orange-600 text-white px-6 py-3 rounded-full hover:bg-orange-700 transition-all duration-300 w-full flex items-center justify-center gap-2 shadow-md hover:shadow-lg glow" aria-label="Adicionar ao carrinho">
+      <button onclick="addToCart()" class="text-white rounded-full hover:bg-opacity-80 transition-all duration-300 w-full flex items-center justify-center gap-2 shadow-md hover:shadow-lg glow" aria-label="Adicionar ao carrinho">
         <i class="fas fa-cart-plus"></i> Adicionar ao Pedido
       </button>
     </div>
@@ -309,18 +181,18 @@
 
   <!-- Modal do Carrinho -->
   <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-20 transition-opacity duration-300">
-    <div class="bg-white rounded-2xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto relative shadow-2xl border-t-4 border-orange-600 transform transition-all duration-300 scale-95">
+    <div class="rounded-2xl p-8 w-full max-h-[90vh] overflow-y-auto relative shadow-2xl border-t-4 transform transition-all duration-300 scale-95">
       <button onclick="closeCartModal()" class="absolute top-4 right-4 text-gray-600 hover:text-gray-800 transition-all duration-300" aria-label="Fechar modal do carrinho">
         <i class="fas fa-times text-2xl"></i>
       </button>
-      <h2 class="text-3xl font-bold text-orange-600 mb-4 flex items-center gap-2">
+      <h2 class="font-bold mb-4 flex items-center gap-2">
         <i class="fas fa-shopping-cart"></i> Seu Carrinho
       </h2>
       <div id="cart-items" class="space-y-4 mb-4">
         <!-- Itens do carrinho serão inseridos aqui -->
       </div>
-      <p id="cart-total" class="text-xl font-semibold text-gray-800 mb-4 bg-amber-100 inline-block px-4 py-1 rounded-full dark:bg-dark-mode dark:text-dark-mode"></p>
-      <button onclick="clearCart()" class="bg-red-600 text-white px-6 py-3 rounded-full hover:bg-red-700 transition-all duration-300 w-full flex items-center justify-center gap-2 shadow-md hover:shadow-lg glow" aria-label="Limpar carrinho">
+      <p id="cart-total" class="font-semibold mb-4 inline-block px-4 py-1 rounded-full"></p>
+      <button onclick="clearCart()" class="text-white rounded-full hover:bg-opacity-80 transition-all duration-300 w-full flex items-center justify-center gap-2 shadow-md hover:shadow-lg glow" aria-label="Limpar carrinho">
         <i class="fas fa-trash"></i> Limpar Carrinho
       </button>
     </div>
@@ -332,18 +204,18 @@
   </button>
 
   <!-- Rodapé -->
-  <footer class="bg-gradient-to-r from-orange-600 via-amber-500 to-red-500 text-white py-6 mt-12">
+  <footer class="text-white py-6 mt-12">
     <div class="container mx-auto px-4 text-center">
-      <p class="text-lg font-semibold mb-4">Entre em contato conosco!</p>
+      <p class="font-semibold mb-4">Entre em contato conosco!</p>
       <div class="flex justify-center gap-6">
-        <a id="whatsapp-link" href="#" target="_blank" class="flex items-center gap-2 hover:text-amber-200 transition-all duration-300" aria-label="Contato via WhatsApp">
+        <a id="whatsapp-link" href="#" target="_blank" class="flex items-center gap-2 hover:text-opacity-80 transition-all duration-300" aria-label="Contato via WhatsApp">
           <i class="fab fa-whatsapp text-2xl"></i> WhatsApp
         </a>
-        <a id="instagram-link" href="#" target="_blank" class="flex items-center gap-2 hover:text-amber-200 transition-all duration-300" aria-label="Perfil no Instagram">
+        <a id="instagram-link" href="#" target="_blank" class="flex items-center gap-2 hover:text-opacity-80 transition-all duration-300" aria-label="Perfil no Instagram">
           <i class="fab fa-instagram text-2xl"></i> Instagram
         </a>
       </div>
-      <p class="mt-4 text-sm">© 2025 La Casa de Pizzas. Todos os direitos reservados.</p>
+      <p class="mt-4">© 2025 La Casa de Pizzas. Todos os direitos reservados.</p>
     </div>
   </footer>
 
@@ -360,6 +232,171 @@
     let selectedBorder = null;
     let selectedExtras = [];
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    // Função para aplicar configurações visuais do config.js
+    function applyConfigStyles() {
+      // Aplicar fontes
+      document.body.style.fontFamily = window.config.fonts.family;
+      document.querySelector("h1").style.fontSize = window.config.fonts.sizes.header;
+      document.querySelectorAll("h2").forEach(h2 => h2.style.fontSize = window.config.fonts.sizes.title);
+      document.body.style.fontSize = window.config.fonts.sizes.body;
+
+      // Aplicar cores
+      document.body.style.background = window.config.colors.background;
+      document.body.style.color = window.config.colors.text;
+      document.querySelector("header").style.background = `linear-gradient(to right, ${window.config.colors.primary}, ${window.config.colors.accent})`;
+      document.querySelector("footer").style.background = `linear-gradient(to right, ${window.config.colors.primary}, ${window.config.colors.accent})`;
+      document.querySelector(".promo-banner").style.background = window.config.colors.promoBackground;
+      document.querySelectorAll("section:not(.promo-banner), #page-info").forEach(section => {
+        section.style.backgroundColor = window.config.colors.cardBackground;
+        section.style.borderColor = window.config.colors.primary;
+      });
+      document.querySelectorAll("button:not(#dark-mode-toggle):not(#cart-button):not(#back-to-top), select").forEach(btn => {
+        btn.style.backgroundColor = window.config.colors.primary;
+        btn.style.color = "white";
+        btn.style.borderColor = window.config.colors.primary;
+      });
+      document.querySelectorAll("#dark-mode-toggle, #cart-button").forEach(btn => {
+        btn.style.backgroundColor = window.config.colors.secondary;
+        btn.style.color = window.config.colors.text;
+      });
+      document.querySelector("#back-to-top").style.backgroundColor = window.config.colors.primary;
+
+      // Aplicar tamanhos
+      document.querySelector("#logo").style.height = window.config.sizes.logoHeight;
+      document.querySelectorAll("button:not(#dark-mode-toggle):not(#cart-button):not(#back-to-top)").forEach(btn => {
+        btn.style.padding = window.config.sizes.buttonPadding;
+      });
+      document.querySelectorAll("#item-modal > div, #cart-modal > div").forEach(modal => {
+        modal.style.maxWidth = window.config.sizes.modalMaxWidth;
+      });
+
+      // Configurar loader
+      document.querySelector(".loader").style.borderTopColor = window.config.colors.primary;
+
+      // Configurar links do rodapé
+      document.getElementById("whatsapp-link").href = window.config.whatsappLink;
+      document.getElementById("whatsapp-link").innerHTML = `<i class="fab fa-whatsapp text-2xl"></i> WhatsApp (${window.config.whatsappNumber})`;
+      document.getElementById("instagram-link").href = window.config.instagramUrl;
+      document.getElementById("instagram-link").innerHTML = `<i class="fab fa-instagram text-2xl"></i> Instagram (${window.config.instagramHandle})`;
+
+      // Configurar logo e título
+      document.getElementById("logo").src = window.config.logoUrl;
+      document.querySelector("h1").textContent = window.config.pizzariaName;
+    }
+
+    // Aplicar estilos dinâmicos via CSS
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = `
+      @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+      .fade-in {
+        animation: fadeIn ${window.config.animations.fadeInDuration} ease-in-out;
+      }
+      .glow {
+        animation: glow ${window.config.animations.glowDuration} infinite;
+      }
+      .spin {
+        animation: spin ${window.config.animations.spinDuration} linear infinite;
+      }
+      .bounce {
+        animation: bounce ${window.config.animations.bounceDuration};
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes glow {
+        0% { box-shadow: 0 0 5px ${window.config.colors.primary}80; }
+        50% { box-shadow: 0 0 20px ${window.config.colors.primary}CC; }
+        100% { box-shadow: 0 0 5px ${window.config.colors.primary}80; }
+      }
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+      .card-hover:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+      }
+      img[alt="Imagem indisponível"] {
+        background-color: #f1f5f9;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: ${window.config.fonts.sizes.small};
+        font-weight: 500;
+      }
+      .loader {
+        border: 4px solid #f3f3f3;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        margin: 20px auto;
+      }
+      .dark .card-bg, .dark section, .dark #page-info {
+        background-color: ${window.config.colors.cardBackgroundDark} !important;
+      }
+      .dark .text-dark-mode {
+        color: ${window.config.colors.textDark} !important;
+      }
+      .dark .bg-dark-mode {
+        background-color: ${window.config.colors.backgroundDark} !important;
+      }
+      #dark-mode-toggle {
+        padding: 0.5rem;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #dark-mode-toggle i {
+        font-size: 1.25rem;
+      }
+      #back-to-top {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: opacity 0.3s, transform 0.3s;
+      }
+      #back-to-top:hover {
+        transform: scale(1.1);
+      }
+      #toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #34D399;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        display: none;
+        z-index: 100;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+      .dark {
+        background: ${window.config.colors.backgroundDark} !important;
+        color: ${window.config.colors.textDark} !important;
+      }
+      .dark select {
+        background-color: ${window.config.colors.cardBackgroundDark};
+        color: ${window.config.colors.textDark};
+      }
+    `;
+    document.head.appendChild(styleSheet);
 
     // Função para carregar os dados do cardápio
     function loadCardapioData() {
@@ -387,20 +424,6 @@
       localStorage.setItem("cardapioData", JSON.stringify(cardapioData));
     }
 
-    // Função para aplicar configurações do config.js
-    function applyConfigStyles() {
-      document.getElementById("logo").src = window.config.logoUrl;
-      document.querySelector("h1").textContent = window.config.pizzariaName;
-      document.documentElement.style.setProperty('--primary-color', window.config.primaryColor);
-      document.documentElement.style.setProperty('--secondary-color', window.config.secondaryColor);
-      document.documentElement.style.setProperty('--background-color', window.config.backgroundColor);
-      document.documentElement.style.setProperty('--text-color', window.config.textColor);
-      document.getElementById("whatsapp-link").href = window.config.whatsappLink;
-      document.getElementById("whatsapp-link").innerHTML = `<i class="fab fa-whatsapp text-2xl"></i> WhatsApp (${window.config.whatsappNumber})`;
-      document.getElementById("instagram-link").href = window.config.instagramUrl;
-      document.getElementById("instagram-link").innerHTML = `<i class="fab fa-instagram text-2xl"></i> Instagram (${window.config.instagramHandle})`;
-    }
-
     // Função para renderizar os itens do cardápio
     function renderMenuItems() {
       const start = (currentPage - 1) * itemsPerPage;
@@ -412,18 +435,18 @@
       itemsToShow.forEach(item => {
         const price = item.promocao?.ativo ? item.promocao.precoPromocional : item.preço;
         const card = document.createElement("div");
-        card.className = "bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 fade-in card-hover card-bg";
+        card.className = "rounded-2xl shadow-lg overflow-hidden transition-all duration-300 fade-in card-hover card-bg";
         card.innerHTML = `
-          <img src="${item.imagem}" alt="${item.nome}" class="w-full h-48 object-cover hover:opacity-90 transition-opacity duration-300" loading="lazy">
+          <img src="${item.imagem}" alt="${item.nome}" class="w-full object-cover hover:opacity-90 transition-opacity duration-300" style="height: ${window.config.sizes.cardImageHeight}" loading="lazy">
           <div class="p-5">
-            <h3 class="text-xl font-bold text-orange-600 mb-2 dark:text-dark-mode">${item.nome}</h3>
-            <p class="text-gray-600 text-sm mb-3 line-clamp-2 dark:text-dark-mode">${item.descrição}</p>
-            <p class="text-gray-800 font-semibold text-lg mb-2 dark:text-dark-mode ${item.promocao?.ativo ? 'line-through text-gray-500 dark:text-gray-400' : ''}">R$ ${item.preço.toFixed(2)}</p>
-            ${item.promocao?.ativo ? `<p class="text-green-600 font-semibold text-lg mb-2 dark:text-green-400">Promoção: R$ ${item.promocao.precoPromocional.toFixed(2)}</p>` : ''}
-            <p class="text-sm text-gray-600 mb-3 flex items-center gap-1 dark:text-dark-mode">
+            <h3 class="font-bold mb-2 text-dark-mode">${item.nome}</h3>
+            <p class="text-sm mb-3 line-clamp-2 text-dark-mode">${item.descrição}</p>
+            <p class="font-semibold mb-2 text-dark-mode ${item.promocao?.ativo ? 'line-through text-gray-500 dark:text-gray-400' : ''}">R$ ${item.preço.toFixed(2)}</p>
+            ${item.promocao?.ativo ? `<p class="text-green-600 font-semibold mb-2 dark:text-green-400">Promoção: R$ ${item.promocao.precoPromocional.toFixed(2)}</p>` : ''}
+            <p class="text-sm mb-3 flex items-center gap-1 text-dark-mode">
               <i class="fas fa-star text-yellow-400"></i> ${item.avaliacao ? item.avaliacao.toFixed(1) : 'N/A'} (${item.numAvaliacoes} avaliações)
             </p>
-            <button onclick="openModal(${item.id})" class="bg-orange-600 text-white px-4 py-2 rounded-full hover:bg-orange-700 transition-all duration-300 w-full flex items-center justify-center gap-2 shadow-sm hover:shadow-md glow" aria-label="Ver detalhes de ${item.nome}">
+            <button onclick="openModal(${item.id})" class="w-full flex items-center justify-center gap-2 shadow-sm hover:shadow-md glow" aria-label="Ver detalhes de ${item.nome}">
               <i class="fas fa-eye"></i> Ver Detalhes
             </button>
           </div>
@@ -454,7 +477,6 @@
       document.getElementById("modal-rating").textContent = selectedItem.avaliacao ? selectedItem.avaliacao.toFixed(1) : 'N/A';
       document.getElementById("modal-num-ratings").textContent = selectedItem.numAvaliacoes;
 
-      // Tamanhos
       const sizesSelect = document.getElementById("modal-sizes");
       sizesSelect.innerHTML = "";
       const sizes = Object.entries(selectedItem.tamanhos);
@@ -472,7 +494,6 @@
         selectedSize = null;
       }
 
-      // Extras
       const extrasContainer = document.getElementById("modal-extras");
       extrasContainer.innerHTML = "";
       selectedExtras = [];
@@ -482,16 +503,15 @@
           const div = document.createElement("div");
           div.className = "flex items-center gap-2";
           div.innerHTML = `
-            <input type="checkbox" id="extra-${extra}" value="${extra}" onchange="updateSelectedExtras(this)" class="h-4 w-4 text-orange-600 focus:ring-orange-600 border-gray-300 rounded">
-            <label for="extra-${extra}" class="text-gray-600 dark:text-dark-mode">${extra} (+ R$ ${price.toFixed(2)})</label>
+            <input type="checkbox" id="extra-${extra}" value="${extra}" onchange="updateSelectedExtras(this)" class="h-4 w-4 focus:ring-2 rounded">
+            <label for="extra-${extra}" class="text-dark-mode">${extra} (+ R$ ${price.toFixed(2)})</label>
           `;
           extrasContainer.appendChild(div);
         });
       } else {
-        extrasContainer.innerHTML = '<p class="text-gray-600 dark:text-dark-mode">Nenhum extra disponível</p>';
+        extrasContainer.innerHTML = '<p class="text-dark-mode">Nenhum extra disponível</p>';
       }
 
-      // Bordas
       const bordersSelect = document.getElementById("modal-borders");
       bordersSelect.innerHTML = "";
       const borders = Object.entries(selectedItem.bordasDisponiveis);
@@ -509,7 +529,6 @@
         selectedBorder = null;
       }
 
-      // Itens do Combo
       const comboItemsDiv = document.getElementById("modal-combo-items");
       const comboItemsList = document.getElementById("modal-combo-items-list");
       comboItemsList.innerHTML = "";
@@ -535,7 +554,6 @@
       }, 10);
     }
 
-    // Função para atualizar os extras selecionados
     function updateSelectedExtras(checkbox) {
       if (checkbox.checked) {
         selectedExtras.push(checkbox.value);
@@ -545,7 +563,6 @@
       updateModalPrice();
     }
 
-    // Função para atualizar o preço no modal
     function updateModalPrice() {
       if (!selectedItem) return;
       let basePrice = selectedItem.promocao?.ativo ? selectedItem.promocao.precoPromocional : selectedItem.preço;
@@ -565,7 +582,6 @@
       return totalPrice;
     }
 
-    // Função para fechar o modal
     function closeModal() {
       const modal = document.getElementById("item-modal");
       modal.querySelector("div").classList.add("scale-95");
@@ -578,7 +594,6 @@
       }, 300);
     }
 
-    // Função para adicionar ao carrinho
     function addToCart() {
       if (!selectedItem) return;
       const totalPrice = updateModalPrice();
@@ -597,7 +612,6 @@
       closeModal();
     }
 
-    // Função para atualizar a contagem do carrinho
     function updateCartCount() {
       const cartCount = document.getElementById("cart-count");
       cartCount.textContent = cart.length;
@@ -606,23 +620,22 @@
       }
     }
 
-    // Função para abrir o modal do carrinho
     function openCartModal() {
       const cartItemsContainer = document.getElementById("cart-items");
       cartItemsContainer.innerHTML = "";
       if (cart.length === 0) {
-        cartItemsContainer.innerHTML = '<p class="text-gray-600 dark:text-dark-mode">Seu carrinho está vazio.</p>';
+        cartItemsContainer.innerHTML = '<p class="text-dark-mode">Seu carrinho está vazio.</p>';
       } else {
         cart.forEach((item, index) => {
           const cartItem = document.createElement("div");
-          cartItem.className = "flex justify-between items-center p-4 bg-gray-100 rounded-lg dark:bg-gray-700";
+          cartItem.className = "flex justify-between items-center p-4 rounded-lg dark:bg-gray-700";
           cartItem.innerHTML = `
             <div>
-              <h4 class="text-lg font-semibold text-gray-800 dark:text-dark-mode">${item.nome}</h4>
-              <p class="text-sm text-gray-600 dark:text-dark-mode">Tamanho: ${item.tamanho}</p>
-              <p class="text-sm text-gray-600 dark:text-dark-mode">Borda: ${item.borda}</p>
-              <p class="text-sm text-gray-600 dark:text-dark-mode">Extras: ${item.extras.length ? item.extras.join(", ") : 'Nenhum'}</p>
-              <p class="text-sm font-semibold text-gray-800 dark:text-dark-mode">R$ ${item.preco.toFixed(2)}</p>
+              <h4 class="text-lg font-semibold text-dark-mode">${item.nome}</h4>
+              <p class="text-dark-mode">Tamanho: ${item.tamanho}</p>
+              <p class="text-dark-mode">Borda: ${item.borda}</p>
+              <p class="text-dark-mode">Extras: ${item.extras.length ? item.extras.join(", ") : 'Nenhum'}</p>
+              <p class="font-semibold text-dark-mode">R$ ${item.preco.toFixed(2)}</p>
             </div>
             <button onclick="removeFromCart(${index})" class="text-red-600 hover:text-red-800 transition-all duration-300" aria-label="Remover ${item.nome} do carrinho">
               <i class="fas fa-trash"></i>
@@ -640,7 +653,6 @@
       }, 10);
     }
 
-    // Função para fechar o modal do carrinho
     function closeCartModal() {
       const modal = document.getElementById("cart-modal");
       modal.querySelector("div").classList.add("scale-95");
@@ -649,7 +661,6 @@
       }, 300);
     }
 
-    // Função para remover item do carrinho
     function removeFromCart(index) {
       cart.splice(index, 1);
       localStorage.setItem("cart", JSON.stringify(cart));
@@ -657,7 +668,6 @@
       openCartModal();
     }
 
-    // Função para limpar o carrinho
     function clearCart() {
       cart = [];
       localStorage.setItem("cart", JSON.stringify(cart));
@@ -665,7 +675,6 @@
       openCartModal();
     }
 
-    // Função para exibir toast
     function showToast(message) {
       const toast = document.getElementById("toast");
       toast.textContent = message;
@@ -675,7 +684,6 @@
       }, 3000);
     }
 
-    // Função para filtrar itens
     function filterItems() {
       const searchTerm = document.getElementById("search-input").value.toLowerCase();
       const categoryFilter = document.getElementById("category-filter").value;
@@ -690,7 +698,6 @@
       renderMenuItems();
     }
 
-    // Função para resetar os filtros
     function resetFilters() {
       document.getElementById("search-input").value = "";
       document.getElementById("category-filter").value = "";
@@ -699,29 +706,20 @@
       renderMenuItems();
     }
 
-    // Função para mudar de página
     function changePage(direction) {
       currentPage += direction;
       renderMenuItems();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Função para alternar modo escuro
     function toggleDarkMode() {
       document.body.classList.toggle("dark");
       const isDark = document.body.classList.contains("dark");
       document.getElementById("dark-mode-toggle").innerHTML = isDark
         ? '<i class="fas fa-sun"></i>'
         : '<i class="fas fa-moon"></i>';
-      document.body.classList.toggle("bg-gray-900", isDark);
-      document.body.classList.toggle("text-white", isDark);
-      document.body.classList.toggle("bg-gradient-to-br", !isDark);
-      document.body.classList.toggle("from-orange-200", !isDark);
-      document.body.classList.toggle("via-amber-300", !isDark);
-      document.body.classList.toggle("to-red-300", !isDark);
     }
 
-    // Função para mostrar/esconder o botão "Voltar ao topo"
     function handleScroll() {
       const backToTop = document.getElementById("back-to-top");
       if (window.scrollY > 300) {
@@ -731,7 +729,6 @@
       }
     }
 
-    // Inicialização
     const configScript = document.getElementById("config-script");
     const cardapioScript = document.getElementById("cardapio-script");
 

@@ -45,157 +45,91 @@
   <title>La Casa de Pizzas - Administração</title>
   <script src="https://kit.fontawesome.com/1f7a5fcea1.js" crossorigin="anonymous"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    /* Animações personalizadas */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .fade-in {
-      animation: fadeIn 0.5s ease-in-out;
-    }
-    /* Estilo para imagens indisponíveis */
-    img[alt="Imagem indisponível"] {
-      background-color: #f1f5f9;
-      color: #6b7280;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
-  </style>
 </head>
-<body class="bg-gradient-to-br from-orange-100 via-amber-200 to-red-200 min-h-screen text-gray-800">
-  <!-- Cabeçalho -->
-  <header class="bg-gradient-to-r from-orange-600 via-orange-500 to-red-500 text-white shadow-xl sticky top-0 z-10">
-    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-      <div class="flex items-center gap-4">
-        <img id="logo" src="https://via.placeholder.com/140x50.png?text=La+Casa+de+Pizzas" alt="Logo da La Casa de Pizzas" class="h-14 rounded-lg">
-        <h1 class="text-3xl font-extrabold tracking-tight drop-shadow-lg">Admin - La Casa de Pizzas</h1>
-      </div>
-      <div class="flex gap-3">
-        <button id="dark-mode-toggle" class="bg-amber-400 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-amber-500 transition-all flex items-center gap-2">
-          <i class="fas fa-moon"></i> Modo Escuro
-        </button>
-        <a href="index.html" class="bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-orange-700 transition-all flex items-center gap-2">
-          <i class="fas fa-home"></i> Voltar ao Cardápio
-        </a>
-      </div>
-    </div>
-  </header>
+<body>
+  <!-- Loader -->
+  <div id="loader" class="fixed inset-0 bg-opacity-80 flex items-center justify-center z-50">
+    <div class="loader"></div>
+  </div>
 
-  <!-- Login -->
-  <div id="login-screen" class="container mx-auto px-4 py-8 flex justify-center items-center min-h-[calc(100vh-80px)]">
-    <div class="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full border-t-4 border-orange-500">
-      <h2 class="text-2xl font-bold text-orange-600 mb-6 flex items-center gap-2">
-        <i class="fas fa-lock"></i> Login Admin
+  <!-- Login Modal -->
+  <div id="login-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-20">
+    <div class="rounded-2xl p-8 max-w-sm w-full shadow-2xl border-t-4">
+      <h2 class="font-bold mb-4 flex items-center gap-2">
+        <i class="fas fa-lock"></i> Acesso Administrativo
       </h2>
-      <input type="password" id="password-input" placeholder="Digite a senha administrativa" class="border border-gray-300 rounded-lg p-3 w-full mb-4 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Senha administrativa">
-      <button onclick="login()" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-all w-full flex items-center justify-center gap-2 shadow-md">
+      <input type="password" id="admin-password" placeholder="Digite a senha..." class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 shadow-sm transition-all duration-300 mb-4" aria-label="Digite a senha de administrador">
+      <button onclick="login()" class="text-white rounded-full hover:bg-opacity-80 transition-all duration-300 w-full flex items-center justify-center gap-2 shadow-md glow" aria-label="Fazer login">
         <i class="fas fa-sign-in-alt"></i> Entrar
       </button>
     </div>
   </div>
 
-  <!-- Dashboard -->
-  <div id="dashboard" class="container mx-auto px-4 py-8 hidden">
-    <!-- Abas -->
-    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border-t-4 border-orange-500">
-      <div class="flex gap-4 border-b border-gray-200">
-        <button onclick="showTab('tab-menu')" class="tab-button px-4 py-2 font-semibold text-orange-600 border-b-4 border-orange-500">Gerenciar Cardápio</button>
-        <button onclick="showTab('tab-config')" class="tab-button px-4 py-2 font-semibold text-gray-600 hover:text-orange-600 hover:border-b-4 hover:border-orange-500 transition-all">Configurações</button>
+  <!-- Cabeçalho -->
+  <header class="text-white shadow-2xl sticky top-0 z-10 hidden" id="header">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-4">
+        <a href="index.html">
+          <img id="logo" src="" alt="Logo da La Casa de Pizzas" class="rounded-lg hover:scale-110 transition-transform duration-300 cursor-pointer">
+        </a>
+        <h1 class="font-extrabold tracking-tight drop-shadow-lg"></h1>
       </div>
-
-      <!-- Aba: Gerenciar Cardápio -->
-      <div id="tab-menu" class="tab-content mt-6">
-        <h2 class="text-2xl font-bold text-orange-600 mb-4 flex items-center gap-2">
-          <i class="fas fa-pizza-slice"></i> Itens do Cardápio
-        </h2>
-        <button onclick="openAddItemForm()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-all mb-4 flex items-center gap-2">
-          <i class="fas fa-plus"></i> Adicionar Novo Item
+      <div class="flex items-center gap-4">
+        <button onclick="logout()" class="bg-red-600 text-white rounded-full hover:bg-red-700 transition-all duration-300 flex items-center gap-2 shadow-md glow" aria-label="Sair">
+          <i class="fas fa-sign-out-alt"></i> Sair
         </button>
-        <div id="menu-items-list" class="space-y-4">
-          <!-- Itens serão inseridos dinamicamente -->
-        </div>
-      </div>
-
-      <!-- Aba: Configurações -->
-      <div id="tab-config" class="tab-content mt-6 hidden">
-        <h2 class="text-2xl font-bold text-orange-600 mb-4 flex items-center gap-2">
-          <i class="fas fa-cog"></i> Configurações
-        </h2>
-        <p class="text-gray-600 mb-4">Ajuste as configurações da pizzaria abaixo:</p>
-        <div class="space-y-4">
-          <div>
-            <label for="config-name" class="block text-gray-600 font-medium">Nome da Pizzaria</label>
-            <input type="text" id="config-name" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Nome da pizzaria">
-          </div>
-          <div>
-            <label for="config-primary-color" class="block text-gray-600 font-medium">Cor Primária</label>
-            <input type="color" id="config-primary-color" class="border border-gray-300 rounded-lg p-1 w-full h-12 shadow-sm">
-          </div>
-          <div>
-            <label for="config-secondary-color" class="block text-gray-600 font-medium">Cor Secundária</label>
-            <input type="color" id="config-secondary-color" class="border border-gray-300 rounded-lg p-1 w-full h-12 shadow-sm">
-          </div>
-          <div>
-            <label for="config-background-color" class="block text-gray-600 font-medium">Cor de Fundo</label>
-            <input type="color" id="config-background-color" class="border border-gray-300 rounded-lg p-1 w-full h-12 shadow-sm">
-          </div>
-          <div>
-            <label for="config-text-color" class="block text-gray-600 font-medium">Cor do Texto</label>
-            <input type="color" id="config-text-color" class="border border-gray-300 rounded-lg p-1 w-full h-12 shadow-sm">
-          </div>
-          <div>
-            <label for="config-logo-url" class="block text-gray-600 font-medium">URL do Logo</label>
-            <input type="text" id="config-logo-url" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="URL do logo">
-          </div>
-          <div>
-            <label for="config-whatsapp-link" class="block text-gray-600 font-medium">Link do WhatsApp</label>
-            <input type="text" id="config-whatsapp-link" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Link do WhatsApp">
-          </div>
-          <div>
-            <label for="config-whatsapp-number" class="block text-gray-600 font-medium">Número do WhatsApp</label>
-            <input type="text" id="config-whatsapp-number" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Número do WhatsApp">
-          </div>
-          <div>
-            <label for="config-instagram-url" class="block text-gray-600 font-medium">URL do Instagram</label>
-            <input type="text" id="config-instagram-url" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="URL do Instagram">
-          </div>
-          <div>
-            <label for="config-instagram-handle" class="block text-gray-600 font-medium">Handle do Instagram</label>
-            <input type="text" id="config-instagram-handle" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Handle do Instagram">
-          </div>
-          <button onclick="saveConfig()" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-all w-full flex items-center justify-center gap-2 shadow-md">
-            <i class="fas fa-save"></i> Salvar Configurações
-          </button>
-        </div>
       </div>
     </div>
-  </div>
+  </header>
 
-  <!-- Modal de Edição/Adição de Item -->
-  <div id="item-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-20">
-    <div class="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto relative shadow-2xl border-t-4 border-orange-500">
-      <button onclick="closeItemModal()" class="absolute top-4 right-4 text-gray-600 hover:text-gray-800 transition-all">
+  <!-- Seção Principal -->
+  <main class="container mx-auto px-4 py-8 hidden" id="main-content">
+    <!-- Gerenciar Itens -->
+    <section class="rounded-2xl shadow-xl p-6 mb-8 border-t-4">
+      <h2 class="font-bold mb-4 flex items-center gap-3">
+        <i class="fas fa-pizza-slice"></i> Gerenciar Itens do Cardápio
+      </h2>
+      <button onclick="openAddItemModal()" class="text-white rounded-full hover:bg-opacity-80 transition-all duration-300 flex items-center gap-2 mb-4 shadow-md glow" aria-label="Adicionar novo item">
+        <i class="fas fa-plus"></i> Adicionar Novo Item
+      </button>
+      <div id="item-list" class="space-y-4">
+        <!-- Itens serão inseridos dinamicamente -->
+      </div>
+    </section>
+
+    <!-- Gerenciar Bordas -->
+    <section class="rounded-2xl shadow-xl p-6 mb-8 border-t-4">
+      <h2 class="font-bold mb-4 flex items-center gap-3">
+        <i class="fas fa-border-all"></i> Gerenciar Bordas Disponíveis
+      </h2>
+      <div class="flex gap-4 mb-4">
+        <input type="text" id="new-border-name" placeholder="Nome da borda..." class="border border-gray-200 rounded-lg p-3 flex-1 focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" aria-label="Nome da nova borda">
+        <input type="number" id="new-border-price" placeholder="Preço (R$)" step="0.01" class="border border-gray-200 rounded-lg p-3 w-32 focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" aria-label="Preço da nova borda">
+        <button onclick="addBorder()" class="text-white rounded-full hover:bg-opacity-80 transition-all duration-300 flex items-center gap-2 shadow-md glow" aria-label="Adicionar borda">
+          <i class="fas fa-plus"></i> Adicionar
+        </button>
+      </div>
+      <div id="border-list" class="space-y-4">
+        <!-- Bordas serão inseridas dinamicamente -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal para Adicionar/Editar Item -->
+  <div id="edit-item-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-20 transition-opacity duration-300">
+    <div class="rounded-2xl p-8 w-full max-h-[90vh] overflow-y-auto relative shadow-2xl border-t-4 transform transition-all duration-300 scale-95">
+      <button onclick="closeEditItemModal()" class="absolute top-4 right-4 text-gray-600 hover:text-gray-800 transition-all duration-300" aria-label="Fechar modal de edição">
         <i class="fas fa-times text-2xl"></i>
       </button>
-      <h2 id="modal-title" class="text-2xl font-bold text-orange-600 mb-6 flex items-center gap-2">
-        <i class="fas fa-pizza-slice"></i> Adicionar Item
-      </h2>
-      <div class="space-y-4">
+      <h2 id="edit-modal-title" class="font-bold mb-4"></h2>
+      <form id="edit-item-form" class="space-y-4">
         <div>
-          <label for="modal-id" class="block text-gray-600 font-medium">ID (Automático)</label>
-          <input type="text" id="modal-id" class="border border-gray-300 rounded-lg p-3 w-full bg-gray-100 cursor-not-allowed" readonly aria-label="ID do item">
+          <label for="edit-nome" class="block mb-1">Nome</label>
+          <input type="text" id="edit-nome" name="nome" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" required aria-label="Nome do item">
         </div>
         <div>
-          <label for="modal-name" class="block text-gray-600 font-medium">Nome</label>
-          <input type="text" id="modal-name" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Nome do item">
-        </div>
-        <div>
-          <label for="modal-category" class="block text-gray-600 font-medium">Categoria</label>
-          <select id="modal-category" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Categoria do item">
+          <label for="edit-categoria" class="block mb-1">Categoria</label>
+          <select id="edit-categoria" name="categoria" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" required aria-label="Categoria do item">
             <option value="Salgadas">Salgadas</option>
             <option value="Doces">Doces</option>
             <option value="Vegetarianas">Vegetarianas</option>
@@ -204,98 +138,151 @@
           </select>
         </div>
         <div>
-          <label for="modal-price" class="block text-gray-600 font-medium">Preço Base (R$)</label>
-          <input type="number" id="modal-price" step="0.01" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Preço base do item">
+          <label for="edit-preco" class="block mb-1">Preço (R$)</label>
+          <input type="number" id="edit-preco" name="preço" step="0.01" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" required aria-label="Preço do item">
         </div>
         <div>
-          <label for="modal-image" class="block text-gray-600 font-medium">URL da Imagem</label>
-          <input type="text" id="modal-image" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="URL da imagem do item">
+          <label for="edit-imagem" class="block mb-1">URL da Imagem</label>
+          <input type="url" id="edit-imagem" name="imagem" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" aria-label="URL da imagem do item">
         </div>
         <div>
-          <label for="modal-description" class="block text-gray-600 font-medium">Descrição</label>
-          <textarea id="modal-description" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" rows="3" aria-label="Descrição do item"></textarea>
+          <label for="edit-descricao" class="block mb-1">Descrição</label>
+          <textarea id="edit-descricao" name="descrição" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" rows="3" aria-label="Descrição do item"></textarea>
         </div>
         <div>
-          <label for="modal-ingredients" class="block text-gray-600 font-medium">Ingredientes (separados por vírgula)</label>
-          <input type="text" id="modal-ingredients" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Ingredientes do item">
+          <label for="edit-ingredientes" class="block mb-1">Ingredientes (separados por vírgula)</label>
+          <input type="text" id="edit-ingredientes" name="ingredientes" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" aria-label="Ingredientes do item">
         </div>
-        <!-- Tamanhos -->
         <div>
-          <label class="block text-gray-600 font-medium">Tamanhos e Preços</label>
-          <div id="modal-sizes" class="space-y-2">
-            <!-- Campos dinâmicos -->
-          </div>
-          <button onclick="addSizeField()" class="text-orange-500 hover:text-orange-600 mt-2 flex items-center gap-2">
-            <i class="fas fa-plus"></i> Adicionar Tamanho
-          </button>
+          <label for="edit-tamanhos" class="block mb-1">Tamanhos e Preços (formato: Pequena:35.00,Média:45.00)</label>
+          <input type="text" id="edit-tamanhos" name="tamanhos" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" aria-label="Tamanhos e preços do item">
         </div>
-        <!-- Extras -->
         <div>
-          <label class="block text-gray-600 font-medium">Extras e Preços</label>
-          <div id="modal-extras" class="space-y-2">
-            <!-- Campos dinâmicos -->
-          </div>
-          <button onclick="addExtraField()" class="text-orange-500 hover:text-orange-600 mt-2 flex items-center gap-2">
-            <i class="fas fa-plus"></i> Adicionar Extra
-          </button>
+          <label for="edit-extras" class="block mb-1">Extras e Preços (formato: Azeitonas:5.00,Rúcula:6.00)</label>
+          <input type="text" id="edit-extras" name="extrasDisponiveis" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" aria-label="Extras disponíveis e preços">
         </div>
-        <!-- Bordas -->
         <div>
-          <label class="block text-gray-600 font-medium">Bordas e Preços</label>
-          <div id="modal-borders" class="space-y-2">
-            <!-- Campos dinâmicos -->
-          </div>
-          <button onclick="addBorderField()" class="text-orange-500 hover:text-orange-600 mt-2 flex items-center gap-2">
-            <i class="fas fa-plus"></i> Adicionar Borda
-          </button>
-        </div>
-        <!-- Itens do Combo -->
-        <div id="modal-combo-items-section" class="hidden">
-          <label class="block text-gray-600 font-medium">Itens do Combo (selecione os IDs)</label>
-          <div id="modal-combo-items" class="space-y-2">
-            <!-- Campos dinâmicos -->
-          </div>
-          <button onclick="addComboItemField()" class="text-orange-500 hover:text-orange-600 mt-2 flex items-center gap-2">
-            <i class="fas fa-plus"></i> Adicionar Item ao Combo
-          </button>
-        </div>
-        <!-- Promoção -->
-        <div>
-          <label class="block text-gray-600 font-medium">Promoção</label>
-          <div class="flex items-center gap-2 mb-2">
-            <input type="checkbox" id="modal-promo-active" class="h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-300 rounded" onchange="togglePromoFields()">
-            <label for="modal-promo-active" class="text-gray-600">Ativar Promoção</label>
-          </div>
-          <div id="promo-fields" class="hidden space-y-2">
-            <label for="modal-promo-price" class="block text-gray-600 font-medium">Preço Promocional (R$)</label>
-            <input type="number" id="modal-promo-price" step="0.01" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Preço promocional">
+          <label for="edit-bordas" class="block mb-1">Bordas Disponíveis (selecionar)</label>
+          <div id="edit-bordas" class="space-y-2 max-h-40 overflow-y-auto">
+            <!-- Checkboxes de bordas serão preenchidos dinamicamente -->
           </div>
         </div>
-        <!-- Avaliação -->
         <div>
-          <label for="modal-rating" class="block text-gray-600 font-medium">Avaliação (0 a 5)</label>
-          <input type="number" id="modal-rating" step="0.1" min="0" max="5" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Avaliação do item">
+          <label for="edit-promocao" class="block mb-1">Promoção (ativo:preço, ex.: true:40.00)</label>
+          <input type="text" id="edit-promocao" name="promocao" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" aria-label="Detalhes da promoção">
         </div>
         <div>
-          <label for="modal-num-ratings" class="block text-gray-600 font-medium">Número de Avaliações</label>
-          <input type="number" id="modal-num-ratings" min="0" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Número de avaliações">
+          <label for="edit-avaliacao" class="block mb-1">Avaliação (0 a 5)</label>
+          <input type="number" id="edit-avaliacao" name="avaliacao" step="0.1" min="0" max="5" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" aria-label="Avaliação do item">
         </div>
-        <button onclick="saveItem()" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-all w-full flex items-center justify-center gap-2 shadow-md">
-          <i class="fas fa-save"></i> Salvar Item
+        <div>
+          <label for="edit-numAvaliacoes" class="block mb-1">Número de Avaliações</label>
+          <input type="number" id="edit-numAvaliacoes" name="numAvaliacoes" min="0" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" aria-label="Número de avaliações do item">
+        </div>
+        <div id="edit-combo-items-section" class="hidden">
+          <label for="edit-combo-items" class="block mb-1">Itens do Combo (IDs separados por vírgula)</label>
+          <input type="text" id="edit-combo-items" name="itens" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" aria-label="Itens do combo">
+        </div>
+        <button type="submit" class="text-white rounded-full hover:bg-opacity-80 transition-all duration-300 w-full flex items-center justify-center gap-2 shadow-md glow" aria-label="Salvar item">
+          <i class="fas fa-save"></i> Salvar
         </button>
-      </div>
+      </form>
     </div>
   </div>
 
   <!-- Scripts -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
   <script src="config.js" id="config-script"></script>
   <script src="cardapio.js" id="cardapio-script"></script>
   <script>
     let cardapioData = [];
+    let globalBorders = JSON.parse(localStorage.getItem("globalBorders")) || {
+      "Tradicional": 0.00,
+      "Catupiry": 8.00,
+      "Cheddar Cremoso": 8.00,
+      "Gorgonzola": 10.00,
+      "Cream Cheese": 10.00,
+      "Parmesão": 9.00,
+      "Chocolate": 8.00,
+      "Doce de Leite": 8.00
+    };
     let editingItemId = null;
 
-    // Função para carregar os dados do cardápio
+    // Função para aplicar configurações visuais do config.js
+    function applyConfigStyles() {
+      document.body.style.fontFamily = window.config.fonts.family;
+      document.body.style.background = window.config.colors.background;
+      document.body.style.color = window.config.colors.text;
+      document.querySelector("header").style.background = `linear-gradient(to right, ${window.config.colors.primary}, ${window.config.colors.accent})`;
+      document.querySelectorAll("section").forEach(section => {
+        section.style.backgroundColor = window.config.colors.cardBackground;
+        section.style.borderColor = window.config.colors.primary;
+      });
+      document.querySelectorAll("button, select").forEach(btn => {
+        btn.style.backgroundColor = window.config.colors.primary;
+        btn.style.color = "white";
+        btn.style.borderColor = window.config.colors.primary;
+      });
+      document.querySelector(".loader").style.borderTopColor = window.config.colors.primary;
+      document.getElementById("logo").style.height = window.config.sizes.logoHeight;
+      document.querySelectorAll("button").forEach(btn => {
+        btn.style.padding = window.config.sizes.buttonPadding;
+      });
+      document.querySelector("#edit-item-modal > div").style.maxWidth = window.config.sizes.modalMaxWidth;
+      document.querySelector("h1").style.fontSize = window.config.fonts.sizes.header;
+      document.querySelectorAll("h2").forEach(h2 => h2.style.fontSize = window.config.fonts.sizes.title);
+      document.body.style.fontSize = window.config.fonts.sizes.body;
+
+      document.getElementById("logo").src = window.config.logoUrl;
+      document.querySelector("h1").textContent = `Admin - ${window.config.pizzariaName}`;
+    }
+
+    // Aplicar estilos dinâmicos via CSS
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = `
+      @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+      .fade-in {
+        animation: fadeIn ${window.config.animations.fadeInDuration} ease-in-out;
+      }
+      .glow {
+        animation: glow ${window.config.animations.glowDuration} infinite;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes glow {
+        0% { box-shadow: 0 0 5px ${window.config.colors.primary}80; }
+        50% { box-shadow: 0 0 20px ${window.config.colors.primary}CC; }
+        100% { box-shadow: 0 0 5px ${window.config.colors.primary}80; }
+      }
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      .loader {
+        border: 4px solid #f3f3f3;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        margin: 20px auto;
+      }
+      .dark .card-bg, .dark section {
+        background-color: ${window.config.colors.cardBackgroundDark} !important;
+      }
+      .dark .text-dark-mode {
+        color: ${window.config.colors.textDark} !important;
+      }
+      .dark {
+        background: ${window.config.colors.backgroundDark} !important;
+        color: ${window.config.colors.textDark} !important;
+      }
+      .dark select {
+        background-color: ${window.config.colors.cardBackgroundDark};
+        color: ${window.config.colors.textDark};
+      }
+    `;
+    document.head.appendChild(styleSheet);
+
     function loadCardapioData() {
       const storedData = localStorage.getItem("cardapioData");
       if (storedData) {
@@ -310,420 +297,280 @@
         cardapioData = [...window.cardapio];
         saveCardapioData();
       }
-      renderMenuItems();
+      renderItemList();
+      renderBorderList();
+      document.getElementById("loader").classList.add("hidden");
     }
 
-    // Função para salvar os dados do cardápio no localStorage
     function saveCardapioData() {
       localStorage.setItem("cardapioData", JSON.stringify(cardapioData));
     }
 
-    // Função para aplicar configurações do config.js
-    function applyConfigStyles() {
-      document.getElementById("logo").src = window.config.logoUrl;
-      document.querySelector("h1").textContent = `Admin - ${window.config.pizzariaName}`;
-      document.documentElement.style.setProperty('--primary-color', window.config.primaryColor);
-      document.documentElement.style.setProperty('--secondary-color', window.config.secondaryColor);
-      document.documentElement.style.setProperty('--background-color', window.config.backgroundColor);
-      document.documentElement.style.setProperty('--text-color', window.config.textColor);
+    function saveGlobalBorders() {
+      localStorage.setItem("globalBorders", JSON.stringify(globalBorders));
     }
 
-    // Função de login
     function login() {
-      const passwordInput = document.getElementById("password-input").value;
-      const hashedPassword = sha256(passwordInput);
-      if (hashedPassword === window.config.adminPassword) {
-        document.getElementById("login-screen").classList.add("hidden");
-        document.getElementById("dashboard").classList.remove("hidden");
-        loadCardapioData();
+      const passwordInput = document.getElementById("admin-password").value;
+      const hashedInput = hashPassword(passwordInput);
+      if (hashedInput === window.config.adminPassword) {
+        document.getElementById("login-modal").classList.add("hidden");
+        document.getElementById("header").classList.remove("hidden");
+        document.getElementById("main-content").classList.remove("hidden");
       } else {
         alert("Senha incorreta!");
       }
     }
 
-    // Função para mostrar abas
-    function showTab(tabId) {
-      document.querySelectorAll(".tab-content").forEach(tab => tab.classList.add("hidden"));
-      document.querySelectorAll(".tab-button").forEach(button => {
-        button.classList.remove("text-orange-600", "border-b-4", "border-orange-500");
-        button.classList.add("text-gray-600");
-      });
-      document.getElementById(tabId).classList.remove("hidden");
-      document.querySelector(`button[onclick="showTab('${tabId}')"]`).classList.add("text-orange-600", "border-b-4", "border-orange-500");
-      if (tabId === "tab-config") loadConfig();
+    function logout() {
+      window.location.reload();
     }
 
-    // Função para renderizar os itens do cardápio
-    function renderMenuItems() {
-      const menuItemsList = document.getElementById("menu-items-list");
-      menuItemsList.innerHTML = "";
+    function hashPassword(password) {
+      return password === "LVz" ? window.config.adminPassword : "";
+    }
+
+    function renderItemList() {
+      const itemList = document.getElementById("item-list");
+      itemList.innerHTML = "";
       cardapioData.forEach(item => {
-        const itemDiv = document.createElement("div");
-        itemDiv.className = "bg-gray-50 rounded-lg p-4 shadow-sm flex justify-between items-center fade-in";
-        itemDiv.innerHTML = `
+        const div = document.createElement("div");
+        div.className = "flex justify-between items-center p-4 rounded-lg dark:bg-gray-700 card-bg";
+        div.innerHTML = `
           <div>
-            <h3 class="text-lg font-semibold text-orange-600">${item.nome}</h3>
-            <p class="text-gray-600">Categoria: ${item.categoria} | Preço: R$ ${item.preço.toFixed(2)}</p>
-            ${item.promocao?.ativo ? `<p class="text-green-600">Promoção: R$ ${item.promocao.precoPromocional.toFixed(2)}</p>` : ''}
+            <h3 class="text-lg font-semibold text-dark-mode">${item.nome}</h3>
+            <p class="text-dark-mode">Categoria: ${item.categoria} | Preço: R$ ${item.preço.toFixed(2)}</p>
           </div>
           <div class="flex gap-2">
-            <button onclick="editItem(${item.id})" class="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition-all flex items-center gap-2">
-              <i class="fas fa-edit"></i> Editar
+            <button onclick="openEditItemModal(${item.id})" class="text-white rounded-full hover:bg-opacity-80 transition-all duration-300 glow" style="padding: 0.5rem 1rem;" aria-label="Editar ${item.nome}">
+              <i class="fas fa-edit"></i>
             </button>
-            <button onclick="deleteItem(${item.id})" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition-all flex items-center gap-2">
-              <i class="fas fa-trash"></i> Excluir
+            <button onclick="deleteItem(${item.id})" class="bg-red-600 text-white rounded-full hover:bg-red-700 transition-all duration-300 glow" style="padding: 0.5rem 1rem;" aria-label="Excluir ${item.nome}">
+              <i class="fas fa-trash"></i>
             </button>
           </div>
         `;
-        menuItemsList.appendChild(itemDiv);
+        itemList.appendChild(div);
       });
     }
 
-    // Função para abrir o formulário de adição de item
-    function openAddItemForm() {
+    function renderBorderList() {
+      const borderList = document.getElementById("border-list");
+      borderList.innerHTML = "";
+      Object.entries(globalBorders).forEach(([border, price]) => {
+        const div = document.createElement("div");
+        div.className = "flex justify-between items-center p-4 rounded-lg dark:bg-gray-700 card-bg";
+        div.innerHTML = `
+          <div>
+            <h3 class="text-lg font-semibold text-dark-mode">${border}</h3>
+            <p class="text-dark-mode">Preço: R$ ${price.toFixed(2)}</p>
+          </div>
+          <button onclick="deleteBorder('${border}')" class="bg-red-600 text-white rounded-full hover:bg-red-700 transition-all duration-300 glow" style="padding: 0.5rem 1rem;" aria-label="Excluir borda ${border}">
+            <i class="fas fa-trash"></i>
+          </button>
+        `;
+        borderList.appendChild(div);
+      });
+    }
+
+    function addBorder() {
+      const borderName = document.getElementById("new-border-name").value.trim();
+      const borderPrice = parseFloat(document.getElementById("new-border-price").value);
+      if (borderName && !isNaN(borderPrice) && borderPrice >= 0) {
+        globalBorders[borderName] = borderPrice;
+        saveGlobalBorders();
+        renderBorderList();
+        document.getElementById("new-border-name").value = "";
+        document.getElementById("new-border-price").value = "";
+      } else {
+        alert("Por favor, insira um nome e preço válidos para a borda.");
+      }
+    }
+
+    function deleteBorder(borderName) {
+      if (confirm(`Tem certeza que deseja excluir a borda "${borderName}"? Isso pode afetar itens existentes.`)) {
+        delete globalBorders[borderName];
+        saveGlobalBorders();
+        cardapioData.forEach(item => {
+          if (item.bordasDisponiveis && borderName in item.bordasDisponiveis) {
+            delete item.bordasDisponiveis[borderName];
+          }
+        });
+        saveCardapioData();
+        renderBorderList();
+        renderItemList();
+      }
+    }
+
+    function openAddItemModal() {
       editingItemId = null;
-      document.getElementById("modal-title").textContent = "Adicionar Item";
-      document.getElementById("modal-id").value = cardapioData.length ? Math.max(...cardapioData.map(item => item.id)) + 1 : 1;
-      document.getElementById("modal-name").value = "";
-      document.getElementById("modal-category").value = "Salgadas";
-      document.getElementById("modal-price").value = "";
-      document.getElementById("modal-image").value = "";
-      document.getElementById("modal-description").value = "";
-      document.getElementById("modal-ingredients").value = "";
-      document.getElementById("modal-sizes").innerHTML = "";
-      document.getElementById("modal-extras").innerHTML = "";
-      document.getElementById("modal-borders").innerHTML = "";
-      document.getElementById("modal-combo-items").innerHTML = "";
-      document.getElementById("modal-promo-active").checked = false;
-      document.getElementById("modal-promo-price").value = "";
-      document.getElementById("modal-rating").value = "";
-      document.getElementById("modal-num-ratings").value = "";
-      togglePromoFields();
-      toggleComboItemsSection();
-      document.getElementById("item-modal").classList.remove("hidden");
+      document.getElementById("edit-modal-title").textContent = "Adicionar Novo Item";
+      document.getElementById("edit-item-form").reset();
+      document.getElementById("edit-combo-items-section").classList.add("hidden");
+      populateBordersCheckboxes({});
+      const modal = document.getElementById("edit-item-modal");
+      modal.classList.remove("hidden");
+      setTimeout(() => {
+        modal.querySelector("div").classList.remove("scale-95");
+      }, 10);
     }
 
-    // Função para abrir o formulário de edição de item
-    function editItem(itemId) {
-      const item = cardapioData.find(item => item.id === itemId);
+    function openEditItemModal(itemId) {
+      const item = cardapioData.find(i => i.id === itemId);
       if (!item) return;
-
       editingItemId = itemId;
-      document.getElementById("modal-title").textContent = "Editar Item";
-      document.getElementById("modal-id").value = item.id;
-      document.getElementById("modal-name").value = item.nome;
-      document.getElementById("modal-category").value = item.categoria;
-      document.getElementById("modal-price").value = item.preço;
-      document.getElementById("modal-image").value = item.imagem;
-      document.getElementById("modal-description").value = item.descrição;
-      document.getElementById("modal-ingredients").value = item.ingredientes.join(", ");
-      
-      // Tamanhos
-      const sizesContainer = document.getElementById("modal-sizes");
-      sizesContainer.innerHTML = "";
-      Object.entries(item.tamanhos).forEach(([size, price]) => {
-        const div = document.createElement("div");
-        div.className = "flex gap-2 items-center";
-        div.innerHTML = `
-          <input type="text" value="${size}" placeholder="Tamanho" class="border border-gray-300 rounded-lg p-3 flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm size-name">
-          <input type="number" value="${price}" step="0.01" placeholder="Preço (R$)" class="border border-gray-300 rounded-lg p-3 w-32 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm size-price">
-          <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-600">
-            <i class="fas fa-trash"></i>
-          </button>
-        `;
-        sizesContainer.appendChild(div);
-      });
+      document.getElementById("edit-modal-title").textContent = "Editar Item";
+      document.getElementById("edit-nome").value = item.nome;
+      document.getElementById("edit-categoria").value = item.categoria;
+      document.getElementById("edit-preco").value = item.preço;
+      document.getElementById("edit-imagem").value = item.imagem;
+      document.getElementById("edit-descricao").value = item.descrição;
+      document.getElementById("edit-ingredientes").value = item.ingredientes.join(", ");
+      document.getElementById("edit-tamanhos").value = Object.entries(item.tamanhos).map(([size, price]) => `${size}:${price}`).join(",");
+      document.getElementById("edit-extras").value = Object.entries(item.extrasDisponiveis).map(([extra, price]) => `${extra}:${price}`).join(",");
+      populateBordersCheckboxes(item.bordasDisponiveis);
+      document.getElementById("edit-promocao").value = item.promocao ? `${item.promocao.ativo}:${item.promocao.precoPromocional}` : "";
+      document.getElementById("edit-avaliacao").value = item.avaliacao || "";
+      document.getElementById("edit-numAvaliacoes").value = item.numAvaliacoes || "";
+      const comboSection = document.getElementById("edit-combo-items-section");
+      if (item.categoria === "Combos") {
+        comboSection.classList.remove("hidden");
+        document.getElementById("edit-combo-items").value = item.itens ? item.itens.join(",") : "";
+      } else {
+        comboSection.classList.add("hidden");
+      }
+      const modal = document.getElementById("edit-item-modal");
+      modal.classList.remove("hidden");
+      setTimeout(() => {
+        modal.querySelector("div").classList.remove("scale-95");
+      }, 10);
+    }
 
-      // Extras
-      const extrasContainer = document.getElementById("modal-extras");
-      extrasContainer.innerHTML = "";
-      Object.entries(item.extrasDisponiveis).forEach(([extra, price]) => {
-        const div = document.createElement("div");
-        div.className = "flex gap-2 items-center";
-        div.innerHTML = `
-          <input type="text" value="${extra}" placeholder="Extra" class="border border-gray-300 rounded-lg p-3 flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm extra-name">
-          <input type="number" value="${price}" step="0.01" placeholder="Preço (R$)" class="border border-gray-300 rounded-lg p-3 w-32 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm extra-price">
-          <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-600">
-            <i class="fas fa-trash"></i>
-          </button>
-        `;
-        extrasContainer.appendChild(div);
-      });
-
-      // Bordas
-      const bordersContainer = document.getElementById("modal-borders");
+    function populateBordersCheckboxes(selectedBorders) {
+      const bordersContainer = document.getElementById("edit-bordas");
       bordersContainer.innerHTML = "";
-      Object.entries(item.bordasDisponiveis).forEach(([border, price]) => {
+      Object.keys(globalBorders).forEach(border => {
         const div = document.createElement("div");
-        div.className = "flex gap-2 items-center";
+        div.className = "flex items-center gap-2";
         div.innerHTML = `
-          <input type="text" value="${border}" placeholder="Borda" class="border border-gray-300 rounded-lg p-3 flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm border-name">
-          <input type="number" value="${price}" step="0.01" placeholder="Preço (R$)" class="border border-gray-300 rounded-lg p-3 w-32 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm border-price">
-          <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-600">
-            <i class="fas fa-trash"></i>
-          </button>
+          <input type="checkbox" id="border-${border}" name="bordas" value="${border}" ${selectedBorders[border] !== undefined ? 'checked' : ''} class="h-4 w-4 focus:ring-2 rounded">
+          <label for="border-${border}">${border} (R$ ${globalBorders[border].toFixed(2)})</label>
         `;
         bordersContainer.appendChild(div);
       });
+    }
 
-      // Itens do Combo
-      const comboItemsContainer = document.getElementById("modal-combo-items");
-      comboItemsContainer.innerHTML = "";
-      if (item.categoria === "Combos" && item.itens) {
-        item.itens.forEach(itemId => {
-          const div = document.createElement("div");
-          div.className = "flex gap-2 items-center";
-          div.innerHTML = `
-            <input type="number" value="${itemId}" placeholder="ID do Item" class="border border-gray-300 rounded-lg p-3 w-32 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm combo-item-id">
-            <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-600">
-              <i class="fas fa-trash"></i>
-            </button>
-          `;
-          comboItemsContainer.appendChild(div);
+    function closeEditItemModal() {
+      const modal = document.getElementById("edit-item-modal");
+      modal.querySelector("div").classList.add("scale-95");
+      setTimeout(() => {
+        modal.classList.add("hidden");
+      }, 300);
+    }
+
+    document.getElementById("edit-item-form").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const newItem = {
+        id: editingItemId || (cardapioData.length ? Math.max(...cardapioData.map(i => i.id)) + 1 : 1),
+        nome: formData.get("nome"),
+        categoria: formData.get("categoria"),
+        preço: parseFloat(formData.get("preço")),
+        imagem: formData.get("imagem") || "https://via.placeholder.com/300x200.png?text=Imagem+Indisponível",
+        descrição: formData.get("descrição"),
+        ingredientes: formData.get("ingredientes").split(",").map(i => i.trim()).filter(i => i),
+        tamanhos: {},
+        extrasDisponiveis: {},
+        bordasDisponiveis: {},
+        promocao: null,
+        avaliacao: parseFloat(formData.get("avaliacao")) || null,
+        numAvaliacoes: parseInt(formData.get("numAvaliacoes")) || 0
+      };
+
+      const tamanhosInput = formData.get("tamanhos");
+      if (tamanhosInput) {
+        tamanhosInput.split(",").forEach(pair => {
+          const [size, price] = pair.split(":");
+          if (size && price) {
+            newItem.tamanhos[size.trim()] = parseFloat(price);
+          }
         });
       }
 
-      // Promoção
-      document.getElementById("modal-promo-active").checked = item.promocao?.ativo || false;
-      document.getElementById("modal-promo-price").value = item.promocao?.precoPromocional || "";
-      togglePromoFields();
-
-      // Avaliação
-      document.getElementById("modal-rating").value = item.avaliacao || "";
-      document.getElementById("modal-num-ratings").value = item.numAvaliacoes || "";
-
-      toggleComboItemsSection();
-      document.getElementById("item-modal").classList.remove("hidden");
-    }
-
-    // Função para deletar um item
-    function deleteItem(itemId) {
-      if (confirm("Tem certeza que deseja excluir este item?")) {
-        cardapioData = cardapioData.filter(item => item.id !== itemId);
-        saveCardapioData();
-        renderMenuItems();
-      }
-    }
-
-    // Função para adicionar campo de tamanho
-    function addSizeField() {
-      const sizesContainer = document.getElementById("modal-sizes");
-      const div = document.createElement("div");
-      div.className = "flex gap-2 items-center";
-      div.innerHTML = `
-        <input type="text" placeholder="Tamanho" class="border border-gray-300 rounded-lg p-3 flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm size-name">
-        <input type="number" step="0.01" placeholder="Preço (R$)" class="border border-gray-300 rounded-lg p-3 w-32 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm size-price">
-        <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-600">
-          <i class="fas fa-trash"></i>
-        </button>
-      `;
-      sizesContainer.appendChild(div);
-    }
-
-    // Função para adicionar campo de extra
-    function addExtraField() {
-      const extrasContainer = document.getElementById("modal-extras");
-      const div = document.createElement("div");
-      div.className = "flex gap-2 items-center";
-      div.innerHTML = `
-        <input type="text" placeholder="Extra" class="border border-gray-300 rounded-lg p-3 flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm extra-name">
-        <input type="number" step="0.01" placeholder="Preço (R$)" class="border border-gray-300 rounded-lg p-3 w-32 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm extra-price">
-        <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-600">
-          <i class="fas fa-trash"></i>
-        </button>
-      `;
-      extrasContainer.appendChild(div);
-    }
-
-    // Função para adicionar campo de borda
-    function addBorderField() {
-      const bordersContainer = document.getElementById("modal-borders");
-      const div = document.createElement("div");
-      div.className = "flex gap-2 items-center";
-      div.innerHTML = `
-        <input type="text" placeholder="Borda" class="border border-gray-300 rounded-lg p-3 flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm border-name">
-        <input type="number" step="0.01" placeholder="Preço (R$)" class="border border-gray-300 rounded-lg p-3 w-32 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm border-price">
-        <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-600">
-          <i class="fas fa-trash"></i>
-        </button>
-      `;
-      bordersContainer.appendChild(div);
-    }
-
-    // Função para adicionar campo de item do combo
-    function addComboItemField() {
-      const comboItemsContainer = document.getElementById("modal-combo-items");
-      const div = document.createElement("div");
-      div.className = "flex gap-2 items-center";
-      div.innerHTML = `
-        <input type="number" placeholder="ID do Item" class="border border-gray-300 rounded-lg p-3 w-32 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm combo-item-id">
-        <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-600">
-          <i class="fas fa-trash"></i>
-        </button>
-      `;
-      comboItemsContainer.appendChild(div);
-    }
-
-    // Função para alternar visibilidade dos campos de promoção
-    function togglePromoFields() {
-      const promoFields = document.getElementById("promo-fields");
-      const promoActive = document.getElementById("modal-promo-active").checked;
-      promoFields.classList.toggle("hidden", !promoActive);
-    }
-
-    // Função para alternar visibilidade da seção de itens do combo
-    function toggleComboItemsSection() {
-      const category = document.getElementById("modal-category").value;
-      const comboSection = document.getElementById("modal-combo-items-section");
-      comboSection.classList.toggle("hidden", category !== "Combos");
-    }
-
-    // Função para salvar um item
-    function saveItem() {
-      const id = parseInt(document.getElementById("modal-id").value);
-      const nome = document.getElementById("modal-name").value;
-      const categoria = document.getElementById("modal-category").value;
-      const preço = parseFloat(document.getElementById("modal-price").value);
-      const imagem = document.getElementById("modal-image").value;
-      const descrição = document.getElementById("modal-description").value;
-      const ingredientes = document.getElementById("modal-ingredients").value.split(",").map(item => item.trim()).filter(item => item);
-
-      // Tamanhos
-      const sizes = {};
-      document.querySelectorAll("#modal-sizes > div").forEach(div => {
-        const sizeName = div.querySelector(".size-name").value;
-        const sizePrice = parseFloat(div.querySelector(".size-price").value);
-        if (sizeName && !isNaN(sizePrice)) {
-          sizes[sizeName] = sizePrice;
-        }
-      });
-
-      // Extras
-      const extras = {};
-      document.querySelectorAll("#modal-extras > div").forEach(div => {
-        const extraName = div.querySelector(".extra-name").value;
-        const extraPrice = parseFloat(div.querySelector(".extra-price").value);
-        if (extraName && !isNaN(extraPrice)) {
-          extras[extraName] = extraPrice;
-        }
-      });
-
-      // Bordas
-      const borders = {};
-      document.querySelectorAll("#modal-borders > div").forEach(div => {
-        const borderName = div.querySelector(".border-name").value;
-        const borderPrice = parseFloat(div.querySelector(".border-price").value);
-        if (borderName && !isNaN(borderPrice)) {
-          borders[borderName] = borderPrice;
-        }
-      });
-
-      // Itens do Combo
-      let comboItems = [];
-      if (categoria === "Combos") {
-        comboItems = Array.from(document.querySelectorAll(".combo-item-id"))
-          .map(input => parseInt(input.value))
-          .filter(id => !isNaN(id));
+      const extrasInput = formData.get("extrasDisponiveis");
+      if (extrasInput) {
+        extrasInput.split(",").forEach(pair => {
+          const [extra, price] = pair.split(":");
+          if (extra && price) {
+            newItem.extrasDisponiveis[extra.trim()] = parseFloat(price);
+          }
+        });
       }
 
-      // Promoção
-      const promoActive = document.getElementById("modal-promo-active").checked;
-      const promoPrice = parseFloat(document.getElementById("modal-promo-price").value);
-      const promocao = promoActive && !isNaN(promoPrice) ? { ativo: true, precoPromocional: promoPrice } : null;
+      const selectedBorders = Array.from(document.querySelectorAll('input[name="bordas"]:checked')).map(input => input.value);
+      selectedBorders.forEach(border => {
+        newItem.bordasDisponiveis[border] = globalBorders[border];
+      });
 
-      // Avaliação
-      const avaliacao = parseFloat(document.getElementById("modal-rating").value) || 0;
-      const numAvaliacoes = parseInt(document.getElementById("modal-num-ratings").value) || 0;
-
-      // Validação
-      if (!nome || isNaN(preço)) {
-        alert("Por favor, preencha todos os campos obrigatórios (Nome e Preço Base).");
-        return;
+      const promocaoInput = formData.get("promocao");
+      if (promocaoInput) {
+        const [ativo, precoPromocional] = promocaoInput.split(":");
+        if (ativo && precoPromocional) {
+          newItem.promocao = {
+            ativo: ativo.toLowerCase() === "true",
+            precoPromocional: parseFloat(precoPromocional)
+          };
+        }
       }
 
-      const newItem = {
-        id,
-        nome,
-        categoria,
-        preço,
-        imagem: imagem || "https://via.placeholder.com/300x200.png?text=Imagem+Indisponível",
-        descrição,
-        ingredientes,
-        tamanhos: sizes,
-        extrasDisponiveis: extras,
-        bordasDisponiveis: borders,
-        itens: categoria === "Combos" ? comboItems : undefined,
-        promocao,
-        avaliacao,
-        numAvaliacoes
-      };
+      if (newItem.categoria === "Combos") {
+        const comboItemsInput = formData.get("itens");
+        newItem.itens = comboItemsInput ? comboItemsInput.split(",").map(id => parseInt(id.trim())).filter(id => !isNaN(id)) : [];
+      }
 
-      if (editingItemId !== null) {
-        const index = cardapioData.findIndex(item => item.id === editingItemId);
+      if (editingItemId) {
+        const index = cardapioData.findIndex(i => i.id === editingItemId);
         cardapioData[index] = newItem;
       } else {
         cardapioData.push(newItem);
       }
 
       saveCardapioData();
-      renderMenuItems();
-      closeItemModal();
+      renderItemList();
+      closeEditItemModal();
+    });
+
+    function deleteItem(itemId) {
+      if (confirm("Tem certeza que deseja excluir este item?")) {
+        cardapioData = cardapioData.filter(i => i.id !== itemId);
+        saveCardapioData();
+        renderItemList();
+      }
     }
 
-    // Função para fechar o modal de item
-    function closeItemModal() {
-      document.getElementById("item-modal").classList.add("hidden");
-    }
+    document.getElementById("edit-categoria").addEventListener("change", function() {
+      const comboSection = document.getElementById("edit-combo-items-section");
+      if (this.value === "Combos") {
+        comboSection.classList.remove("hidden");
+      } else {
+        comboSection.classList.add("hidden");
+      }
+    });
 
-    // Função para carregar as configurações
-    function loadConfig() {
-      document.getElementById("config-name").value = window.config.pizzariaName;
-      document.getElementById("config-primary-color").value = window.config.primaryColor;
-      document.getElementById("config-secondary-color").value = window.config.secondaryColor;
-      document.getElementById("config-background-color").value = window.config.backgroundColor;
-      document.getElementById("config-text-color").value = window.config.textColor;
-      document.getElementById("config-logo-url").value = window.config.logoUrl;
-      document.getElementById("config-whatsapp-link").value = window.config.whatsappLink;
-      document.getElementById("config-whatsapp-number").value = window.config.whatsappNumber;
-      document.getElementById("config-instagram-url").value = window.config.instagramUrl;
-      document.getElementById("config-instagram-handle").value = window.config.instagramHandle;
-    }
-
-    // Função para salvar as configurações
-    function saveConfig() {
-      window.config.pizzariaName = document.getElementById("config-name").value;
-      window.config.primaryColor = document.getElementById("config-primary-color").value;
-      window.config.secondaryColor = document.getElementById("config-secondary-color").value;
-      window.config.backgroundColor = document.getElementById("config-background-color").value;
-      window.config.textColor = document.getElementById("config-text-color").value;
-      window.config.logoUrl = document.getElementById("config-logo-url").value;
-      window.config.whatsappLink = document.getElementById("config-whatsapp-link").value;
-      window.config.whatsappNumber = document.getElementById("config-whatsapp-number").value;
-      window.config.instagramUrl = document.getElementById("config-instagram-url").value;
-      window.config.instagramHandle = document.getElementById("config-instagram-handle").value;
-
-      alert("Configurações salvas! Recarregue a página para ver as alterações.");
-      applyConfigStyles();
-    }
-
-    // Função para alternar modo escuro
-    function toggleDarkMode() {
-      document.body.classList.toggle("dark");
-      const isDark = document.body.classList.contains("dark");
-      document.getElementById("dark-mode-toggle").innerHTML = isDark
-        ? '<i class="fas fa-sun"></i> Modo Claro'
-        : '<i class="fas fa-moon"></i> Modo Escuro';
-      document.body.classList.toggle("bg-gray-900", isDark);
-      document.body.classList.toggle("text-white", isDark);
-      document.body.classList.toggle("bg-gradient-to-br", !isDark);
-      document.body.classList.toggle("from-orange-100", !isDark);
-      document.body.classList.toggle("via-amber-200", !isDark);
-      document.body.classList.toggle("to-red-200", !isDark);
-    }
-
-    // Inicialização
     const configScript = document.getElementById("config-script");
     const cardapioScript = document.getElementById("cardapio-script");
+
+    configScript.onerror = function() {
+      console.error("Erro ao carregar config.js.");
+      alert("Erro ao carregar as configurações. Verifique o arquivo config.js.");
+      document.getElementById("loader").classList.add("hidden");
+    };
+
+    cardapioScript.onerror = function() {
+      console.error("Erro ao carregar cardapio.js.");
+      alert("Erro ao carregar o cardápio. Verifique o arquivo cardapio.js.");
+      document.getElementById("loader").classList.add("hidden");
+    };
 
     configScript.onload = function() {
       console.log("Config.js carregado.");
@@ -732,23 +579,18 @@
         cardapioScript.onload = function() {
           console.log("Cardapio.js carregado.");
           if (window.cardapio) {
-            document.getElementById("dark-mode-toggle").addEventListener("click", toggleDarkMode);
-            document.getElementById("modal-category").addEventListener("change", toggleComboItemsSection);
+            loadCardapioData();
           } else {
             console.error("Erro: window.cardapio não foi definido.");
             alert("Erro ao carregar o cardápio. Verifique o arquivo cardapio.js.");
+            document.getElementById("loader").classList.add("hidden");
           }
         };
-        cardapioScript.onerror = function() {
-          console.error("Erro ao carregar cardapio.js.");
-          alert("Erro ao carregar o cardápio. Verifique o arquivo cardapio.js.");
-        };
+      } else {
+        console.error("Erro: window.config não foi definido.");
+        alert("Erro ao carregar as configurações. Verifique o arquivo config.js.");
+        document.getElementById("loader").classList.add("hidden");
       }
-    };
-
-    configScript.onerror = function() {
-      console.error("Erro ao carregar config.js.");
-      alert("Erro ao carregar as configurações. Verifique o arquivo config.js.");
     };
   </script>
 </body>
