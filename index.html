@@ -42,611 +42,464 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="page-title">Cardápio - La Casa de Pizzas</title>
+  <title>La Casa de Pizzas - Cardápio</title>
+  <script src="https://kit.fontawesome.com/1f7a5fcea1.js" crossorigin="anonymous"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="config.js" defer></script>
-  <script src="cardapio.js" defer></script>
-  <script src="login.js" defer></script>
   <style>
-    :root {
-      --cor-primaria: #FF4500;
-      --cor-secundaria: #FFD700;
-      --cor-fundo: #FFF8E7;
-      --cor-texto: #2D2D2D;
-    }
-    body {
-      background-color: var(--cor-fundo);
-      color: var(--cor-texto);
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      padding: 0;
-      padding-bottom: 60px;
-    }
-    .fade-in {
-      animation: fadeIn 0.5s ease-in;
-    }
+    /* Animações personalizadas */
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .custom-btn {
-      transition: all 0.3s ease;
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
     }
-    .custom-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
     }
-    .carousel-item {
-      transition: transform 0.5s ease;
+    .pulse {
+      animation: pulse 2s infinite;
     }
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.7);
+    /* Efeito de hover nos cards */
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    /* Estilo para imagens indisponíveis */
+    img[alt="Imagem indisponível"] {
+      background-color: #f1f5f9;
+      color: #6b7280;
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 50;
+      font-size: 0.875rem;
+      font-weight: 500;
     }
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 15px;
-      max-width: 600px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-      position: relative;
-    }
-    @media (max-width: 640px) {
-      .pizza-grid {
-        grid-template-columns: 1fr;
-      }
-      .carousel-item {
-        flex-direction: column;
-      }
-      .carousel-item img {
-        width: 100%;
-        height: 200px;
-      }
+    /* Banner promocional */
+    .promo-banner {
+      background: linear-gradient(90deg, #FF4500, #FFD700);
+      animation: pulse 3s infinite;
     }
   </style>
 </head>
-<body>
-  <!-- Banner Promocional -->
-  <div id="promo-banner" class="fixed top-0 left-0 right-0 bg-red-500 text-white text-center py-2 z-50">
-    Promoção: 2 pizzas pelo preço de 1! Use o cupom: 2POR1
-    <button onclick="this.parentElement.style.display='none'" class="ml-2 bg-white text-red-500 px-2 py-1 rounded-full" aria-label="Fechar banner promocional">X</button>
-  </div>
-
-  <header class="bg-[var(--cor-primaria)] text-white py-4 shadow-lg sticky top-10 z-40">
-    <div class="container mx-auto px-4 flex justify-between items-center">
+<body class="bg-gradient-to-br from-orange-100 via-amber-200 to-red-200 min-h-screen text-gray-800">
+  <!-- Cabeçalho -->
+  <header class="bg-gradient-to-r from-orange-600 via-orange-500 to-red-500 text-white shadow-xl sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
       <div class="flex items-center gap-4">
-        <img id="logo" src="" alt="Logo da La Casa de Pizzas" class="h-12 rounded-lg cursor-pointer" onclick="handleLogoClick()">
-        <h1 id="nome-pizzaria" class="text-2xl font-bold">La Casa de Pizzas</h1>
+        <a href="admin.html" title="Acessar área administrativa">
+          <img id="logo" src="https://via.placeholder.com/140x50.png?text=La+Casa+de+Pizzas" alt="Logo da La Casa de Pizzas" class="h-14 rounded-lg hover:scale-110 transition-transform cursor-pointer">
+        </a>
+        <h1 class="text-3xl font-extrabold tracking-tight drop-shadow-lg">La Casa de Pizzas</h1>
       </div>
-      <div class="flex gap-4 items-center">
-        <span id="user-greeting" class="hidden text-lg font-medium"></span>
-        <button id="login-btn" onclick="abrirModalLogin()" class="custom-btn bg-white text-[var(--cor-primaria)] px-4 py-2 rounded-lg" aria-label="Fazer login">Login</button>
-        <button id="logout-btn" onclick="logout()" class="custom-btn bg-white text-[var(--cor-primaria)] px-4 py-2 rounded-lg hidden" aria-label="Sair">Sair</button>
+      <div>
+        <button id="dark-mode-toggle" class="bg-amber-400 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-amber-500 transition-all flex items-center gap-2">
+          <i class="fas fa-moon"></i> Modo Escuro
+        </button>
       </div>
     </div>
   </header>
 
-  <section class="container mx-auto px-4 py-8">
-    <h2 class="text-3xl font-bold mb-8 text-center">Nosso Cardápio</h2>
-    <!-- Barra de Pesquisa -->
-    <div class="mb-6 flex justify-center">
-      <input type="text" id="search-input" placeholder="Pesquisar itens..." class="w-full max-w-md p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]" aria-label="Pesquisar itens no cardápio">
-    </div>
-    <!-- Filtros por Categoria -->
-    <div class="filter-bar flex gap-3 mb-8 flex-wrap justify-center" role="tablist">
-      <button class="filter-btn px-4 py-2 rounded-full bg-gray-200 text-[var(--cor-texto)] font-medium active:bg-[var(--cor-primaria)] active:text-white transition-all" data-category="Todas" role="tab" aria-selected="true" aria-label="Mostrar todos os itens">Todas</button>
-      <button class="filter-btn px-4 py-2 rounded-full bg-gray-200 text-[var(--cor-texto)] font-medium hover:bg-gray-300 transition-all" data-category="Salgadas" role="tab" aria-selected="false" aria-label="Mostrar pizzas salgadas">Salgadas</button>
-      <button class="filter-btn px-4 py-2 rounded-full bg-gray-200 text-[var(--cor-texto)] font-medium hover:bg-gray-300 transition-all" data-category="Doces" role="tab" aria-selected="false" aria-label="Mostrar pizzas doces">Doces</button>
-      <button class="filter-btn px-4 py-2 rounded-full bg-gray-200 text-[var(--cor-texto)] font-medium hover:bg-gray-300 transition-all" data-category="Vegetarianas" role="tab" aria-selected="false" aria-label="Mostrar pizzas vegetarianas">Vegetarianas</button>
-      <button class="filter-btn px-4 py-2 rounded-full bg-gray-200 text-[var(--cor-texto)] font-medium hover:bg-gray-300 transition-all" data-category="Bebidas" role="tab" aria-selected="false" aria-label="Mostrar bebidas">Bebidas</button>
-      <button class="filter-btn px-4 py-2 rounded-full bg-gray-200 text-[var(--cor-texto)] font-medium hover:bg-gray-300 transition-all" data-category="Combos" role="tab" aria-selected="false" aria-label="Mostrar combos">Combos</button>
-    </div>
-
-    <!-- Seção de Combos -->
-    <div class="combos-section mb-12">
-      <h2 class="text-2xl font-bold mb-6 text-center">Combos Especiais 🥤🍕</h2>
-      <div class="carousel relative rounded-lg shadow-lg overflow-hidden">
-        <div id="carousel-inner" class="carousel-inner flex"></div>
-        <button class="carousel-btn prev absolute top-1/2 left-4 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75" aria-label="Item anterior do carrossel">←</button>
-        <button class="carousel-btn next absolute top-1/2 right-4 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75" aria-label="Próximo item do carrossel">→</button>
-        <div class="carousel-dots flex justify-center gap-2 mt-4"></div>
-      </div>
-    </div>
-
-    <!-- Seção de Pizzas -->
-    <div class="category-section">
-      <div id="pizza-grid" class="pizza-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-    </div>
+  <!-- Banner Promocional -->
+  <section class="promo-banner text-center py-4 text-white shadow-md">
+    <p class="text-lg font-bold flex items-center justify-center gap-2">
+      <i class="fas fa-star animate-spin"></i>
+      Aproveite nossas promoções! Descontos em pizzas e combos hoje!
+      <i class="fas fa-star animate-spin"></i>
+    </p>
   </section>
 
-  <!-- Carrinho Flutuante -->
-  <div class="floating-cart fixed bottom-6 right-6 bg-[var(--cor-primaria)] text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg cursor-pointer z-50" onclick="toggleCartPreview()" aria-label="Abrir carrinho">
-    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-    <span id="cart-counter" class="cart-counter absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">0</span>
-  </div>
+  <!-- Seção Principal -->
+  <main class="container mx-auto px-4 py-8">
+    <!-- Filtros -->
+    <section class="bg-white rounded-xl shadow-lg p-6 mb-8 border-t-4 border-orange-500">
+      <h2 class="text-2xl font-bold text-orange-600 mb-4 flex items-center gap-2">
+        <i class="fas fa-filter"></i> Filtrar Cardápio
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <input type="text" id="search-input" placeholder="Pesquisar por nome..." class="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Pesquisar por nome">
+        <select id="category-filter" class="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Filtrar por categoria">
+          <option value="">Todas as Categorias</option>
+          <option value="Salgadas">Salgadas</option>
+          <option value="Doces">Doces</option>
+          <option value="Vegetarianas">Vegetarianas</option>
+          <option value="Bebidas">Bebidas</option>
+          <option value="Combos">Combos</option>
+        </select>
+        <button onclick="resetFilters()" class="bg-orange-500 text-white px-4 py-3 rounded-lg hover:bg-orange-600 transition-all flex items-center gap-2 shadow-sm">
+          <i class="fas fa-sync-alt"></i> Limpar Filtros
+        </button>
+      </div>
+    </section>
 
-  <div id="cart-preview" class="cart-preview hidden fixed bottom-24 right-6 bg-white rounded-lg shadow-lg w-80 max-h-96 overflow-y-auto p-4 z-50">
-    <h3 class="text-lg font-semibold mb-4">Seu Carrinho</h3>
-    <div id="cart-items"></div>
-    <p id="cart-total" class="total font-semibold text-right mt-4">Total: R$ 0,00</p>
-    <button onclick="window.location.href='checkout.html'" class="checkout-btn w-full bg-[var(--cor-primaria)] text-white p-2 rounded-lg mt-4" aria-label="Finalizar pedido">Finalizar Pedido</button>
-  </div>
+    <!-- Lista de Itens -->
+    <section id="menu-items" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Itens serão inseridos dinamicamente via JavaScript -->
+    </section>
 
-  <!-- Modal de Detalhes -->
-  <div id="modal-details" class="modal hidden" role="dialog" aria-labelledby="modal-details-title">
-    <div class="modal-content">
-      <button class="close-btn absolute top-4 right-4 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center" onclick="fecharModalDetails()" aria-label="Fechar modal de detalhes">X</button>
-      <img id="modal-details-image" src="" alt="" class="w-full h-60 object-cover rounded-lg mb-4">
-      <h3 id="modal-details-title" class="text-xl font-semibold mb-2"></h3>
-      <div class="rating flex items-center gap-1 mb-2">
-        <span id="modal-details-rating"></span>
-        <span class="text-gray-600 text-sm">(<span id="modal-details-num-reviews"></span>)</span>
+    <!-- Paginação -->
+    <div class="flex justify-center gap-4 mt-8">
+      <button onclick="changePage(-1)" id="prev-page" class="bg-orange-500 text-white px-5 py-3 rounded-lg hover:bg-orange-600 transition-all flex items-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed shadow-md">
+        <i class="fas fa-chevron-left"></i> Anterior
+      </button>
+      <span id="page-info" class="self-center text-xl font-medium bg-white px-4 py-2 rounded-lg shadow-md">Página 1</span>
+      <button onclick="changePage(1)" id="next-page" class="bg-orange-500 text-white px-5 py-3 rounded-lg hover:bg-orange-600 transition-all flex items-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed shadow-md">
+        Próxima <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </main>
+
+  <!-- Modal de Detalhes do Item -->
+  <div id="item-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-20">
+    <div class="bg-white rounded-2xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto relative shadow-2xl border-t-4 border-orange-500">
+      <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-600 hover:text-gray-800 transition-all">
+        <i class="fas fa-times text-2xl"></i>
+      </button>
+      <img id="modal-image" src="" alt="Imagem do item" class="w-full h-56 object-cover rounded-lg mb-4 shadow-md">
+      <h2 id="modal-name" class="text-3xl font-bold text-orange-600 mb-2"></h2>
+      <p id="modal-description" class="text-gray-600 mb-4 leading-relaxed"></p>
+      <p id="modal-price" class="text-xl font-semibold text-gray-800 mb-3 bg-amber-100 inline-block px-4 py-1 rounded-full"></p>
+      <p class="text-sm text-gray-600 mb-2"><strong>Categoria:</strong> <span id="modal-category"></span></p>
+      <p class="text-sm text-gray-600 mb-2"><strong>Ingredientes:</strong> <span id="modal-ingredients"></span></p>
+      <p class="text-sm text-gray-600 mb-4"><strong>Avaliação:</strong> <span id="modal-rating"></span> (<span id="modal-num-ratings"></span> avaliações)</p>
+      <!-- Tamanhos -->
+      <div class="mb-4">
+        <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center gap-2">
+          <i class="fas fa-ruler"></i> Tamanhos
+        </h3>
+        <select id="modal-sizes" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" onchange="updateModalPrice()">
+          <!-- Opções serão preenchidas via JavaScript -->
+        </select>
       </div>
-      <p id="modal-details-description" class="text-gray-600 mb-4"></p>
-      <p id="modal-details-price" class="text-[var(--cor-primaria)] font-bold text-lg mb-4"></p>
-      <div class="size-select mb-4">
-        <label for="modal-details-size" class="block font-medium mb-2">Tamanho:</label>
-        <select id="modal-details-size" class="w-full p-2 border rounded-lg" aria-label="Selecionar tamanho da pizza"></select>
+      <!-- Extras -->
+      <div class="mb-4">
+        <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center gap-2">
+          <i class="fas fa-plus-circle"></i> Extras
+        </h3>
+        <div id="modal-extras" class="space-y-3">
+          <!-- Checkboxes serão preenchidos via JavaScript -->
+        </div>
       </div>
-      <div class="extra-ingredients mb-4">
-        <label class="block font-medium mb-2">Extras:</label>
-        <div id="modal-details-extras"></div>
+      <!-- Bordas -->
+      <div class="mb-4">
+        <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center gap-2">
+          <i class="fas fa-border-all"></i> Bordas
+        </h3>
+        <select id="modal-borders" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" onchange="updateModalPrice()">
+          <!-- Opções serão preenchidas via JavaScript -->
+        </select>
       </div>
-      <div class="border-select mb-4">
-        <label class="block font-medium mb-2">Borda:</label>
-        <select id="modal-details-border" class="w-full p-2 border rounded-lg" aria-label="Selecionar borda da pizza"></select>
+      <!-- Itens do Combo (se aplicável) -->
+      <div id="modal-combo-items" class="mb-4 hidden">
+        <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center gap-2">
+          <i class="fas fa-box-open"></i> Itens do Combo
+        </h3>
+        <ul id="modal-combo-items-list" class="list-disc list-inside text-gray-600 space-y-1"></ul>
       </div>
-      <button onclick="adicionarAoCarrinho()" class="custom-btn w-full bg-[var(--cor-primaria)] text-white p-2 rounded-lg" aria-label="Adicionar ao carrinho">Adicionar ao Carrinho</button>
+      <!-- Botão de Pedido -->
+      <button onclick="addToCart()" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-all w-full flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
+        <i class="fas fa-cart-plus"></i> Adicionar ao Pedido
+      </button>
     </div>
   </div>
 
-  <!-- Modal de Login -->
-  <div id="modal-login" class="modal hidden" role="dialog" aria-labelledby="modal-login-title">
-    <div class="modal-content">
-      <button class="close-btn absolute top-4 right-4 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center" onclick="fecharModalLogin()" aria-label="Fechar modal de login">X</button>
-      <h3 id="modal-login-title" class="text-xl font-semibold mb-4 text-center">Login</h3>
-      <p id="modal-login-error" class="text-red-500 text-sm text-center mb-4 hidden"></p>
-      <input type="text" id="login-nome" placeholder="Nome" class="w-full p-2 border rounded-lg mb-4" aria-label="Nome do usuário">
-      <input type="password" id="login-senha" placeholder="Senha" class="w-full p-2 border rounded-lg mb-4" aria-label="Senha do usuário">
-      <button onclick="handleLogin()" class="custom-btn w-full bg-[var(--cor-primaria)] text-white p-2 rounded-lg mb-2" aria-label="Entrar">Entrar</button>
-      <span onclick="toggleLoginRegister()" class="toggle-link block text-center text-[var(--cor-primaria)] underline cursor-pointer">Criar uma conta</span>
-    </div>
-  </div>
-
-  <footer class="bg-[var(--cor-primaria)] text-white py-4 shadow-inner">
-    <div class="container mx-auto px-4 text-center">
-      <p class="mb-2">📞 WhatsApp: <span id="footer-whatsapp"></span></p>
-      <div class="social-links flex justify-center gap-6">
-        <a id="footer-whatsapp-link" href="" target="_blank" class="hover:underline" aria-label="Contato via WhatsApp">WhatsApp</a>
-        <a id="footer-instagram-link" href="" target="_blank" class="hover:underline" aria-label="Perfil no Instagram">Instagram</a>
-      </div>
-    </div>
-  </footer>
-
+  <!-- Scripts -->
+  <script src="config.js" id="config-script"></script>
+  <script src="cardapio.js" id="cardapio-script"></script>
   <script>
-    let cart = [];
-    let currentSlide = 0;
-    let clickCount = 0;
-    let searchTimeout;
+    let cardapioData = [];
+    let filteredItems = [];
+    let currentPage = 1;
+    const itemsPerPage = 9;
+    let selectedItem = null;
+    let selectedSize = null;
+    let selectedBorder = null;
+    let selectedExtras = [];
 
-    // Inicialização
-    document.addEventListener('DOMContentLoaded', () => {
-      if (!window.config || !window.cardapio || !window.getUsuarioAtual) {
-        alert('Erro ao carregar dependências. Verifique se os scripts estão carregados corretamente.');
-        return;
+    // Função para carregar os dados do cardápio
+    function loadCardapioData() {
+      const storedData = localStorage.getItem("cardapioData");
+      if (storedData) {
+        try {
+          cardapioData = JSON.parse(storedData);
+        } catch (err) {
+          console.error("Erro ao carregar dados do localStorage:", err);
+          cardapioData = [...window.cardapio];
+          saveCardapioData();
+        }
+      } else {
+        cardapioData = [...window.cardapio];
+        saveCardapioData();
+      }
+      filteredItems = [...cardapioData];
+      renderMenuItems();
+    }
+
+    // Função para salvar os dados do cardápio no localStorage
+    function saveCardapioData() {
+      localStorage.setItem("cardapioData", JSON.stringify(cardapioData));
+    }
+
+    // Função para aplicar configurações do config.js
+    function applyConfigStyles() {
+      document.getElementById("logo").src = window.config.logoUrl;
+      document.querySelector("h1").textContent = window.config.pizzariaName;
+      document.documentElement.style.setProperty('--primary-color', window.config.primaryColor);
+      document.documentElement.style.setProperty('--secondary-color', window.config.secondaryColor);
+      document.documentElement.style.setProperty('--background-color', window.config.backgroundColor);
+      document.documentElement.style.setProperty('--text-color', window.config.textColor);
+    }
+
+    // Função para renderizar os itens do cardápio
+    function renderMenuItems() {
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const itemsToShow = filteredItems.slice(start, end);
+
+      const menuItems = document.getElementById("menu-items");
+      menuItems.innerHTML = "";
+      itemsToShow.forEach(item => {
+        const price = item.promocao?.ativo ? item.promocao.precoPromocional : item.preço;
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-xl shadow-md overflow-hidden transition-all fade-in card-hover";
+        card.innerHTML = `
+          <img src="${item.imagem}" alt="${item.nome}" class="w-full h-48 object-cover hover:opacity-90 transition-opacity">
+          <div class="p-5">
+            <h3 class="text-xl font-bold text-orange-600 mb-2">${item.nome}</h3>
+            <p class="text-gray-600 text-sm mb-3 line-clamp-2">${item.descrição}</p>
+            <p class="text-gray-800 font-semibold text-lg mb-2 ${item.promocao?.ativo ? 'line-through text-gray-500' : ''}">R$ ${item.preço.toFixed(2)}</p>
+            ${item.promocao?.ativo ? `<p class="text-green-600 font-semibold text-lg mb-2">Promoção: R$ ${item.promocao.precoPromocional.toFixed(2)}</p>` : ''}
+            <p class="text-sm text-gray-600 mb-3 flex items-center gap-1">
+              <i class="fas fa-star text-yellow-400"></i> ${item.avaliacao ? item.avaliacao.toFixed(1) : 'N/A'} (${item.numAvaliacoes} avaliações)
+            </p>
+            <button onclick="openModal(${item.id})" class="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-all w-full flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
+              <i class="fas fa-eye"></i> Ver Detalhes
+            </button>
+          </div>
+        `;
+        menuItems.appendChild(card);
+      });
+
+      const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+      document.getElementById("page-info").textContent = `Página ${currentPage} de ${totalPages}`;
+      document.getElementById("prev-page").disabled = currentPage === 1;
+      document.getElementById("next-page").disabled = currentPage === totalPages;
+    }
+
+    // Função para abrir o modal com detalhes do item
+    function openModal(itemId) {
+      selectedItem = cardapioData.find(item => item.id === itemId);
+      if (!selectedItem) return;
+
+      document.getElementById("modal-image").src = selectedItem.imagem;
+      document.getElementById("modal-image").onerror = function() {
+        this.src = 'https://via.placeholder.com/300x200.png?text=Imagem+Indisponível';
+        this.alt = 'Imagem indisponível';
+      };
+      document.getElementById("modal-name").textContent = selectedItem.nome;
+      document.getElementById("modal-description").textContent = selectedItem.descrição;
+      document.getElementById("modal-category").textContent = selectedItem.categoria;
+      document.getElementById("modal-ingredients").textContent = selectedItem.ingredientes.length ? selectedItem.ingredientes.join(", ") : "Nenhum ingrediente listado";
+      document.getElementById("modal-rating").textContent = selectedItem.avaliacao ? selectedItem.avaliacao.toFixed(1) : 'N/A';
+      document.getElementById("modal-num-ratings").textContent = selectedItem.numAvaliacoes;
+
+      // Tamanhos
+      const sizesSelect = document.getElementById("modal-sizes");
+      sizesSelect.innerHTML = "";
+      const sizes = Object.entries(selectedItem.tamanhos);
+      if (sizes.length > 0) {
+        sizes.forEach(([size, price], index) => {
+          const option = document.createElement("option");
+          option.value = size;
+          option.textContent = `${size} - R$ ${price.toFixed(2)}`;
+          sizesSelect.appendChild(option);
+          if (index === 0) selectedSize = size;
+        });
+      } else {
+        sizesSelect.innerHTML = '<option value="">Tamanho único</option>';
+        selectedSize = null;
       }
 
-      // Configurações iniciais
-      document.documentElement.style.setProperty('--cor-primaria', window.config.primaryColor);
-      document.documentElement.style.setProperty('--cor-secundaria', window.config.secondaryColor);
-      document.documentElement.style.setProperty('--cor-fundo', window.config.backgroundColor);
-      document.documentElement.style.setProperty('--cor-texto', window.config.textColor);
-
-      document.getElementById('nome-pizzaria').textContent = window.config.pizzariaName;
-      document.getElementById('logo').src = window.config.logoUrl;
-      document.getElementById('footer-whatsapp').textContent = window.config.whatsappNumber;
-      document.getElementById('footer-whatsapp-link').href = window.config.whatsappLink;
-      document.getElementById('footer-instagram-link').href = window.config.instagramUrl;
-      document.getElementById('footer-instagram-link').textContent = window.config.instagramHandle;
-
-      const usuario = window.getUsuarioAtual();
-      if (usuario) {
-        document.getElementById('user-greeting').textContent = `Olá, ${usuario.nome}!`;
-        document.getElementById('user-greeting').classList.remove('hidden');
-        document.getElementById('login-btn').classList.add('hidden');
-        document.getElementById('logout-btn').classList.remove('hidden');
+      // Extras
+      const extrasContainer = document.getElementById("modal-extras");
+      extrasContainer.innerHTML = "";
+      selectedExtras = [];
+      const extras = Object.entries(selectedItem.extrasDisponiveis);
+      if (extras.length > 0) {
+        extras.forEach(([extra, price]) => {
+          const div = document.createElement("div");
+          div.className = "flex items-center gap-2";
+          div.innerHTML = `
+            <input type="checkbox" id="extra-${extra}" value="${extra}" onchange="updateSelectedExtras(this)" class="h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-300 rounded">
+            <label for="extra-${extra}" class="text-gray-600">${extra} (+ R$ ${price.toFixed(2)})</label>
+          `;
+          extrasContainer.appendChild(div);
+        });
+      } else {
+        extrasContainer.innerHTML = '<p class="text-gray-600">Nenhum extra disponível</p>';
       }
 
-      // Carrega itens do cardápio
-      carregarCardapio();
-      carregarCarrossel();
-
-      // Filtros
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.filter-btn').forEach(b => {
-            b.classList.remove('active:bg-[var(--cor-primaria)]', 'active:text-white');
-            b.setAttribute('aria-selected', 'false');
-          });
-          btn.classList.add('active:bg-[var(--cor-primaria)]', 'active:text-white');
-          btn.setAttribute('aria-selected', 'true');
-          filtrarCardapio();
+      // Bordas
+      const bordersSelect = document.getElementById("modal-borders");
+      bordersSelect.innerHTML = "";
+      const borders = Object.entries(selectedItem.bordasDisponiveis);
+      if (borders.length > 0) {
+        borders.forEach(([border, price], index) => {
+          const option = document.createElement("option");
+          option.value = border;
+          option.textContent = `${border} - R$ ${price.toFixed(2)}`;
+          bordersSelect.appendChild(option);
+          if (index === 0) selectedBorder = border;
         });
-      });
+      } else {
+        bordersSelect.innerHTML = '<option value="">Sem borda disponível</option>';
+        selectedBorder = null;
+      }
 
-      // Pesquisa
-      document.getElementById('search-input').addEventListener('input', () => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(filtrarCardapio, 300);
-      });
-
-      // Carrossel
-      document.querySelector('.carousel-btn.prev').addEventListener('click', () => moveCarousel(-1));
-      document.querySelector('.carousel-btn.next').addEventListener('click', () => moveCarousel(1));
-
-      // Swipe para dispositivos móveis
-      let touchStartX = 0;
-      let touchEndX = 0;
-      const carouselInner = document.getElementById('carousel-inner');
-      carouselInner.addEventListener('touchstart', e => {
-        touchStartX = e.changedTouches[0].screenX;
-      });
-      carouselInner.addEventListener('touchend', e => {
-        touchEndX = e.changedTouches[0].screenX;
-        if (touchStartX - touchEndX > 50) moveCarousel(1);
-        if (touchEndX - touchStartX > 50) moveCarousel(-1);
-      });
-
-      // Carrega carrinho do localStorage
-      cart = JSON.parse(localStorage.getItem('cart')) || [];
-      atualizarCarrinho();
-    });
-
-    // Função para carregar o cardápio
-    function carregarCardapio() {
-      const grid = document.getElementById('pizza-grid');
-      grid.innerHTML = '';
-      const filteredItems = window.cardapio.filter(item => item.categoria !== 'Combos');
-      filteredItems.forEach((item, index) => {
-        const card = document.createElement('div');
-        card.className = 'pizza-card bg-white rounded-lg shadow-md cursor-pointer fade-in';
-        card.style.animationDelay = `${index * 0.1}s`;
-        card.addEventListener('click', () => abrirModalDetalhes(item.id));
-        const precoDisplay = item.promocao && item.promocao.ativo ? `
-          <span class="text-[var(--cor-primaria)] font-bold">R$ ${item.promocao.precoPromocional.toFixed(2)}</span>
-          <span class="text-gray-400 line-through ml-2">R$ ${item.preço.toFixed(2)}</span>
-        ` : `R$ ${item.preço.toFixed(2)}`;
-        card.innerHTML = `
-          <img src="${item.imagem}" alt="${item.nome}" class="w-full h-48 object-cover rounded-t-lg">
-          <div class="p-4">
-            <h3 class="text-lg font-semibold">${item.nome}</h3>
-            <div class="rating flex items-center gap-1 my-2">
-              <span class="text-yellow-500">★ ${item.avaliacao.toFixed(1)}</span>
-              <span class="text-gray-600 text-sm">(${item.numAvaliacoes})</span>
-            </div>
-            <p class="text-gray-600 text-sm line-clamp-2">${item.descrição}</p>
-            <p class="price text-lg font-bold mt-2">${precoDisplay}</p>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-    }
-
-    // Função para carregar o carrossel
-    function carregarCarrossel() {
-      const carouselInner = document.getElementById('carousel-inner');
-      const dotsContainer = document.querySelector('.carousel-dots');
-      const combos = window.cardapio.filter(item => item.categoria === 'Combos');
-      carouselInner.innerHTML = '';
-      dotsContainer.innerHTML = '';
-      combos.forEach((combo, index) => {
-        const precoDisplay = combo.promocao && combo.promocao.ativo ? `
-          <span class="text-[var(--cor-primaria)] font-bold">R$ ${combo.promocao.precoPromocional.toFixed(2)}</span>
-          <span class="text-gray-400 line-through ml-2">R$ ${combo.preço.toFixed(2)}</span>
-        ` : `R$ ${combo.preço.toFixed(2)}`;
-        const item = document.createElement('div');
-        item.className = 'carousel-item flex items-center gap-6 p-6 bg-white';
-        item.innerHTML = `
-          <img src="${combo.imagem}" alt="${combo.nome}" class="w-3/5 h-64 object-cover rounded-lg">
-          <div class="carousel-content flex-1 relative">
-            <span class="badge absolute -top-2 left-0 bg-red-500 text-white text-sm font-semibold px-3 py-1 rounded-full shadow-md">Oferta!</span>
-            <h3 class="text-xl font-semibold mt-4">${combo.nome}</h3>
-            <div class="rating flex items-center gap-1 my-2">
-              <span class="text-yellow-500">★ ${combo.avaliacao.toFixed(1)}</span>
-              <span class="text-gray-600 text-sm">(${combo.numAvaliacoes})</span>
-            </div>
-            <p class="text-gray-600 text-sm mb-4">${combo.descrição}</p>
-            <p class="price text-lg font-bold mb-4">${precoDisplay}</p>
-            <button onclick="event.stopPropagation(); abrirModalDetalhes(${combo.id})" class="custom-btn bg-[var(--cor-primaria)] text-white px-4 py-2 rounded-lg" aria-label="Ver detalhes do combo ${combo.nome}">Ver Combo</button>
-          </div>
-        `;
-        carouselInner.appendChild(item);
-
-        const dot = document.createElement('div');
-        dot.className = `carousel-dot w-3 h-3 rounded-full cursor-pointer ${index === 0 ? 'bg-[var(--cor-primaria)] scale-125' : 'bg-gray-300'}`;
-        dot.addEventListener('click', () => {
-          currentSlide = index;
-          updateCarousel();
+      // Itens do Combo
+      const comboItemsDiv = document.getElementById("modal-combo-items");
+      const comboItemsList = document.getElementById("modal-combo-items-list");
+      comboItemsList.innerHTML = "";
+      if (selectedItem.categoria === "Combos" && selectedItem.itens) {
+        comboItemsDiv.classList.remove("hidden");
+        selectedItem.itens.forEach(itemId => {
+          const comboItem = cardapioData.find(item => item.id === itemId);
+          if (comboItem) {
+            const li = document.createElement("li");
+            li.textContent = comboItem.nome;
+            comboItemsList.appendChild(li);
+          }
         });
-        dotsContainer.appendChild(dot);
-      });
-      updateCarousel();
+      } else {
+        comboItemsDiv.classList.add("hidden");
+      }
+
+      updateModalPrice();
+      document.getElementById("item-modal").classList.remove("hidden");
     }
 
-    // Função para mover o carrossel
-    function moveCarousel(direction) {
-      const combos = window.cardapio.filter(item => item.categoria === 'Combos');
-      currentSlide = (currentSlide + direction + combos.length) % combos.length;
-      updateCarousel();
-    }
-
-    // Função para atualizar o carrossel
-    function updateCarousel() {
-      const carouselInner = document.getElementById('carousel-inner');
-      carouselInner.style.transform = `translateX(-${currentSlide * 100}%)`;
-      document.querySelectorAll('.carousel-dot').forEach((dot, index) => {
-        dot.className = `carousel-dot w-3 h-3 rounded-full cursor-pointer ${index === currentSlide ? 'bg-[var(--cor-primaria)] scale-125' : 'bg-gray-300'}`;
-      });
-    }
-
-    // Função para filtrar o cardápio
-    function filtrarCardapio() {
-      const searchTerm = document.getElementById('search-input').value.toLowerCase();
-      const selectedCategory = document.querySelector('.filter-btn[aria-selected="true"]').dataset.category;
-      const filteredItems = window.cardapio.filter(item => {
-        const matchesCategory = selectedCategory === 'Todas' || item.categoria === selectedCategory;
-        const matchesSearch = item.nome.toLowerCase().includes(searchTerm) || item.descrição.toLowerCase().includes(searchTerm);
-        return matchesCategory && matchesSearch && item.categoria !== 'Combos';
-      });
-      const grid = document.getElementById('pizza-grid');
-      grid.innerHTML = '';
-      filteredItems.forEach((item, index) => {
-        const card = document.createElement('div');
-        card.className = 'pizza-card bg-white rounded-lg shadow-md cursor-pointer fade-in';
-        card.style.animationDelay = `${index * 0.1}s`;
-        card.addEventListener('click', () => abrirModalDetalhes(item.id));
-        const precoDisplay = item.promocao && item.promocao.ativo ? `
-          <span class="text-[var(--cor-primaria)] font-bold">R$ ${item.promocao.precoPromocional.toFixed(2)}</span>
-          <span class="text-gray-400 line-through ml-2">R$ ${item.preço.toFixed(2)}</span>
-        ` : `R$ ${item.preço.toFixed(2)}`;
-        card.innerHTML = `
-          <img src="${item.imagem}" alt="${item.nome}" class="w-full h-48 object-cover rounded-t-lg">
-          <div class="p-4">
-            <h3 class="text-lg font-semibold">${item.nome}</h3>
-            <div class="rating flex items-center gap-1 my-2">
-              <span class="text-yellow-500">★ ${item.avaliacao.toFixed(1)}</span>
-              <span class="text-gray-600 text-sm">(${item.numAvaliacoes})</span>
-            </div>
-            <p class="text-gray-600 text-sm line-clamp-2">${item.descrição}</p>
-            <p class="price text-lg font-bold mt-2">${precoDisplay}</p>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-    }
-
-    // Função para abrir o modal de detalhes
-    function abrirModalDetalhes(id) {
-      const item = window.cardapio.find(i => i.id === id);
-      if (!item) return;
-
-      document.getElementById('modal-details').dataset.itemId = id;
-      document.getElementById('modal-details-image').src = item.imagem;
-      document.getElementById('modal-details-image').alt = item.nome;
-      document.getElementById('modal-details-title').textContent = item.nome;
-      document.getElementById('modal-details-rating').textContent = `★ ${item.avaliacao.toFixed(1)}`;
-      document.getElementById('modal-details-num-reviews').textContent = item.numAvaliacoes;
-      document.getElementById('modal-details-description').textContent = item.descrição;
-
-      const sizeSelect = document.getElementById('modal-details-size');
-      sizeSelect.innerHTML = '';
-      item.tamanhos.forEach(tamanho => {
-        const option = document.createElement('option');
-        option.value = tamanho.nome;
-        option.textContent = `${tamanho.nome} - R$ ${tamanho.preço.toFixed(2)}`;
-        sizeSelect.appendChild(option);
-      });
-
-      const extrasContainer = document.getElementById('modal-details-extras');
-      extrasContainer.innerHTML = '';
-      item.extrasDisponiveis.forEach(extra => {
-        const div = document.createElement('div');
-        div.className = 'flex items-center gap-2';
-        div.innerHTML = `
-          <input type="checkbox" id="extra-${extra.nome}" value="${extra.nome}" data-price="${extra.preço}" onchange="atualizarPrecoModal()">
-          <label for="extra-${extra.nome}">${extra.nome} (+R$ ${extra.preço.toFixed(2)})</label>
-        `;
-        extrasContainer.appendChild(div);
-      });
-
-      const borderSelect = document.getElementById('modal-details-border');
-      borderSelect.innerHTML = '';
-      item.bordasDisponiveis.forEach(borda => {
-        const option = document.createElement('option');
-        option.value = borda.nome;
-        option.textContent = `${borda.nome} ${borda.preço > 0 ? `(+R$ ${borda.preço.toFixed(2)})` : ''}`;
-        borderSelect.appendChild(option);
-      });
-
-      atualizarPrecoModal();
-      document.getElementById('modal-details').classList.remove('hidden');
+    // Função para atualizar os extras selecionados
+    function updateSelectedExtras(checkbox) {
+      if (checkbox.checked) {
+        selectedExtras.push(checkbox.value);
+      } else {
+        selectedExtras = selectedExtras.filter(extra => extra !== checkbox.value);
+      }
+      updateModalPrice();
     }
 
     // Função para atualizar o preço no modal
-    function atualizarPrecoModal() {
-      const item = window.cardapio.find(i => i.id === parseInt(document.getElementById('modal-details').dataset.itemId));
-      if (!item) return;
-
-      const sizeSelect = document.getElementById('modal-details-size');
-      const selectedSize = item.tamanhos.find(t => t.nome === sizeSelect.value);
-      let total = selectedSize.preço;
-
-      const extras = Array.from(document.querySelectorAll('#modal-details-extras input:checked')).reduce((sum, input) => {
-        return sum + parseFloat(input.dataset.price);
-      }, 0);
-      total += extras;
-
-      const borderSelect = document.getElementById('modal-details-border');
-      const selectedBorder = item.bordasDisponiveis.find(b => b.nome === borderSelect.value);
-      total += selectedBorder.preço;
-
-      document.getElementById('modal-details-price').textContent = `R$ ${total.toFixed(2)}`;
-    }
-
-    // Função para adicionar ao carrinho
-    function adicionarAoCarrinho() {
-      const itemId = parseInt(document.getElementById('modal-details').dataset.itemId);
-      const item = window.cardapio.find(i => i.id === itemId);
-      const sizeSelect = document.getElementById('modal-details-size');
-      const selectedSize = item.tamanhos.find(t => t.nome === sizeSelect.value);
-      const extras = Array.from(document.querySelectorAll('#modal-details-extras input:checked')).map(input => ({
-        nome: input.value,
-        preço: parseFloat(input.dataset.price),
-      }));
-      const borderSelect = document.getElementById('modal-details-border');
-      const selectedBorder = item.bordasDisponiveis.find(b => b.nome === borderSelect.value);
-
-      const cartItem = {
-        id: Date.now(),
-        itemId: item.id,
-        nome: item.nome,
-        tamanho: selectedSize.nome,
-        precoBase: selectedSize.preço,
-        extras: extras,
-        borda: selectedBorder,
-      };
-      cart.push(cartItem);
-      localStorage.setItem('cart', JSON.stringify(cart));
-      atualizarCarrinho();
-      fecharModalDetails();
-      alert('Item adicionado ao carrinho!');
-    }
-
-    // Função para atualizar o carrinho
-    function atualizarCarrinho() {
-      const cartItems = document.getElementById('cart-items');
-      cartItems.innerHTML = '';
-      let total = 0;
-      cart.forEach(item => {
-        const itemDetails = window.cardapio.find(i => i.id === item.itemId);
-        let itemTotal = item.precoBase;
-        const extrasTotal = item.extras.reduce((sum, extra) => sum + extra.preço, 0);
-        itemTotal += extrasTotal + item.borda.preço;
-        total += itemTotal;
-
-        const div = document.createElement('div');
-        div.className = 'cart-item flex justify-between items-center py-2 border-b';
-        div.innerHTML = `
-          <div>
-            <p class="font-medium">${item.nome} (${item.tamanho})</p>
-            <p class="text-sm text-gray-600">${item.extras.length > 0 ? 'Extras: ' + item.extras.map(e => e.nome).join(', ') : ''}${item.borda.preço > 0 ? ` | Borda: ${item.borda.nome}` : ''}</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <p class="font-semibold">R$ ${itemTotal.toFixed(2)}</p>
-            <button onclick="removerDoCarrinho(${item.id})" class="text-red-500" aria-label="Remover item ${item.nome} do carrinho">X</button>
-          </div>
-        `;
-        cartItems.appendChild(div);
+    function updateModalPrice() {
+      let basePrice = selectedItem.promocao?.ativo ? selectedItem.promocao.precoPromocional : selectedItem.preço;
+      if (selectedSize && selectedItem.tamanhos[selectedSize]) {
+        basePrice = selectedItem.tamanhos[selectedSize];
+      }
+      let extraPrice = 0;
+      selectedExtras.forEach(extra => {
+        extraPrice += selectedItem.extrasDisponiveis[extra] || 0;
       });
-      document.getElementById('cart-counter').textContent = cart.length;
-      document.getElementById('cart-total').textContent = `Total: R$ ${total.toFixed(2)}`;
-    }
-
-    // Função para remover item do carrinho
-    function removerDoCarrinho(id) {
-      cart = cart.filter(item => item.id !== id);
-      localStorage.setItem('cart', JSON.stringify(cart));
-      atualizarCarrinho();
-    }
-
-    // Funções para abrir/fechar modais
-    function abrirModalLogin() {
-      document.getElementById('modal-login-title').textContent = 'Login';
-      document.getElementById('modal-login').classList.remove('hidden');
-    }
-
-    function fecharModalLogin() {
-      document.getElementById('modal-login').classList.add('hidden');
-      document.getElementById('modal-login-error').classList.add('hidden');
-      document.getElementById('login-nome').value = '';
-      document.getElementById('login-senha').value = '';
-    }
-
-    function fecharModalDetails() {
-      document.getElementById('modal-details').classList.add('hidden');
-    }
-
-    function toggleCartPreview() {
-      document.getElementById('cart-preview').classList.toggle('hidden');
-    }
-
-    function toggleLoginRegister() {
-      const title = document.getElementById('modal-login-title');
-      const toggleLink = document.querySelector('.toggle-link');
-      if (title.textContent === 'Login') {
-        title.textContent = 'Registrar';
-        toggleLink.textContent = 'Já tem uma conta? Faça login';
-      } else {
-        title.textContent = 'Login';
-        toggleLink.textContent = 'Criar uma conta';
+      let borderPrice = 0;
+      if (selectedBorder && selectedItem.bordasDisponiveis[selectedBorder]) {
+        borderPrice = selectedItem.bordasDisponiveis[selectedBorder];
       }
+      const totalPrice = basePrice + extraPrice + borderPrice;
+      document.getElementById("modal-price").textContent = `R$ ${totalPrice.toFixed(2)}`;
     }
 
-    function handleLogin() {
-      const nome = document.getElementById('login-nome').value;
-      const senha = document.getElementById('login-senha').value;
-      const errorElement = document.getElementById('modal-login-error');
-      const title = document.getElementById('modal-login-title').textContent;
+    // Função para fechar o modal
+    function closeModal() {
+      document.getElementById("item-modal").classList.add("hidden");
+      selectedItem = null;
+      selectedSize = null;
+      selectedBorder = null;
+      selectedExtras = [];
+    }
 
-      if (title === 'Login') {
-        const result = window.verificarLogin(nome, senha);
-        if (result.sucesso) {
-          document.getElementById('user-greeting').textContent = `Olá, ${nome}!`;
-          document.getElementById('user-greeting').classList.remove('hidden');
-          document.getElementById('login-btn').classList.add('hidden');
-          document.getElementById('logout-btn').classList.remove('hidden');
-          fecharModalLogin();
-        } else {
-          errorElement.textContent = result.mensagem;
-          errorElement.classList.remove('hidden');
-        }
-      } else {
-        const result = window.adicionarUsuario(nome, senha);
-        if (result.sucesso) {
-          document.getElementById('modal-login-title').textContent = 'Login';
-          document.querySelector('.toggle-link').textContent = 'Criar uma conta';
-          errorElement.textContent = 'Usuário registrado! Faça login.';
-          errorElement.classList.remove('hidden');
-          errorElement.classList.remove('text-red-500');
-          errorElement.classList.add('text-green-500');
-        } else {
-          errorElement.textContent = result.mensagem;
-          errorElement.classList.remove('hidden');
-        }
+    // Função para adicionar ao carrinho (placeholder)
+    function addToCart() {
+      alert(`Item "${selectedItem.nome}" adicionado ao carrinho!\nTamanho: ${selectedSize || 'Único'}\nBorda: ${selectedBorder || 'Nenhuma'}\nExtras: ${selectedExtras.length ? selectedExtras.join(", ") : 'Nenhum'}\nTotal: ${document.getElementById("modal-price").textContent}`);
+      closeModal();
+    }
+
+    // Função para filtrar itens
+    function filterItems() {
+      const searchTerm = document.getElementById("search-input").value.toLowerCase();
+      const categoryFilter = document.getElementById("category-filter").value;
+
+      filteredItems = cardapioData.filter(item => {
+        const matchesSearch = item.nome.toLowerCase().includes(searchTerm);
+        const matchesCategory = categoryFilter ? item.categoria === categoryFilter : true;
+        return matchesSearch && matchesCategory;
+      });
+
+      currentPage = 1;
+      renderMenuItems();
+    }
+
+    // Função para resetar os filtros
+    function resetFilters() {
+      document.getElementById("search-input").value = "";
+      document.getElementById("category-filter").value = "";
+      filteredItems = [...cardapioData];
+      currentPage = 1;
+      renderMenuItems();
+    }
+
+    // Função para mudar de página
+    function changePage(direction) {
+      currentPage += direction;
+      renderMenuItems();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Função para alternar modo escuro
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+      const isDark = document.body.classList.contains("dark");
+      document.getElementById("dark-mode-toggle").innerHTML = isDark
+        ? '<i class="fas fa-sun"></i> Modo Claro'
+        : '<i class="fas fa-moon"></i> Modo Escuro';
+      document.body.classList.toggle("bg-gray-900", isDark);
+      document.body.classList.toggle("text-white", isDark);
+      document.body.classList.toggle("bg-gradient-to-br", !isDark);
+      document.body.classList.toggle("from-orange-100", !isDark);
+      document.body.classList.toggle("via-amber-200", !isDark);
+      document.body.classList.toggle("to-red-200", !isDark);
+    }
+
+    // Inicialização
+    const configScript = document.getElementById("config-script");
+    const cardapioScript = document.getElementById("cardapio-script");
+
+    configScript.onload = function() {
+      console.log("Config.js carregado.");
+      if (window.config) {
+        applyConfigStyles();
+        cardapioScript.onload = function() {
+          console.log("Cardapio.js carregado.");
+          if (window.cardapio) {
+            loadCardapioData();
+            document.getElementById("search-input").addEventListener("input", filterItems);
+            document.getElementById("category-filter").addEventListener("change", filterItems);
+            document.getElementById("dark-mode-toggle").addEventListener("click", toggleDarkMode);
+          } else {
+            console.error("Erro: window.cardapio não foi definido.");
+            alert("Erro ao carregar o cardápio. Verifique o arquivo cardapio.js.");
+          }
+        };
+        cardapioScript.onerror = function() {
+          console.error("Erro ao carregar cardapio.js.");
+          alert("Erro ao carregar o cardápio. Verifique o arquivo cardapio.js.");
+        };
       }
-    }
+    };
 
-    function logout() {
-      window.logout();
-      document.getElementById('user-greeting').classList.add('hidden');
-      document.getElementById('login-btn').classList.remove('hidden');
-      document.getElementById('logout-btn').classList.add('hidden');
-    }
-
-    function handleLogoClick() {
-      clickCount++;
-      if (clickCount === 5) {
-        window.location.href = 'admin.html';
-        clickCount = 0;
-      }
-    }
+    configScript.onerror = function() {
+      console.error("Erro ao carregar config.js.");
+      alert("Erro ao carregar as configurações. Verifique o arquivo config.js.");
+    };
   </script>
 </body>
 </html>

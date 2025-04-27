@@ -42,1114 +42,258 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin & Dashboard - La Casa de Pizzas</title>
+  <title>La Casa de Pizzas - Administração</title>
   <script src="https://kit.fontawesome.com/1f7a5fcea1.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root {
-      --primary-color: #FF4500;
-      --secondary-color: #FFD700;
-      --background-color: #FFF8E7;
-      --text-color: #1A1A1A;
-    }
-
-    .dark-mode {
-      --background-color: #1F2937;
-      --text-color: #F3F4F6;
-      --bg-white: #374151;
-    }
-
-    body {
-      font-family: 'Roboto', Arial, sans-serif;
-      background: linear-gradient(135deg, var(--background-color), #f5e8d0);
-      color: var(--text-color);
-      min-height: 100vh;
-      margin: 0;
-      transition: background 0.3s ease;
-    }
-
-    /* Estilos para a seção de login (admin) */
-    .admin-section {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-
-    .admin-container {
-      text-align: center;
-      background-color: var(--bg-white, white);
-      padding: 2.5rem;
-      border-radius: 15px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-      max-width: 380px;
-      width: 90%;
-      animation: fadeIn 0.5s ease-in-out;
-    }
-
+    /* Animações personalizadas */
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
-    .logo {
-      max-width: 140px;
-      margin-bottom: 1.5rem;
-      border-radius: 10px;
-      transition: transform 0.3s ease;
-    }
-
-    .logo:hover {
-      transform: scale(1.05);
-    }
-
-    h2 {
-      margin-bottom: 1.5rem;
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--primary-color);
-      letter-spacing: 0.5px;
-    }
-
-    .password-container {
-      position: relative;
-      width: 100%;
-      max-width: 260px;
-      margin: 0 auto;
-    }
-
-    input[type="password"] {
-      padding: 12px 40px 12px 12px;
-      margin: 0.5rem 0;
-      width: 100%;
-      border: 2px solid var(--primary-color);
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    input[type="password"]:focus {
-      outline: none;
-      border-color: var(--secondary-color);
-      box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
-    }
-
-    .toggle-password {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      cursor: pointer;
-      color: var(--text-color);
-      opacity: 0.7;
-      transition: opacity 0.3s ease;
-    }
-
-    .toggle-password:hover {
-      opacity: 1;
-    }
-
-    button {
-      padding: 12px 24px;
-      background: linear-gradient(90deg, var(--primary-color), #ff5e1a);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: 600;
-      margin: 0.5rem 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: background 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
-      box-shadow: 0 4px 10px rgba(255, 69, 0, 0.2);
-    }
-
-    button:hover:not(:disabled) {
-      background: linear-gradient(90deg, var(--secondary-color), #ffeb3b);
-      color: var(--text-color);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(255, 215, 0, 0.3);
-    }
-
-    button:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    #error-message, #success-message, #loading-message {
-      margin-top: 1rem;
-      font-size: 0.9rem;
-      font-weight: 500;
-    }
-
-    #error-message {
-      color: #dc2626;
-      display: none;
-    }
-
-    #success-message {
-      color: #16a34a;
-      display: none;
-    }
-
-    #loading-message {
-      color: #4b5563;
-    }
-
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 1rem;
-      color: var(--primary-color);
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      position: relative;
-      transition: color 0.3s ease;
-    }
-
-    .back-link::after {
-      content: '';
-      position: absolute;
-      width: 0;
-      height: 2px;
-      bottom: -2px;
-      left: 0;
-      background-color: var(--secondary-color);
-      transition: width 0.3s ease;
-    }
-
-    .back-link:hover {
-      color: var(--secondary-color);
-    }
-
-    .back-link:hover::after {
-      width: 100%;
-    }
-
-    .tooltip {
-      position: relative;
-      display: inline-block;
-      width: 100%;
-    }
-
-    .tooltip .tooltip-text {
-      visibility: hidden;
-      width: 200px;
-      background-color: #555;
-      color: #fff;
-      text-align: center;
-      border-radius: 5px;
-      padding: 5px;
-      position: absolute;
-      z-index: 1;
-      bottom: 125%;
-      left: 50%;
-      transform: translateX(-50%);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-
-    .tooltip:hover .tooltip-text {
-      visibility: visible;
-      opacity: 1;
-    }
-
-    /* Estilos para a seção de dashboard */
-    .dashboard-section {
-      display: none;
-    }
-
-    header {
-      background: linear-gradient(90deg, var(--primary-color), #ff5e1a);
-      color: white;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    header img {
-      height: 60px;
-      border-radius: 8px;
-      transition: transform 0.3s ease;
-    }
-
-    header img:hover {
-      transform: scale(1.05);
-    }
-
-    header h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-
-    header .flex button {
-      background: linear-gradient(90deg, var(--secondary-color), #ffeb3b);
-      color: var(--text-color);
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: background 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
-      box-shadow: 0 4px 10px rgba(255, 215, 0, 0.2);
-    }
-
-    header .flex button:hover {
-      background: linear-gradient(90deg, var(--primary-color), #ff5e1a);
-      color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(255, 69, 0, 0.3);
-    }
-
-    .dashboard-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 2rem;
-    }
-
-    .tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      justify-content: center;
-      margin-bottom: 1.5rem;
-      background: #f9f9f9;
-      padding: 0.5rem;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    }
-
-    .tab-btn {
-      padding: 12px 24px;
-      border-radius: 10px;
-      background: #e5e7eb;
-      color: #4b5563;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: background 0.3s ease, color 0.3s ease, transform 0.1s ease;
-      position: relative;
-    }
-
-    .tab-btn:hover {
-      background: #d1d5db;
-      color: #1f2937;
-      transform: translateY(-2px);
-    }
-
-    .tab-btn.active {
-      background: linear-gradient(90deg, var(--primary-color), #ff5e1a);
-      color: white;
-    }
-
-    .tab-btn.active::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 50%;
-      height: 4px;
-      background: var(--secondary-color);
-      border-radius: 2px;
-    }
-
-    .tab-content {
-      background: linear-gradient(135deg, white, #f9f9f9);
-      padding: 2rem;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      transition: opacity 0.3s ease;
-    }
-
-    .tab-content.hidden {
-      display: none;
-      opacity: 0;
-    }
-
-    .info-section p {
-      font-size: 1rem;
-      margin-bottom: 0.75rem;
-      line-height: 1.5;
-    }
-
-    .info-section a {
-      color: var(--primary-color);
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-
-    .info-section a:hover {
-      color: var(--secondary-color);
-      text-decoration: underline;
-    }
-
-    .stats-section p {
-      font-size: 1rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .add-item-section form {
-      display: grid;
-      gap: 1rem;
-    }
-
-    .add-item-section label {
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-      display: block;
-    }
-
-    .add-item-section input,
-    .add-item-section select,
-    .add-item-section textarea {
-      padding: 10px;
-      border: 2px solid #e5e7eb;
-      border-radius: 8px;
-      width: 100%;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .add-item-section input:focus,
-    .add-item-section select:focus,
-    .add-item-section textarea:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 8px rgba(255, 69, 0, 0.2);
-    }
-
-    .add-item-section button {
-      background: linear-gradient(90deg, var(--primary-color), #ff5e1a);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: background 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
-      box-shadow: 0 4px 10px rgba(255, 69, 0, 0.2);
-    }
-
-    .add-item-section button:hover {
-      background: linear-gradient(90deg, var(--secondary-color), #ffeb3b);
-      color: var(--text-color);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(255, 215, 0, 0.3);
-    }
-
-    .menu-section .filter-section {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .menu-section input,
-    .menu-section select {
-      padding: 10px;
-      border: 2px solid #e5e7eb;
-      border-radius: 8px;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .menu-section input:focus,
-    .menu-section select:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 8px rgba(255, 69, 0, 0.2);
-    }
-
-    .menu-section button {
-      background: linear-gradient(90deg, var(--primary-color), #ff5e1a);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: background 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
-      box-shadow: 0 4px 10px rgba(255, 69, 0, 0.2);
-    }
-
-    .menu-section button:hover {
-      background: linear-gradient(90deg, var(--secondary-color), #ffeb3b);
-      color: var(--text-color);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(255, 215, 0, 0.3);
-    }
-
-    .menu-section table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .menu-section th {
-      background: linear-gradient(90deg, var(--primary-color), #ff5e1a);
-      color: white;
-      padding: 12px;
-      text-align: left;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    .menu-section th:hover {
-      background: linear-gradient(90deg, var(--secondary-color), #ffeb3b);
-      color: var(--text-color);
-    }
-
-    .menu-section td {
-      padding: 12px;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .menu-section tr:nth-child(even) {
-      background: #f9fafb;
-    }
-
-    .menu-section tr:hover {
-      background: #f1f5f9;
-    }
-
-    .menu-section img {
-      border-radius: 5px;
-    }
-
-    .menu-section button {
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: transform 0.1s ease, box-shadow 0.3s ease;
-    }
-
-    .menu-section button.bg-[var(--secondary-color)] {
-      background: var(--secondary-color);
-      color: var(--text-color);
-      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
-    }
-
-    .menu-section button.bg-[var(--secondary-color)]:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
-    }
-
-    .menu-section button.bg-red-500 {
-      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
-    }
-
-    .menu-section button.bg-red-500:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-    }
-
-    .pagination button {
-      background: linear-gradient(90deg, var(--primary-color), #ff5e1a);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: background 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
-      box-shadow: 0 4px 10px rgba(255, 69, 0, 0.2);
-    }
-
-    .pagination button:hover:not(:disabled) {
-      background: linear-gradient(90deg, var(--secondary-color), #ffeb3b);
-      color: var(--text-color);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(255, 215, 0, 0.3);
-    }
-
-    .pagination button:disabled {
-      background: #d1d5db;
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    /* Estilo para imagens indisponíveis */
+    img[alt="Imagem indisponível"] {
+      background-color: #f1f5f9;
       color: #6b7280;
-      box-shadow: none;
-      cursor: not-allowed;
-    }
-
-    .modal {
       display: flex;
+      align-items: center;
       justify-content: center;
-      align-items: center;
-    }
-
-    .modal-content {
-      background: linear-gradient(135deg, white, #f9f9f9);
-      padding: 2rem;
-      border-radius: 15px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-      position: relative;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .close-btn {
-      padding: 8px;
-      border-radius: 50%;
-      transition: background 0.3s ease, transform 0.1s ease;
-    }
-
-    .close-btn:hover {
-      background: #d1d5db;
-      transform: scale(1.1);
-    }
-
-    .modal-content h2 {
-      margin-bottom: 1.5rem;
-    }
-
-    .modal-content form {
-      display: grid;
-      gap: 1rem;
-    }
-
-    .modal-content label {
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-      display: block;
-    }
-
-    .modal-content input,
-    .modal-content select,
-    .modal-content textarea {
-      padding: 10px;
-      border: 2px solid #e5e7eb;
-      border-radius: 8px;
-      width: 100%;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .modal-content input:focus,
-    .modal-content select:focus,
-    .modal-content textarea:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 8px rgba(255, 69, 0, 0.2);
-    }
-
-    .modal-content button {
-      background: linear-gradient(90deg, var(--primary-color), #ff5e1a);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: background 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
-      box-shadow: 0 4px 10px rgba(255, 69, 0, 0.2);
-    }
-
-    .modal-content button:hover {
-      background: linear-gradient(90deg, var(--secondary-color), #ffeb3b);
-      color: var(--text-color);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(255, 215, 0, 0.3);
-    }
-
-    .modal-content button.bg-gray-500 {
-      background: #6b7280;
-      box-shadow: 0 4px 10px rgba(107, 114, 128, 0.2);
-    }
-
-    .modal-content button.bg-gray-500:hover {
-      background: #4b5563;
-      box-shadow: 0 6px 15px rgba(107, 114, 128, 0.3);
-    }
-
-    .modal-content button.bg-red-500 {
-      box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);
-    }
-
-    .modal-content button.bg-red-500:hover {
-      box-shadow: 0 6px 15px rgba(239, 68, 68, 0.3);
-    }
-
-    .image-preview {
-      display: none;
-      max-width: 150px;
-      max-height: 150px;
-      object-fit: cover;
-      margin-top: 10px;
-      border-radius: 5px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .loading {
-      display: none;
-      margin-top: 10px;
-      font-size: 14px;
-      color: var(--text-color);
-    }
-
-    @media (max-width: 768px) {
-      .tabs {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .tab-btn {
-        width: 100%;
-        justify-content: center;
-      }
-
-      .tab-btn.active::after {
-        width: 30%;
-      }
-
-      .add-item-section form,
-      .modal-content form {
-        grid-template-columns: 1fr;
-      }
-
-      header h1 {
-        font-size: 1.5rem;
-      }
-
-      header img {
-        height: 50px;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .admin-container, .dashboard-container {
-        padding: 1rem;
-      }
-
-      .logo {
-        max-width: 110px;
-      }
-
-      h2 {
-        font-size: 1.5rem;
-      }
-
-      input[type="password"] {
-        max-width: 220px;
-      }
-
-      .tab-content {
-        padding: 1.5rem;
-      }
-
-      .menu-section table {
-        font-size: 0.9rem;
-      }
-
-      .menu-section th,
-      .menu-section td {
-        padding: 8px;
-      }
-
-      .menu-section button {
-        padding: 6px 12px;
-        font-size: 0.9rem;
-      }
+      font-size: 0.875rem;
+      font-weight: 500;
     }
   </style>
 </head>
-<body>
-  <!-- Seção de Login (Admin) -->
-  <div class="admin-section" id="admin-section">
-    <div class="admin-container">
-      <img id="logo-admin" src="https://via.placeholder.com/140x50.png?text=La+Casa+de+Pizzas" alt="Logo da La Casa de Pizzas" class="logo">
-      <h2>Área Administrativa</h2>
-      <div>
-        <div class="tooltip">
-          <div class="password-container">
-            <input type="password" id="admin-password" placeholder="Digite a senha" required aria-label="Senha administrativa">
-            <i class="fas fa-eye toggle-password" id="toggle-password"></i>
-          </div>
-          <span class="tooltip-text">Insira a senha administrativa para acessar o dashboard.</span>
-        </div>
-        <br>
-        <button id="login-button" onclick="validateAdmin()" disabled><i class="fas fa-sign-in-alt"></i> Entrar</button>
-      </div>
-      <p id="loading-message">Carregando...</p>
-      <p id="success-message">Acesso autorizado! Carregando dashboard...</p>
-      <p id="error-message">A senha inserida está incorreta. Por favor, verifique e tente novamente.</p>
-      <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Voltar para a página inicial</a>
-    </div>
-  </div>
-
-  <!-- Seção de Dashboard -->
-  <div class="dashboard-section" id="dashboard-section">
-    <header>
+<body class="bg-gradient-to-br from-orange-100 via-amber-200 to-red-200 min-h-screen text-gray-800">
+  <!-- Cabeçalho -->
+  <header class="bg-gradient-to-r from-orange-600 via-orange-500 to-red-500 text-white shadow-xl sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
       <div class="flex items-center gap-4">
-        <img id="logo-dashboard" src="https://via.placeholder.com/60x60.png?text=La+Casa+de+Pizzas" alt="Logo da La Casa de Pizzas">
-        <h1>Dashboard - La Casa de Pizzas</h1>
+        <img id="logo" src="https://via.placeholder.com/140x50.png?text=La+Casa+de+Pizzas" alt="Logo da La Casa de Pizzas" class="h-14 rounded-lg">
+        <h1 class="text-3xl font-extrabold tracking-tight drop-shadow-lg">Admin - La Casa de Pizzas</h1>
       </div>
-      <div class="flex gap-2">
-        <button onclick="toggleDarkMode()"><i class="fas fa-moon"></i> Modo Escuro</button>
-        <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</button>
-      </div>
-    </header>
-
-    <div class="dashboard-container">
-      <div class="tabs">
-        <button class="tab-btn active" onclick="openTab('info-tab')" aria-selected="true"><i class="fas fa-info-circle"></i> Informações</button>
-        <button class="tab-btn" onclick="openTab('stats-tab')" aria-selected="false"><i class="fas fa-chart-pie"></i> Estatísticas</button>
-        <button class="tab-btn" onclick="openTab('add-item-tab')" aria-selected="false"><i class="fas fa-plus-circle"></i> Adicionar Item</button>
-        <button class="tab-btn" onclick="openTab('menu-tab')" aria-selected="false"><i class="fas fa-pizza-slice"></i> Gerenciar Cardápio</button>
-      </div>
-
-      <div id="info-tab" class="tab-content">
-        <div class="info-section">
-          <h2>Informações da Pizzaria</h2>
-          <p><strong>Nome:</strong> <span id="pizzaria-name">La Casa de Pizzas</span></p>
-          <p>
-            <strong>WhatsApp:</strong>
-            <a id="whatsapp-link" href="https://wa.me/5511912345678" target="_blank">(11) 91234-5678</a>
-          </p>
-          <p>
-            <strong>Instagram:</strong>
-            <a id="instagram-link" href="https://instagram.com/lacasadepizzas" target="_blank">@lacasadepizzas</a>
-          </p>
-        </div>
-      </div>
-
-      <div id="stats-tab" class="tab-content hidden">
-        <div class="stats-section">
-          <h2>Estatísticas</h2>
-          <p><strong>Total de Itens:</strong> <span id="total-items">0</span></p>
-          <p><strong>Categoria Mais Popular:</strong> <span id="popular-category">N/A</span></p>
-          <p><strong>Item Mais Bem Avaliado:</strong> <span id="top-rated-item">N/A</span></p>
-          <p><strong>Item Mais Caro:</strong> <span id="most-expensive-item">N/A</span></p>
-          <p><strong>Média de Avaliações:</strong> <span id="average-rating">0.0</span></p>
-          <canvas id="category-chart" class="mt-4"></canvas>
-        </div>
-      </div>
-
-      <div id="add-item-tab" class="tab-content hidden">
-        <div class="add-item-section">
-          <h2>Adicionar Novo Item</h2>
-          <form id="add-item-form" class="grid grid-cols-1 md:grid-cols-2">
-            <div class="tooltip">
-              <label for="item-name">Nome:</label>
-              <input type="text" id="item-name" placeholder="Nome do item" required aria-label="Nome do item">
-              <span class="tooltip-text">Digite o nome do item (ex.: Pizza Margherita).</span>
-            </div>
-            <div class="tooltip">
-              <label for="item-category">Categoria:</label>
-              <select id="item-category" required aria-label="Categoria do item">
-                <option value="" disabled selected>Selecione a categoria</option>
-                <option value="Salgadas">Salgadas</option>
-                <option value="Doces">Doces</option>
-                <option value="Vegetarianas">Vegetarianas</option>
-                <option value="Bebidas">Bebidas</option>
-                <option value="Combos">Combos</option>
-              </select>
-              <span class="tooltip-text">Escolha a categoria do item.</span>
-            </div>
-            <div class="tooltip">
-              <label for="item-price">Preço (R$):</label>
-              <input type="number" id="item-price" placeholder="Preço (R$)" step="0.01" min="0" required aria-label="Preço do item">
-              <span class="tooltip-text">Insira o preço base do item (ex.: 29.90).</span>
-            </div>
-            <div class="tooltip">
-              <label for="item-image">URL da Imagem:</label>
-              <input type="url" id="item-image" placeholder="URL da imagem" required aria-label="URL da imagem">
-              <img id="image-preview" class="image-preview" alt="Pré-visualização da imagem">
-              <div id="image-loading" class="loading">Carregando...</div>
-              <span class="tooltip-text">Insira uma URL de imagem válida (ex.: .jpg, .png).</span>
-            </div>
-            <div class="col-span-2 tooltip">
-              <label for="item-description">Descrição:</label>
-              <textarea id="item-description" placeholder="Descrição do item" required aria-label="Descrição do item"></textarea>
-              <span class="tooltip-text">Descreva o item para os clientes.</span>
-            </div>
-            <div class="col-span-2 tooltip">
-              <label for="item-ingredients">Ingredientes (separados por vírgula):</label>
-              <input type="text" id="item-ingredients" placeholder="Ingredientes (separados por vírgula)" aria-label="Ingredientes do item">
-              <span class="tooltip-text">Liste os ingredientes (ex.: tomate, muçarela, manjericão).</span>
-            </div>
-            <div class="col-span-2">
-              <label>Tamanhos:</label>
-              <div id="sizes-container" class="space-y-2"></div>
-              <button type="button" onclick="addSizeField()" aria-label="Adicionar tamanho"><i class="fas fa-plus"></i> Adicionar Tamanho</button>
-            </div>
-            <div class="col-span-2">
-              <label>Extras Disponíveis:</label>
-              <div id="extras-container" class="space-y-2"></div>
-              <button type="button" onclick="addExtraField()" aria-label="Adicionar extra"><i class="fas fa-plus"></i> Adicionar Extra</button>
-            </div>
-            <div class="col-span-2 flex gap-4">
-              <button type="submit" aria-label="Adicionar item"><i class="fas fa-save"></i> Adicionar</button>
-              <button type="button" onclick="addAndContinue()" class="bg-green-500 hover:bg-green-600" aria-label="Adicionar e continuar"><i class="fas fa-plus-circle"></i> Adicionar e Continuar</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <div id="menu-tab" class="tab-content hidden">
-        <div class="menu-section">
-          <h2>Gerenciamento do Cardápio</h2>
-          <div class="filter-section">
-            <input type="text" id="search-input" placeholder="Pesquisar por nome..." class="flex-1 min-w-[200px]" aria-label="Pesquisar por nome">
-            <select id="category-filter" aria-label="Filtrar por categoria">
-              <option value="">Todas as Categorias</option>
-              <option value="Salgadas">Salgadas</option>
-              <option value="Doces">Doces</option>
-              <option value="Vegetarianas">Vegetarianas</option>
-              <option value="Bebidas">Bebidas</option>
-              <option value="Combos">Combos</option>
-            </select>
-            <button onclick="exportCardapio('json')" aria-label="Exportar cardápio como JSON"><i class="fas fa-file-export"></i> Exportar JSON</button>
-            <button onclick="exportCardapio('csv')" aria-label="Exportar cardápio como CSV"><i class="fas fa-file-csv"></i> Exportar CSV</button>
-          </div>
-          <table id="menu-table">
-            <thead>
-              <tr>
-                <th onclick="sortMenuItems('nome')">Nome</th>
-                <th onclick="sortMenuItems('categoria')">Categoria</th>
-                <th onclick="sortMenuItems('preço')">Preço</th>
-                <th onclick="sortMenuItems('avaliacao')">Avaliação</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="menu-items"></tbody>
-          </table>
-          <div class="pagination mt-4 flex justify-center gap-2">
-            <button onclick="changePage(-1)" id="prev-page" disabled><i class="fas fa-chevron-left"></i> Anterior</button>
-            <span id="page-info" class="self-center">Página 1</span>
-            <button onclick="changePage(1)" id="next-page"><i class="fas fa-chevron-right"></i> Próxima</button>
-          </div>
-        </div>
+      <div class="flex gap-3">
+        <button id="dark-mode-toggle" class="bg-amber-400 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-amber-500 transition-all flex items-center gap-2">
+          <i class="fas fa-moon"></i> Modo Escuro
+        </button>
+        <a href="index.html" class="bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-orange-700 transition-all flex items-center gap-2">
+          <i class="fas fa-home"></i> Voltar ao Cardápio
+        </a>
       </div>
     </div>
+  </header>
 
-    <!-- Modal para edição de itens -->
-    <div id="edit-modal" class="modal hidden">
-      <div class="modal-content">
-        <button class="close-btn" onclick="closeModal()" aria-label="Fechar modal"><i class="fas fa-times"></i></button>
-        <h2>Editar Item</h2>
-        <form id="edit-item-form" class="grid grid-cols-1 md:grid-cols-2">
-          <input type="hidden" id="edit-item-id">
-          <div class="tooltip">
-            <label for="edit-item-name">Nome:</label>
-            <input type="text" id="edit-item-name" placeholder="Nome do item" required aria-label="Nome do item">
-            <span class="tooltip-text">Digite o nome do item (ex.: Pizza Margherita).</span>
-          </div>
-          <div class="tooltip">
-            <label for="edit-item-category">Categoria:</label>
-            <select id="edit-item-category" required aria-label="Categoria do item">
-              <option value="Salgadas">Salgadas</option>
-              <option value="Doces">Doces</option>
-              <option value="Vegetarianas">Vegetarianas</option>
-              <option value="Bebidas">Bebidas</option>
-              <option value="Combos">Combos</option>
-            </select>
-            <span class="tooltip-text">Escolha a categoria do item.</span>
-          </div>
-          <div class="tooltip">
-            <label for="edit-item-price">Preço (R$):</label>
-            <input type="number" id="edit-item-price" placeholder="Preço (R$)" step="0.01" min="0" required aria-label="Preço do item">
-            <span class="tooltip-text">Insira o preço base do item (ex.: 29.90).</span>
-          </div>
-          <div class="tooltip">
-            <label for="edit-item-image">URL da Imagem:</label>
-            <input type="url" id="edit-item-image" placeholder="URL da imagem" required aria-label="URL da imagem">
-            <img id="edit-image-preview" class="image-preview" alt="Pré-visualização da imagem">
-            <div id="edit-image-loading" class="loading">Carregando...</div>
-            <span class="tooltip-text">Insira uma URL de imagem válida (ex.: .jpg, .png).</span>
-          </div>
-          <div class="col-span-2 tooltip">
-            <label for="edit-item-description">Descrição:</label>
-            <textarea id="edit-item-description" placeholder="Descrição do item" required aria-label="Descrição do item"></textarea>
-            <span class="tooltip-text">Descreva o item para os clientes.</span>
-          </div>
-          <div class="col-span-2 tooltip">
-            <label for="edit-item-ingredients">Ingredientes (separados por vírgula):</label>
-            <input type="text" id="edit-item-ingredients" placeholder="Ingredientes (separados por vírgula)" aria-label="Ingredientes do item">
-            <span class="tooltip-text">Liste os ingredientes (ex.: tomate, muçarela, manjericão).</span>
-          </div>
-          <div class="col-span-2">
-            <label>Tamanhos:</label>
-            <div id="edit-sizes-container" class="space-y-2"></div>
-            <button type="button" onclick="addEditSizeField()" aria-label="Adicionar tamanho"><i class="fas fa-plus"></i> Adicionar Tamanho</button>
-          </div>
-          <div class="col-span-2">
-            <label>Extras Disponíveis:</label>
-            <div id="edit-extras-container" class="space-y-2"></div>
-            <button type="button" onclick="addEditExtraField()" aria-label="Adicionar extra"><i class="fas fa-plus"></i> Adicionar Extra</button>
-          </div>
-          <div class="col-span-2">
-            <button type="submit" aria-label="Salvar alterações"><i class="fas fa-save"></i> Salvar Alterações</button>
-          </div>
-        </form>
-      </div>
+  <!-- Login -->
+  <div id="login-screen" class="container mx-auto px-4 py-8 flex justify-center items-center min-h-[calc(100vh-80px)]">
+    <div class="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full border-t-4 border-orange-500">
+      <h2 class="text-2xl font-bold text-orange-600 mb-6 flex items-center gap-2">
+        <i class="fas fa-lock"></i> Login Admin
+      </h2>
+      <input type="password" id="password-input" placeholder="Digite a senha administrativa" class="border border-gray-300 rounded-lg p-3 w-full mb-4 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Senha administrativa">
+      <button onclick="login()" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-all w-full flex items-center justify-center gap-2 shadow-md">
+        <i class="fas fa-sign-in-alt"></i> Entrar
+      </button>
     </div>
+  </div>
 
-    <!-- Modal para confirmação de exclusão -->
-    <div id="delete-modal" class="modal hidden">
-      <div class="modal-content">
-        <h2>Confirmar Exclusão</h2>
-        <p class="mb-4">Tem certeza de que deseja excluir o item "<span id="delete-item-name"></span>"? Esta ação não pode be desfeita.</p>
-        <div class="flex justify-end gap-4">
-          <button onclick="closeDeleteModal()" class="bg-gray-500" aria-label="Cancelar exclusão"><i class="fas fa-times"></i> Cancelar</button>
-          <button onclick="confirmDelete()" class="bg-red-500" aria-label="Confirmar exclusão"><i class="fas fa-trash"></i> Excluir</button>
+  <!-- Dashboard -->
+  <div id="dashboard" class="container mx-auto px-4 py-8 hidden">
+    <!-- Abas -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border-t-4 border-orange-500">
+      <div class="flex gap-4 border-b border-gray-200">
+        <button onclick="showTab('tab-menu')" class="tab-button px-4 py-2 font-semibold text-orange-600 border-b-4 border-orange-500">Gerenciar Cardápio</button>
+        <button onclick="showTab('tab-config')" class="tab-button px-4 py-2 font-semibold text-gray-600 hover:text-orange-600 hover:border-b-4 hover:border-orange-500 transition-all">Configurações</button>
+      </div>
+
+      <!-- Aba: Gerenciar Cardápio -->
+      <div id="tab-menu" class="tab-content mt-6">
+        <h2 class="text-2xl font-bold text-orange-600 mb-4 flex items-center gap-2">
+          <i class="fas fa-pizza-slice"></i> Itens do Cardápio
+        </h2>
+        <button onclick="openAddItemForm()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-all mb-4 flex items-center gap-2">
+          <i class="fas fa-plus"></i> Adicionar Novo Item
+        </button>
+        <div id="menu-items-list" class="space-y-4">
+          <!-- Itens serão inseridos dinamicamente -->
+        </div>
+      </div>
+
+      <!-- Aba: Configurações -->
+      <div id="tab-config" class="tab-content mt-6 hidden">
+        <h2 class="text-2xl font-bold text-orange-600 mb-4 flex items-center gap-2">
+          <i class="fas fa-cog"></i> Configurações
+        </h2>
+        <p class="text-gray-600 mb-4">Ajuste as configurações da pizzaria abaixo:</p>
+        <div class="space-y-4">
+          <div>
+            <label for="config-name" class="block text-gray-600 font-medium">Nome da Pizzaria</label>
+            <input type="text" id="config-name" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Nome da pizzaria">
+          </div>
+          <div>
+            <label for="config-primary-color" class="block text-gray-600 font-medium">Cor Primária</label>
+            <input type="color" id="config-primary-color" class="border border-gray-300 rounded-lg p-1 w-full h-12 shadow-sm">
+          </div>
+          <div>
+            <label for="config-secondary-color" class="block text-gray-600 font-medium">Cor Secundária</label>
+            <input type="color" id="config-secondary-color" class="border border-gray-300 rounded-lg p-1 w-full h-12 shadow-sm">
+          </div>
+          <div>
+            <label for="config-background-color" class="block text-gray-600 font-medium">Cor de Fundo</label>
+            <input type="color" id="config-background-color" class="border border-gray-300 rounded-lg p-1 w-full h-12 shadow-sm">
+          </div>
+          <div>
+            <label for="config-text-color" class="block text-gray-600 font-medium">Cor do Texto</label>
+            <input type="color" id="config-text-color" class="border border-gray-300 rounded-lg p-1 w-full h-12 shadow-sm">
+          </div>
+          <div>
+            <label for="config-logo-url" class="block text-gray-600 font-medium">URL do Logo</label>
+            <input type="text" id="config-logo-url" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="URL do logo">
+          </div>
+          <div>
+            <label for="config-whatsapp-link" class="block text-gray-600 font-medium">Link do WhatsApp</label>
+            <input type="text" id="config-whatsapp-link" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Link do WhatsApp">
+          </div>
+          <div>
+            <label for="config-whatsapp-number" class="block text-gray-600 font-medium">Número do WhatsApp</label>
+            <input type="text" id="config-whatsapp-number" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Número do WhatsApp">
+          </div>
+          <div>
+            <label for="config-instagram-url" class="block text-gray-600 font-medium">URL do Instagram</label>
+            <input type="text" id="config-instagram-url" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="URL do Instagram">
+          </div>
+          <div>
+            <label for="config-instagram-handle" class="block text-gray-600 font-medium">Handle do Instagram</label>
+            <input type="text" id="config-instagram-handle" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Handle do Instagram">
+          </div>
+          <button onclick="saveConfig()" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-all w-full flex items-center justify-center gap-2 shadow-md">
+            <i class="fas fa-save"></i> Salvar Configurações
+          </button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Modal de Edição/Adição de Item -->
+  <div id="item-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-20">
+    <div class="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto relative shadow-2xl border-t-4 border-orange-500">
+      <button onclick="closeItemModal()" class="absolute top-4 right-4 text-gray-600 hover:text-gray-800 transition-all">
+        <i class="fas fa-times text-2xl"></i>
+      </button>
+      <h2 id="modal-title" class="text-2xl font-bold text-orange-600 mb-6 flex items-center gap-2">
+        <i class="fas fa-pizza-slice"></i> Adicionar Item
+      </h2>
+      <div class="space-y-4">
+        <div>
+          <label for="modal-id" class="block text-gray-600 font-medium">ID (Automático)</label>
+          <input type="text" id="modal-id" class="border border-gray-300 rounded-lg p-3 w-full bg-gray-100 cursor-not-allowed" readonly aria-label="ID do item">
+        </div>
+        <div>
+          <label for="modal-name" class="block text-gray-600 font-medium">Nome</label>
+          <input type="text" id="modal-name" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Nome do item">
+        </div>
+        <div>
+          <label for="modal-category" class="block text-gray-600 font-medium">Categoria</label>
+          <select id="modal-category" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Categoria do item">
+            <option value="Salgadas">Salgadas</option>
+            <option value="Doces">Doces</option>
+            <option value="Vegetarianas">Vegetarianas</option>
+            <option value="Bebidas">Bebidas</option>
+            <option value="Combos">Combos</option>
+          </select>
+        </div>
+        <div>
+          <label for="modal-price" class="block text-gray-600 font-medium">Preço Base (R$)</label>
+          <input type="number" id="modal-price" step="0.01" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Preço base do item">
+        </div>
+        <div>
+          <label for="modal-image" class="block text-gray-600 font-medium">URL da Imagem</label>
+          <input type="text" id="modal-image" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="URL da imagem do item">
+        </div>
+        <div>
+          <label for="modal-description" class="block text-gray-600 font-medium">Descrição</label>
+          <textarea id="modal-description" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" rows="3" aria-label="Descrição do item"></textarea>
+        </div>
+        <div>
+          <label for="modal-ingredients" class="block text-gray-600 font-medium">Ingredientes (separados por vírgula)</label>
+          <input type="text" id="modal-ingredients" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Ingredientes do item">
+        </div>
+        <!-- Tamanhos -->
+        <div>
+          <label class="block text-gray-600 font-medium">Tamanhos e Preços</label>
+          <div id="modal-sizes" class="space-y-2">
+            <!-- Campos dinâmicos -->
+          </div>
+          <button onclick="addSizeField()" class="text-orange-500 hover:text-orange-600 mt-2 flex items-center gap-2">
+            <i class="fas fa-plus"></i> Adicionar Tamanho
+          </button>
+        </div>
+        <!-- Extras -->
+        <div>
+          <label class="block text-gray-600 font-medium">Extras e Preços</label>
+          <div id="modal-extras" class="space-y-2">
+            <!-- Campos dinâmicos -->
+          </div>
+          <button onclick="addExtraField()" class="text-orange-500 hover:text-orange-600 mt-2 flex items-center gap-2">
+            <i class="fas fa-plus"></i> Adicionar Extra
+          </button>
+        </div>
+        <!-- Bordas -->
+        <div>
+          <label class="block text-gray-600 font-medium">Bordas e Preços</label>
+          <div id="modal-borders" class="space-y-2">
+            <!-- Campos dinâmicos -->
+          </div>
+          <button onclick="addBorderField()" class="text-orange-500 hover:text-orange-600 mt-2 flex items-center gap-2">
+            <i class="fas fa-plus"></i> Adicionar Borda
+          </button>
+        </div>
+        <!-- Itens do Combo -->
+        <div id="modal-combo-items-section" class="hidden">
+          <label class="block text-gray-600 font-medium">Itens do Combo (selecione os IDs)</label>
+          <div id="modal-combo-items" class="space-y-2">
+            <!-- Campos dinâmicos -->
+          </div>
+          <button onclick="addComboItemField()" class="text-orange-500 hover:text-orange-600 mt-2 flex items-center gap-2">
+            <i class="fas fa-plus"></i> Adicionar Item ao Combo
+          </button>
+        </div>
+        <!-- Promoção -->
+        <div>
+          <label class="block text-gray-600 font-medium">Promoção</label>
+          <div class="flex items-center gap-2 mb-2">
+            <input type="checkbox" id="modal-promo-active" class="h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-300 rounded" onchange="togglePromoFields()">
+            <label for="modal-promo-active" class="text-gray-600">Ativar Promoção</label>
+          </div>
+          <div id="promo-fields" class="hidden space-y-2">
+            <label for="modal-promo-price" class="block text-gray-600 font-medium">Preço Promocional (R$)</label>
+            <input type="number" id="modal-promo-price" step="0.01" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Preço promocional">
+          </div>
+        </div>
+        <!-- Avaliação -->
+        <div>
+          <label for="modal-rating" class="block text-gray-600 font-medium">Avaliação (0 a 5)</label>
+          <input type="number" id="modal-rating" step="0.1" min="0" max="5" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Avaliação do item">
+        </div>
+        <div>
+          <label for="modal-num-ratings" class="block text-gray-600 font-medium">Número de Avaliações</label>
+          <input type="number" id="modal-num-ratings" min="0" class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm" aria-label="Número de avaliações">
+        </div>
+        <button onclick="saveItem()" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-all w-full flex items-center justify-center gap-2 shadow-md">
+          <i class="fas fa-save"></i> Salvar Item
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
   <script src="config.js" id="config-script"></script>
   <script src="cardapio.js" id="cardapio-script"></script>
   <script>
     let cardapioData = [];
-    let categoryChart;
-    let currentPage = 1;
-    const itemsPerPage = 10;
-    let filteredItems = [];
-    let sortField = 'nome';
-    let sortDirection = 1;
-    let itemToDelete = null;
-
-    // Função para alternar visibilidade da senha no login
-    const togglePassword = document.getElementById("toggle-password");
-    const passwordInput = document.getElementById("admin-password");
-    togglePassword.addEventListener("click", function() {
-      const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
-      passwordInput.setAttribute("type", type);
-      this.classList.toggle("fa-eye");
-      this.classList.toggle("fa-eye-slash");
-    });
-
-    // Função para inicializar a página de login
-    function initializeAdminPage() {
-      const loginButton = document.getElementById("login-button");
-      const errorMessage = document.getElementById("error-message");
-      const loadingMessage = document.getElementById("loading-message");
-
-      if (!window.config || !window.config.adminPassword) {
-        console.error("Erro: Config não foi carregado corretamente.");
-        errorMessage.textContent = "Erro: Configuração não carregada. Verifique o arquivo config.js.";
-        errorMessage.style.display = "block";
-        loadingMessage.style.display = "none";
-        loginButton.disabled = true;
-        return false;
-      }
-
-      applyConfigStyles();
-      loginButton.disabled = false;
-      loadingMessage.style.display = "none";
-      console.log("Config.js carregado com sucesso. Senha esperada (hash):", window.config.adminPassword);
-      return true;
-    }
-
-    // Função para aplicar estilos baseados no config.js
-    function applyConfigStyles() {
-      document.documentElement.style.setProperty('--primary-color', window.config.primaryColor);
-      document.documentElement.style.setProperty('--secondary-color', window.config.secondaryColor);
-      document.documentElement.style.setProperty('--background-color', window.config.backgroundColor);
-      document.documentElement.style.setProperty('--text-color', window.config.textColor);
-      document.getElementById("logo-admin").src = window.config.logoUrl || "https://via.placeholder.com/140x50.png?text=La+Casa+de+Pizzas";
-      document.getElementById("logo-dashboard").src = window.config.logoUrl || "https://via.placeholder.com/60x60.png?text=La+Casa+de+Pizzas";
-      document.getElementById("pizzaria-name").textContent = window.config.pizzariaName;
-      document.getElementById("whatsapp-link").href = window.config.whatsappLink;
-      document.getElementById("whatsapp-link").textContent = window.config.whatsappNumber;
-      document.getElementById("instagram-link").href = window.config.instagramUrl;
-      document.getElementById("instagram-link").textContent = window.config.instagramHandle;
-    }
-
-    // Função para validar a senha administrativa
-    async function validateAdmin() {
-      const inputPassword = document.getElementById("admin-password").value;
-      const errorMessage = document.getElementById("error-message");
-      const successMessage = document.getElementById("success-message");
-      const loginButton = document.getElementById("login-button");
-
-      if (!window.config || !window.config.adminPassword) {
-        console.error("Erro: Config não foi carregado corretamente durante a validação.");
-        errorMessage.textContent = "Erro: Configuração não carregada.";
-        errorMessage.style.display = "block";
-        return;
-      }
-
-      loginButton.disabled = true;
-      loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validando...';
-
-      try {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(inputPassword);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashedInput = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-        if (hashedInput === window.config.adminPassword) {
-          console.log("Autenticação bem-sucedida!");
-          successMessage.style.display = "block";
-          errorMessage.style.display = "none";
-          localStorage.setItem("adminToken", "authenticated");
-          document.getElementById("admin-password").value = "";
-          setTimeout(() => {
-            showDashboard();
-            initializeDashboard();
-          }, 1000);
-        } else {
-          console.log("Senha incorreta!");
-          errorMessage.textContent = "A senha inserida está incorreta. Por favor, verifique e tente novamente.";
-          errorMessage.style.display = "block";
-          successMessage.style.display = "none";
-          document.getElementById("admin-password").value = "";
-          loginButton.disabled = false;
-          loginButton.innerHTML = '<i class="fas fa-sign-in-alt"></i> Entrar';
-        }
-      } catch (err) {
-        console.error("Erro durante a validação:", err);
-        errorMessage.textContent = "Erro durante a validação.";
-        errorMessage.style.display = "block";
-        loginButton.disabled = false;
-        loginButton.innerHTML = '<i class="fas fa-sign-in-alt"></i> Entrar';
-      }
-    }
-
-    // Função para mostrar o dashboard e ocultar o login
-    function showDashboard() {
-      document.getElementById("admin-section").style.display = "none";
-      document.getElementById("dashboard-section").style.display = "block";
-    }
-
-    // Função para mostrar o login e ocultar o dashboard
-    function showLogin() {
-      document.getElementById("admin-section").style.display = "flex";
-      document.getElementById("dashboard-section").style.display = "none";
-    }
-
-    // Função para verificar o estado inicial da autenticação
-    function checkAuthentication() {
-      if (localStorage.getItem("adminToken")) {
-        showDashboard();
-        initializeDashboard();
-      } else {
-        showLogin();
-        initializeAdminPage();
-      }
-    }
+    let editingItemId = null;
 
     // Função para carregar os dados do cardápio
     function loadCardapioData() {
@@ -1166,7 +310,7 @@
         cardapioData = [...window.cardapio];
         saveCardapioData();
       }
-      filteredItems = [...cardapioData];
+      renderMenuItems();
     }
 
     // Função para salvar os dados do cardápio no localStorage
@@ -1174,569 +318,438 @@
       localStorage.setItem("cardapioData", JSON.stringify(cardapioData));
     }
 
-    // Função para inicializar o dashboard
-    function initializeDashboard() {
-      if (!window.config || !window.cardapio) {
-        console.error("Erro: Config ou Cardápio não foi carregado corretamente.");
-        alert("Erro ao carregar configurações ou cardápio. Verifique os arquivos config.js e cardapio.js.");
-        logout();
-        return;
-      }
-
-      loadCardapioData();
-      applyConfigStyles();
-      updateStatistics();
-      renderMenuItems();
-
-      let debounceTimeout;
-      document.getElementById("search-input").addEventListener("input", function() {
-        clearTimeout(debounceTimeout);
-        debounceTimeout = setTimeout(filterMenuItems, 300);
-      });
-      document.getElementById("category-filter").addEventListener("change", filterMenuItems);
-
-      document.getElementById("item-image").addEventListener("input", function() {
-        const url = this.value;
-        const preview = document.getElementById("image-preview");
-        const loading = document.getElementById("image-loading");
-
-        if (url) {
-          if (!isValidImageUrl(url)) {
-            alert("Por favor, insira uma URL de imagem válida (ex.: .jpg, .png, .gif).");
-            this.value = "";
-            preview.style.display = "none";
-            loading.style.display = "none";
-            return;
-          }
-
-          loading.style.display = "block";
-          preview.style.display = "none";
-          preview.src = url;
-          preview.onload = function() {
-            loading.style.display = "none";
-            preview.style.display = "block";
-          };
-          preview.onerror = function() {
-            loading.style.display = "none";
-            preview.style.display = "none";
-            alert("URL da imagem inválida ou não foi possível carregar. Verifique e tente novamente.");
-            this.value = "";
-          };
-        } else {
-          loading.style.display = "none";
-          preview.style.display = "none";
-        }
-      });
-
-      document.getElementById("edit-item-image").addEventListener("input", function() {
-        const url = this.value;
-        const preview = document.getElementById("edit-image-preview");
-        const loading = document.getElementById("edit-image-loading");
-
-        if (url) {
-          if (!isValidImageUrl(url)) {
-            alert("Por favor, insira uma URL de imagem válida (ex.: .jpg, .png, .gif).");
-            this.value = "";
-            preview.style.display = "none";
-            loading.style.display = "none";
-            return;
-          }
-
-          loading.style.display = "block";
-          preview.style.display = "none";
-          preview.src = url;
-          preview.onload = function() {
-            loading.style.display = "none";
-            preview.style.display = "block";
-          };
-          preview.onerror = function() {
-            loading.style.display = "none";
-            preview.style.display = "none";
-            alert("URL da imagem inválida ou não foi possível carregar. Verifique e tente novamente.");
-            this.value = "";
-          };
-        } else {
-          loading.style.display = "none";
-          preview.style.display = "none";
-        }
-      });
+    // Função para aplicar configurações do config.js
+    function applyConfigStyles() {
+      document.getElementById("logo").src = window.config.logoUrl;
+      document.querySelector("h1").textContent = `Admin - ${window.config.pizzariaName}`;
+      document.documentElement.style.setProperty('--primary-color', window.config.primaryColor);
+      document.documentElement.style.setProperty('--secondary-color', window.config.secondaryColor);
+      document.documentElement.style.setProperty('--background-color', window.config.backgroundColor);
+      document.documentElement.style.setProperty('--text-color', window.config.textColor);
     }
 
-    function isValidImageUrl(url) {
-      const regex = /\.(jpeg|jpg|gif|png)$/i;
-      return regex.test(url);
-    }
-
-    function updateStatistics() {
-      const totalItems = cardapioData.length;
-      document.getElementById("total-items").textContent = totalItems;
-
-      const categoryCount = {};
-      cardapioData.forEach(item => {
-        categoryCount[item.categoria] = (categoryCount[item.categoria] || 0) + 1;
-      });
-      const popularCategory = Object.keys(categoryCount).reduce((a, b) =>
-        categoryCount[a] > categoryCount[b] ? a : b, "N/A");
-      document.getElementById("popular-category").textContent = popularCategory;
-
-      const topRatedItem = cardapioData.reduce((top, item) => {
-        if (!item.avaliacao) return top;
-        return !top || item.avaliacao > top.avaliacao ? item : top;
-      }, null);
-      document.getElementById("top-rated-item").textContent = topRatedItem ? topRatedItem.nome : "N/A";
-
-      const mostExpensiveItem = cardapioData.reduce((top, item) => {
-        return !top || item.preço > top.preço ? item : top;
-      }, null);
-      document.getElementById("most-expensive-item").textContent = mostExpensiveItem ? mostExpensiveItem.nome : "N/A";
-
-      const averageRating = cardapioData.reduce((sum, item) => sum + (item.avaliacao || 0), 0) / cardapioData.length;
-      document.getElementById("average-rating").textContent = averageRating.toFixed(1);
-
-      if (typeof Chart === 'undefined') {
-        console.error("Chart.js não foi carregado corretamente.");
-        document.getElementById("category-chart").style.display = "none";
-        return;
-      }
-
-      const ctx = document.getElementById("category-chart").getContext("2d");
-      if (categoryChart) categoryChart.destroy();
-      categoryChart = new Chart(ctx, {
-        type: "pie",
-        data: {
-          labels: Object.keys(categoryCount),
-          datasets: [{
-            label: "Itens por Categoria",
-            data: Object.values(categoryCount),
-            backgroundColor: [
-              "#FF4500",
-              "#FFD700",
-              "#36A2EB",
-              "#FF6384",
-              "#4BC0C0"
-            ],
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: "bottom"
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const label = context.label || '';
-                  const value = context.raw || 0;
-                  const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
-                  const percentage = ((value / total) * 100).toFixed(1);
-                  return `${label}: ${value} itens (${percentage}%)`;
-                }
-              }
-            }
-          }
-        }
-      });
-    }
-
-    function sortMenuItems(field) {
-      if (sortField === field) {
-        sortDirection *= -1;
+    // Função de login
+    function login() {
+      const passwordInput = document.getElementById("password-input").value;
+      const hashedPassword = sha256(passwordInput);
+      if (hashedPassword === window.config.adminPassword) {
+        document.getElementById("login-screen").classList.add("hidden");
+        document.getElementById("dashboard").classList.remove("hidden");
+        loadCardapioData();
       } else {
-        sortField = field;
-        sortDirection = 1;
+        alert("Senha incorreta!");
       }
-
-      filteredItems.sort((a, b) => {
-        let valueA, valueB;
-        if (field === 'preço') {
-          valueA = a.preço;
-          valueB = b.preço;
-        } else if (field === 'avaliacao') {
-          valueA = a.avaliacao || 0;
-          valueB = b.avaliacao || 0;
-        } else {
-          valueA = a[field].toString().toLowerCase();
-          valueB = b[field].toString().toLowerCase();
-        }
-        if (valueA < valueB) return -1 * sortDirection;
-        if (valueA > valueB) return 1 * sortDirection;
-        return 0;
-      });
-
-      currentPage = 1;
-      renderMenuItems();
     }
 
-    function filterMenuItems() {
-      const searchTerm = document.getElementById("search-input").value.toLowerCase();
-      const categoryFilter = document.getElementById("category-filter").value;
-
-      filteredItems = cardapioData.filter(item => {
-        const matchesSearch = item.nome.toLowerCase().includes(searchTerm);
-        const matchesCategory = categoryFilter ? item.categoria === categoryFilter : true;
-        return matchesSearch && matchesCategory;
+    // Função para mostrar abas
+    function showTab(tabId) {
+      document.querySelectorAll(".tab-content").forEach(tab => tab.classList.add("hidden"));
+      document.querySelectorAll(".tab-button").forEach(button => {
+        button.classList.remove("text-orange-600", "border-b-4", "border-orange-500");
+        button.classList.add("text-gray-600");
       });
-
-      currentPage = 1;
-      renderMenuItems();
+      document.getElementById(tabId).classList.remove("hidden");
+      document.querySelector(`button[onclick="showTab('${tabId}')"]`).classList.add("text-orange-600", "border-b-4", "border-orange-500");
+      if (tabId === "tab-config") loadConfig();
     }
 
+    // Função para renderizar os itens do cardápio
     function renderMenuItems() {
-      const start = (currentPage - 1) * itemsPerPage;
-      const end = start + itemsPerPage;
-      const itemsToShow = filteredItems.slice(start, end);
-
-      const menuItems = document.getElementById("menu-items");
-      menuItems.innerHTML = "";
-      itemsToShow.forEach(item => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td><img src="${item.imagem}" alt="${item.nome}" class="max-w-[50px]"></td>
-          <td>${item.nome}</td>
-          <td>${item.categoria}</td>
-          <td>R$ ${item.preço.toFixed(2)}</td>
-          <td>${item.avaliacao ? item.avaliacao.toFixed(1) : 'N/A'}</td>
-          <td>
-            <button class="bg-[var(--secondary-color)] text-[var(--text-color)] mr-2" onclick="openEditModal(${item.id})"><i class="fas fa-edit"></i> Editar</button>
-            <button class="bg-red-500 text-white" onclick="openDeleteModal(${item.id})"><i class="fas fa-trash"></i> Excluir</button>
-          </td>
+      const menuItemsList = document.getElementById("menu-items-list");
+      menuItemsList.innerHTML = "";
+      cardapioData.forEach(item => {
+        const itemDiv = document.createElement("div");
+        itemDiv.className = "bg-gray-50 rounded-lg p-4 shadow-sm flex justify-between items-center fade-in";
+        itemDiv.innerHTML = `
+          <div>
+            <h3 class="text-lg font-semibold text-orange-600">${item.nome}</h3>
+            <p class="text-gray-600">Categoria: ${item.categoria} | Preço: R$ ${item.preço.toFixed(2)}</p>
+            ${item.promocao?.ativo ? `<p class="text-green-600">Promoção: R$ ${item.promocao.precoPromocional.toFixed(2)}</p>` : ''}
+          </div>
+          <div class="flex gap-2">
+            <button onclick="editItem(${item.id})" class="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition-all flex items-center gap-2">
+              <i class="fas fa-edit"></i> Editar
+            </button>
+            <button onclick="deleteItem(${item.id})" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition-all flex items-center gap-2">
+              <i class="fas fa-trash"></i> Excluir
+            </button>
+          </div>
         `;
-        menuItems.appendChild(row);
+        menuItemsList.appendChild(itemDiv);
+      });
+    }
+
+    // Função para abrir o formulário de adição de item
+    function openAddItemForm() {
+      editingItemId = null;
+      document.getElementById("modal-title").textContent = "Adicionar Item";
+      document.getElementById("modal-id").value = cardapioData.length ? Math.max(...cardapioData.map(item => item.id)) + 1 : 1;
+      document.getElementById("modal-name").value = "";
+      document.getElementById("modal-category").value = "Salgadas";
+      document.getElementById("modal-price").value = "";
+      document.getElementById("modal-image").value = "";
+      document.getElementById("modal-description").value = "";
+      document.getElementById("modal-ingredients").value = "";
+      document.getElementById("modal-sizes").innerHTML = "";
+      document.getElementById("modal-extras").innerHTML = "";
+      document.getElementById("modal-borders").innerHTML = "";
+      document.getElementById("modal-combo-items").innerHTML = "";
+      document.getElementById("modal-promo-active").checked = false;
+      document.getElementById("modal-promo-price").value = "";
+      document.getElementById("modal-rating").value = "";
+      document.getElementById("modal-num-ratings").value = "";
+      togglePromoFields();
+      toggleComboItemsSection();
+      document.getElementById("item-modal").classList.remove("hidden");
+    }
+
+    // Função para abrir o formulário de edição de item
+    function editItem(itemId) {
+      const item = cardapioData.find(item => item.id === itemId);
+      if (!item) return;
+
+      editingItemId = itemId;
+      document.getElementById("modal-title").textContent = "Editar Item";
+      document.getElementById("modal-id").value = item.id;
+      document.getElementById("modal-name").value = item.nome;
+      document.getElementById("modal-category").value = item.categoria;
+      document.getElementById("modal-price").value = item.preço;
+      document.getElementById("modal-image").value = item.imagem;
+      document.getElementById("modal-description").value = item.descrição;
+      document.getElementById("modal-ingredients").value = item.ingredientes.join(", ");
+      
+      // Tamanhos
+      const sizesContainer = document.getElementById("modal-sizes");
+      sizesContainer.innerHTML = "";
+      Object.entries(item.tamanhos).forEach(([size, price]) => {
+        const div = document.createElement("div");
+        div.className = "flex gap-2 items-center";
+        div.innerHTML = `
+          <input type="text" value="${size}" placeholder="Tamanho" class="border border-gray-300 rounded-lg p-3 flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm size-name">
+          <input type="number" value="${price}" step="0.01" placeholder="Preço (R$)" class="border border-gray-300 rounded-lg p-3 w-32 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm size-price">
+          <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-600">
+            <i class="fas fa-trash"></i>
+          </button>
+        `;
+        sizesContainer.appendChild(div);
       });
 
-      const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
-      document.getElementById("page-info").textContent = `Página ${currentPage} de ${totalPages}`;
-      document.getElementById("prev-page").disabled = currentPage === 1;
-      document.getElementById("next-page").disabled = currentPage === totalPages;
-    }
+      // Extras
+      const extrasContainer = document.getElementById("modal-extras");
+      extrasContainer.innerHTML = "";
+      Object.entries(item.extrasDisponiveis).forEach(([extra, price]) => {
+        const div = document.createElement("div");
+        div.className = "flex gap-2 items-center";
+        div.innerHTML = `
+          <input type="text" value="${extra}" placeholder="Extra" class="border border-gray-300 rounded-lg p-3 flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm extra-name">
+          <input type="number" value="${price}" step="0.01" placeholder="Preço (R$)" class="border border-gray-300 rounded-lg p-3 w-32 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm extra-price">
+          <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-600">
+            <i class="fas fa-trash"></i>
+          </button>
+        `;
+        extrasContainer.appendChild(div);
+      });
 
-    function changePage(direction) {
-      currentPage += direction;
-      renderMenuItems();
-    }
+      // Bordas
+      const bordersContainer = document.getElementById("modal-borders");
+      bordersContainer.innerHTML = "";
+      Object.entries(item.bordasDisponiveis).forEach(([border, price]) => {
+        const div = document.createElement("div");
+        div.className = "flex gap-2 items-center";
+        div.innerHTML = `
+          <input type="text" value="${border}" placeholder="Borda" class="border border-gray-300 rounded-lg p-3 flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm border-name">
+          <input type="number" value="${price}" step="0.01" placeholder="Preço (R$)" class="border border-gray-300 rounded-lg p-3 w-32 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm border-price">
+          <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-600">
+            <i class="fas fa-trash"></i>
+          </button>
+        `;
+        bordersContainer.appendChild(div);
+      });
 
-    function openDeleteModal(itemId) {
-      const item = cardapioData.find(i => i.id === itemId);
-      if (item) {
-        itemToDelete = itemId;
-        document.getElementById("delete-item-name").textContent = item.nome;
-        document.getElementById("delete-modal").classList.remove("hidden");
-      }
-    }
-
-    function closeDeleteModal() {
-      document.getElementById("delete-modal").classList.add("hidden");
-      itemToDelete = null;
-    }
-
-    function confirmDelete() {
-      if (itemToDelete !== null) {
-        cardapioData = cardapioData.filter(item => item.id !== itemToDelete);
-        filteredItems = filteredItems.filter(item => item.id !== itemToDelete);
-        saveCardapioData();
-        updateStatistics();
-        renderMenuItems();
-        closeDeleteModal();
-      }
-    }
-
-    function exportCardapio(format) {
-      if (format === 'json') {
-        const dataStr = JSON.stringify(cardapioData, null, 2);
-        const blob = new Blob([dataStr], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "cardapio.json";
-        link.click();
-      } else if (format === 'csv') {
-        const headers = ['id', 'nome', 'categoria', 'preço', 'imagem', 'descrição', 'ingredientes', 'avaliacao', 'numAvaliacoes'];
-        const rows = cardapioData.map(item => {
-          return headers.map(field => {
-            let value = item[field] || '';
-            if (typeof value === 'string') {
-              value = `"${value.replace(/"/g, '""')}"`;
-            }
-            return value;
-          }).join(',');
+      // Itens do Combo
+      const comboItemsContainer = document.getElementById("modal-combo-items");
+      comboItemsContainer.innerHTML = "";
+      if (item.categoria === "Combos" && item.itens) {
+        item.itens.forEach(itemId => {
+          const div = document.createElement("div");
+          div.className = "flex gap-2 items-center";
+          div.innerHTML = `
+            <input type="number" value="${itemId}" placeholder="ID do Item" class="border border-gray-300 rounded-lg p-3 w-32 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm combo-item-id">
+            <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-600">
+              <i class="fas fa-trash"></i>
+            </button>
+          `;
+          comboItemsContainer.appendChild(div);
         });
-        const csvContent = [headers.join(','), ...rows].join('\n');
-        const blob = new Blob([csvContent], { type: "text/csv" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "cardapio.csv";
-        link.click();
+      }
+
+      // Promoção
+      document.getElementById("modal-promo-active").checked = item.promocao?.ativo || false;
+      document.getElementById("modal-promo-price").value = item.promocao?.precoPromocional || "";
+      togglePromoFields();
+
+      // Avaliação
+      document.getElementById("modal-rating").value = item.avaliacao || "";
+      document.getElementById("modal-num-ratings").value = item.numAvaliacoes || "";
+
+      toggleComboItemsSection();
+      document.getElementById("item-modal").classList.remove("hidden");
+    }
+
+    // Função para deletar um item
+    function deleteItem(itemId) {
+      if (confirm("Tem certeza que deseja excluir este item?")) {
+        cardapioData = cardapioData.filter(item => item.id !== itemId);
+        saveCardapioData();
+        renderMenuItems();
       }
     }
 
-    function openTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-        btn.setAttribute('aria-selected', 'false');
-      });
-
-      const targetTab = document.getElementById(tabId);
-      targetTab.classList.remove('hidden');
-
-      const targetBtn = document.querySelector(`button[onclick="openTab('${tabId}')"]`);
-      targetBtn.classList.add('active');
-      targetBtn.setAttribute('aria-selected', 'true');
-    }
-
-    function toggleDarkMode() {
-      document.body.classList.toggle("dark-mode");
-    }
-
-    function logout() {
-      localStorage.removeItem("adminToken");
-      showLogin();
-      initializeAdminPage();
-    }
-
+    // Função para adicionar campo de tamanho
     function addSizeField() {
-      const container = document.getElementById("sizes-container");
+      const sizesContainer = document.getElementById("modal-sizes");
       const div = document.createElement("div");
       div.className = "flex gap-2 items-center";
       div.innerHTML = `
-        <input type="text" placeholder="Tamanho (ex.: P)" class="size-name p-2 border rounded flex-1" required>
-        <input type="number" placeholder="Preço (R$)" step="0.01" min="0" class="size-price p-2 border rounded flex-1" required>
-        <button type="button" onclick="this.parentElement.remove()" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"><i class="fas fa-trash"></i></button>
+        <input type="text" placeholder="Tamanho" class="border border-gray-300 rounded-lg p-3 flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm size-name">
+        <input type="number" step="0.01" placeholder="Preço (R$)" class="border border-gray-300 rounded-lg p-3 w-32 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm size-price">
+        <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-600">
+          <i class="fas fa-trash"></i>
+        </button>
       `;
-      container.appendChild(div);
+      sizesContainer.appendChild(div);
     }
 
+    // Função para adicionar campo de extra
     function addExtraField() {
-      const container = document.getElementById("extras-container");
+      const extrasContainer = document.getElementById("modal-extras");
       const div = document.createElement("div");
       div.className = "flex gap-2 items-center";
       div.innerHTML = `
-        <input type="text" placeholder="Extra (ex.: Azeitonas)" class="extra-name p-2 border rounded flex-1" required>
-        <input type="number" placeholder="Preço (R$)" step="0.01" min="0" class="extra-price p-2 border rounded flex-1" required>
-        <button type="button" onclick="this.parentElement.remove()" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"><i class="fas fa-trash"></i></button>
+        <input type="text" placeholder="Extra" class="border border-gray-300 rounded-lg p-3 flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm extra-name">
+        <input type="number" step="0.01" placeholder="Preço (R$)" class="border border-gray-300 rounded-lg p-3 w-32 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm extra-price">
+        <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-600">
+          <i class="fas fa-trash"></i>
+        </button>
       `;
-      container.appendChild(div);
+      extrasContainer.appendChild(div);
     }
 
-    function addEditSizeField() {
-      const container = document.getElementById("edit-sizes-container");
+    // Função para adicionar campo de borda
+    function addBorderField() {
+      const bordersContainer = document.getElementById("modal-borders");
       const div = document.createElement("div");
       div.className = "flex gap-2 items-center";
       div.innerHTML = `
-        <input type="text" placeholder="Tamanho (ex.: P)" class="size-name p-2 border rounded flex-1" required>
-        <input type="number" placeholder="Preço (R$)" step="0.01" min="0" class="size-price p-2 border rounded flex-1" required>
-        <button type="button" onclick="this.parentElement.remove()" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"><i class="fas fa-trash"></i></button>
+        <input type="text" placeholder="Borda" class="border border-gray-300 rounded-lg p-3 flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm border-name">
+        <input type="number" step="0.01" placeholder="Preço (R$)" class="border border-gray-300 rounded-lg p-3 w-32 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm border-price">
+        <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-600">
+          <i class="fas fa-trash"></i>
+        </button>
       `;
-      container.appendChild(div);
+      bordersContainer.appendChild(div);
     }
 
-    function addEditExtraField() {
-      const container = document.getElementById("edit-extras-container");
+    // Função para adicionar campo de item do combo
+    function addComboItemField() {
+      const comboItemsContainer = document.getElementById("modal-combo-items");
       const div = document.createElement("div");
       div.className = "flex gap-2 items-center";
       div.innerHTML = `
-        <input type="text" placeholder="Extra (ex.: Azeitonas)" class="extra-name p-2 border rounded flex-1" required>
-        <input type="number" placeholder="Preço (R$)" step="0.01" min="0" class="extra-price p-2 border rounded flex-1" required>
-        <button type="button" onclick="this.parentElement.remove()" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"><i class="fas fa-trash"></i></button>
+        <input type="number" placeholder="ID do Item" class="border border-gray-300 rounded-lg p-3 w-32 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm combo-item-id">
+        <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-600">
+          <i class="fas fa-trash"></i>
+        </button>
       `;
-      container.appendChild(div);
+      comboItemsContainer.appendChild(div);
     }
 
-    function openEditModal(itemId) {
-      const item = cardapioData.find(i => i.id === itemId);
-      if (item) {
-        document.getElementById("edit-item-id").value = item.id;
-        document.getElementById("edit-item-name").value = item.nome;
-        document.getElementById("edit-item-category").value = item.categoria;
-        document.getElementById("edit-item-price").value = item.preço;
-        document.getElementById("edit-item-image").value = item.imagem;
-        document.getElementById("edit-image-preview").src = item.imagem;
-        document.getElementById("edit-image-preview").style.display = "block";
-        document.getElementById("edit-item-description").value = item.descrição;
-        document.getElementById("edit-item-ingredients").value = item.ingredientes || '';
-
-        const sizesContainer = document.getElementById("edit-sizes-container");
-        sizesContainer.innerHTML = "";
-        if (item.tamanhos) {
-          Object.entries(item.tamanhos).forEach(([size, price]) => {
-            const div = document.createElement("div");
-            div.className = "flex gap-2 items-center";
-            div.innerHTML = `
-              <input type="text" value="${size}" placeholder="Tamanho (ex.: P)" class="size-name p-2 border rounded flex-1" required>
-              <input type="number" value="${price}" placeholder="Preço (R$)" step="0.01" min="0" class="size-price p-2 border rounded flex-1" required>
-              <button type="button" onclick="this.parentElement.remove()" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"><i class="fas fa-trash"></i></button>
-            `;
-            sizesContainer.appendChild(div);
-          });
-        }
-
-        const extrasContainer = document.getElementById("edit-extras-container");
-        extrasContainer.innerHTML = "";
-        if (item.extrasDisponiveis) {
-          Object.entries(item.extrasDisponiveis).forEach(([extra, price]) => {
-            const div = document.createElement("div");
-            div.className = "flex gap-2 items-center";
-            div.innerHTML = `
-              <input type="text" value="${extra}" placeholder="Extra (ex.: Azeitonas)" class="extra-name p-2 border rounded flex-1" required>
-              <input type="number" value="${price}" placeholder="Preço (R$)" step="0.01" min="0" class="extra-price p-2 border rounded flex-1" required>
-              <button type="button" onclick="this.parentElement.remove()" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"><i class="fas fa-trash"></i></button>
-            `;
-            extrasContainer.appendChild(div);
-          });
-        }
-
-        document.getElementById("edit-modal").classList.remove("hidden");
-      }
+    // Função para alternar visibilidade dos campos de promoção
+    function togglePromoFields() {
+      const promoFields = document.getElementById("promo-fields");
+      const promoActive = document.getElementById("modal-promo-active").checked;
+      promoFields.classList.toggle("hidden", !promoActive);
     }
 
-    function closeModal() {
-      document.getElementById("edit-modal").classList.add("hidden");
+    // Função para alternar visibilidade da seção de itens do combo
+    function toggleComboItemsSection() {
+      const category = document.getElementById("modal-category").value;
+      const comboSection = document.getElementById("modal-combo-items-section");
+      comboSection.classList.toggle("hidden", category !== "Combos");
     }
 
-    function addItem(continueAdding) {
-      const name = document.getElementById("item-name").value;
-      const category = document.getElementById("item-category").value;
-      const price = parseFloat(document.getElementById("item-price").value);
-      const image = document.getElementById("item-image").value;
-      const description = document.getElementById("item-description").value;
-      const ingredients = document.getElementById("item-ingredients").value;
+    // Função para salvar um item
+    function saveItem() {
+      const id = parseInt(document.getElementById("modal-id").value);
+      const nome = document.getElementById("modal-name").value;
+      const categoria = document.getElementById("modal-category").value;
+      const preço = parseFloat(document.getElementById("modal-price").value);
+      const imagem = document.getElementById("modal-image").value;
+      const descrição = document.getElementById("modal-description").value;
+      const ingredientes = document.getElementById("modal-ingredients").value.split(",").map(item => item.trim()).filter(item => item);
 
+      // Tamanhos
       const sizes = {};
-      document.querySelectorAll("#sizes-container .flex").forEach(div => {
+      document.querySelectorAll("#modal-sizes > div").forEach(div => {
         const sizeName = div.querySelector(".size-name").value;
         const sizePrice = parseFloat(div.querySelector(".size-price").value);
-        if (sizeName && sizePrice >= 0) {
+        if (sizeName && !isNaN(sizePrice)) {
           sizes[sizeName] = sizePrice;
         }
       });
 
+      // Extras
       const extras = {};
-      document.querySelectorAll("#extras-container .flex").forEach(div => {
+      document.querySelectorAll("#modal-extras > div").forEach(div => {
         const extraName = div.querySelector(".extra-name").value;
         const extraPrice = parseFloat(div.querySelector(".extra-price").value);
-        if (extraName && extraPrice >= 0) {
+        if (extraName && !isNaN(extraPrice)) {
           extras[extraName] = extraPrice;
         }
       });
 
+      // Bordas
+      const borders = {};
+      document.querySelectorAll("#modal-borders > div").forEach(div => {
+        const borderName = div.querySelector(".border-name").value;
+        const borderPrice = parseFloat(div.querySelector(".border-price").value);
+        if (borderName && !isNaN(borderPrice)) {
+          borders[borderName] = borderPrice;
+        }
+      });
+
+      // Itens do Combo
+      let comboItems = [];
+      if (categoria === "Combos") {
+        comboItems = Array.from(document.querySelectorAll(".combo-item-id"))
+          .map(input => parseInt(input.value))
+          .filter(id => !isNaN(id));
+      }
+
+      // Promoção
+      const promoActive = document.getElementById("modal-promo-active").checked;
+      const promoPrice = parseFloat(document.getElementById("modal-promo-price").value);
+      const promocao = promoActive && !isNaN(promoPrice) ? { ativo: true, precoPromocional: promoPrice } : null;
+
+      // Avaliação
+      const avaliacao = parseFloat(document.getElementById("modal-rating").value) || 0;
+      const numAvaliacoes = parseInt(document.getElementById("modal-num-ratings").value) || 0;
+
+      // Validação
+      if (!nome || isNaN(preço)) {
+        alert("Por favor, preencha todos os campos obrigatórios (Nome e Preço Base).");
+        return;
+      }
+
       const newItem = {
-        id: cardapioData.length ? Math.max(...cardapioData.map(item => item.id)) + 1 : 1,
-        nome: name,
-        categoria: category,
-        preço: price,
-        imagem: image,
-        descrição: description,
-        ingredientes: ingredients ? ingredients.split(',').map(i => i.trim()) : [],
+        id,
+        nome,
+        categoria,
+        preço,
+        imagem: imagem || "https://via.placeholder.com/300x200.png?text=Imagem+Indisponível",
+        descrição,
+        ingredientes,
         tamanhos: sizes,
         extrasDisponiveis: extras,
-        avaliacao: null,
-        numAvaliacoes: 0
+        bordasDisponiveis: borders,
+        itens: categoria === "Combos" ? comboItems : undefined,
+        promocao,
+        avaliacao,
+        numAvaliacoes
       };
 
-      cardapioData.push(newItem);
-      filteredItems.push(newItem);
+      if (editingItemId !== null) {
+        const index = cardapioData.findIndex(item => item.id === editingItemId);
+        cardapioData[index] = newItem;
+      } else {
+        cardapioData.push(newItem);
+      }
+
       saveCardapioData();
-      updateStatistics();
       renderMenuItems();
-
-      if (!continueAdding) {
-        openTab('menu-tab');
-      }
-
-      document.getElementById("add-item-form").reset();
-      document.getElementById("sizes-container").innerHTML = "";
-      document.getElementById("extras-container").innerHTML = "";
-      document.getElementById("image-preview").style.display = "none";
+      closeItemModal();
     }
 
-    function addAndContinue() {
-      addItem(true);
+    // Função para fechar o modal de item
+    function closeItemModal() {
+      document.getElementById("item-modal").classList.add("hidden");
     }
 
-    document.getElementById("add-item-form").addEventListener("submit", function(event) {
-      event.preventDefault();
-      addItem(false);
-    });
+    // Função para carregar as configurações
+    function loadConfig() {
+      document.getElementById("config-name").value = window.config.pizzariaName;
+      document.getElementById("config-primary-color").value = window.config.primaryColor;
+      document.getElementById("config-secondary-color").value = window.config.secondaryColor;
+      document.getElementById("config-background-color").value = window.config.backgroundColor;
+      document.getElementById("config-text-color").value = window.config.textColor;
+      document.getElementById("config-logo-url").value = window.config.logoUrl;
+      document.getElementById("config-whatsapp-link").value = window.config.whatsappLink;
+      document.getElementById("config-whatsapp-number").value = window.config.whatsappNumber;
+      document.getElementById("config-instagram-url").value = window.config.instagramUrl;
+      document.getElementById("config-instagram-handle").value = window.config.instagramHandle;
+    }
 
-    document.getElementById("edit-item-form").addEventListener("submit", function(event) {
-      event.preventDefault();
-      const itemId = parseInt(document.getElementById("edit-item-id").value);
-      const itemIndex = cardapioData.findIndex(item => item.id === itemId);
-      if (itemIndex !== -1) {
-        const sizes = {};
-        document.querySelectorAll("#edit-sizes-container .flex").forEach(div => {
-          const sizeName = div.querySelector(".size-name").value;
-          const sizePrice = parseFloat(div.querySelector(".size-price").value);
-          if (sizeName && sizePrice >= 0) {
-            sizes[sizeName] = sizePrice;
-          }
-        });
+    // Função para salvar as configurações
+    function saveConfig() {
+      window.config.pizzariaName = document.getElementById("config-name").value;
+      window.config.primaryColor = document.getElementById("config-primary-color").value;
+      window.config.secondaryColor = document.getElementById("config-secondary-color").value;
+      window.config.backgroundColor = document.getElementById("config-background-color").value;
+      window.config.textColor = document.getElementById("config-text-color").value;
+      window.config.logoUrl = document.getElementById("config-logo-url").value;
+      window.config.whatsappLink = document.getElementById("config-whatsapp-link").value;
+      window.config.whatsappNumber = document.getElementById("config-whatsapp-number").value;
+      window.config.instagramUrl = document.getElementById("config-instagram-url").value;
+      window.config.instagramHandle = document.getElementById("config-instagram-handle").value;
 
-        const extras = {};
-        document.querySelectorAll("#edit-extras-container .flex").forEach(div => {
-          const extraName = div.querySelector(".extra-name").value;
-          const extraPrice = parseFloat(div.querySelector(".extra-price").value);
-          if (extraName && extraPrice >= 0) {
-            extras[extraName] = extraPrice;
-          }
-        });
+      alert("Configurações salvas! Recarregue a página para ver as alterações.");
+      applyConfigStyles();
+    }
 
-        cardapioData[itemIndex] = {
-          ...cardapioData[itemIndex],
-          nome: document.getElementById("edit-item-name").value,
-          categoria: document.getElementById("edit-item-category").value,
-          preço: parseFloat(document.getElementById("edit-item-price").value),
-          imagem: document.getElementById("edit-item-image").value,
-          descrição: document.getElementById("edit-item-description").value,
-          ingredientes: document.getElementById("edit-item-ingredients").value ? document.getElementById("edit-item-ingredients").value.split(',').map(i => i.trim()) : [],
-          tamanhos: sizes,
-          extrasDisponiveis: extras
-        };
+    // Função para alternar modo escuro
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+      const isDark = document.body.classList.contains("dark");
+      document.getElementById("dark-mode-toggle").innerHTML = isDark
+        ? '<i class="fas fa-sun"></i> Modo Claro'
+        : '<i class="fas fa-moon"></i> Modo Escuro';
+      document.body.classList.toggle("bg-gray-900", isDark);
+      document.body.classList.toggle("text-white", isDark);
+      document.body.classList.toggle("bg-gradient-to-br", !isDark);
+      document.body.classList.toggle("from-orange-100", !isDark);
+      document.body.classList.toggle("via-amber-200", !isDark);
+      document.body.classList.toggle("to-red-200", !isDark);
+    }
 
-        filteredItems = filteredItems.map(item => item.id === itemId ? cardapioData[itemIndex] : item);
-        saveCardapioData();
-        updateStatistics();
-        renderMenuItems();
-        closeModal();
-      }
-    });
-
-    // Inicialização ao carregar a página
+    // Inicialização
     const configScript = document.getElementById("config-script");
+    const cardapioScript = document.getElementById("cardapio-script");
+
     configScript.onload = function() {
-      console.log("Config.js foi carregado.");
-      const cardapioScript = document.getElementById("cardapio-script");
-      cardapioScript.onload = function() {
-        console.log("Cardapio.js foi carregado.");
-        checkAuthentication();
-      };
-      cardapioScript.onerror = function() {
-        console.error("Erro ao carregar o cardapio.js.");
-        alert("Erro ao carregar o cardápio. Verifique o arquivo cardapio.js.");
-        showLogin();
-      };
-    };
-    configScript.onerror = function() {
-      console.error("Erro ao carregar o config.js.");
-      const errorMessage = document.getElementById("error-message");
-      const loadingMessage = document.getElementById("loading-message");
-      errorMessage.textContent = "Erro: Não foi possível carregar o config.js.";
-      errorMessage.style.display = "block";
-      loadingMessage.style.display = "none";
-      document.getElementById("login-button").disabled = true;
+      console.log("Config.js carregado.");
+      if (window.config) {
+        applyConfigStyles();
+        cardapioScript.onload = function() {
+          console.log("Cardapio.js carregado.");
+          if (window.cardapio) {
+            document.getElementById("dark-mode-toggle").addEventListener("click", toggleDarkMode);
+            document.getElementById("modal-category").addEventListener("change", toggleComboItemsSection);
+          } else {
+            console.error("Erro: window.cardapio não foi definido.");
+            alert("Erro ao carregar o cardápio. Verifique o arquivo cardapio.js.");
+          }
+        };
+        cardapioScript.onerror = function() {
+          console.error("Erro ao carregar cardapio.js.");
+          alert("Erro ao carregar o cardápio. Verifique o arquivo cardapio.js.");
+        };
+      }
     };
 
-    // Permite login ao pressionar Enter
-    document.getElementById("admin-password").addEventListener("keypress", function(event) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        if (!document.getElementById("login-button").disabled) {
-          validateAdmin();
-        }
-      }
-    });
+    configScript.onerror = function() {
+      console.error("Erro ao carregar config.js.");
+      alert("Erro ao carregar as configurações. Verifique o arquivo config.js.");
+    };
   </script>
 </body>
 </html>
