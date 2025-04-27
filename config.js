@@ -4,7 +4,7 @@ window.config = {
   secondaryColor: "#FFD700",
   backgroundColor: "#FFF8E7",
   textColor: "#1A1A1A",
-  logoUrl: "https://via.placeholder.com/140x50.png?text=La+Casa+de+Pizzas",
+  logoUrl: "https://i.imgur.com/3wbh5W3.jpeg",
   pizzariaName: "La Casa de Pizzas",
   whatsappLink: "https://wa.me/5511912345678",
   whatsappNumber: "(11) 91234-5678",
