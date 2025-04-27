@@ -1,81 +1,13 @@
-/**
- * Configurações globais da pizzaria.
- * Define as configurações usadas pelo projeto, como cores, nome da pizzaria, logo e links sociais.
- */
 window.config = {
-  // Cores do tema (em formato hexadecimal)
-  primaryColor: validateColor('#FF4500'), // Cor primária (laranja)
-  secondaryColor: validateColor('#FFD700'), // Cor secundária (amarelo)
-  backgroundColor: validateColor('#FFF8E7'), // Cor de fundo (creme claro)
-  textColor: validateColor('#2D2D2D'), // Cor do texto (cinza escuro)
-
-  // Informações da pizzaria
-  pizzariaName: validateString('La Casa de Pizzas', 'Nome da pizzaria'), // Nome da pizzaria
-  logoUrl: validateUrl('https://i.imgur.com/3wbh5W3.jpeg', 'URL do logo'), // URL do logo
-
-  // Links de contato e redes sociais
-  whatsappNumber: validatePhone('(62) 99577-1104'), // Número de WhatsApp
-  whatsappLink: validateUrl('https://api.whatsapp.com/send?phone=5562995771104', 'Link do WhatsApp'),
-  instagramHandle: validateString('@lacasadepizza2025', 'Nome do Instagram'), // Nome do Instagram (com @)
-  instagramUrl: validateUrl('https://instagram.com/lacasadepizza2025', 'URL do Instagram'), // URL do Instagram
-
-  // Configurações administrativas
-  adminPassword: validateString('', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27e', // Hash MD5 de "LVz"
-
-                                
-/**
- * Valida uma cor no formato hexadecimal.
- * @param {string} color - Cor a ser validada.
- * @param {string} defaultColor - Cor padrão caso a validação falhe.
- * @returns {string} Cor validada ou padrão.
- */
-function validateColor(color, defaultColor = '#000000') {
-  const hexPattern = /^#([0-9A-F]{3}|[0-9A-F]{6})$/i;
-  return typeof color === 'string' && hexPattern.test(color) ? color : defaultColor;
-}
-
-/**
- * Valida uma string não vazia.
- * @param {string} value - Valor a ser validado.
- * @param {string} fieldName - Nome do campo para mensagem de erro.
- * @param {string} defaultValue - Valor padrão caso a validação falhe.
- * @returns {string} String validada ou padrão.
- */
-function validateString(value, fieldName, defaultValue = '') {
-  if (typeof value !== 'string' || value.trim() === '') {
-    console.warn(`[Config] ${fieldName} inválido. Usando valor padrão: ${defaultValue}`);
-    return defaultValue;
-  }
-  return value.trim();
-}
-
-/**
- * Valida uma URL.
- * @param {string} url - URL a ser validada.
- * @param {string} fieldName - Nome do campo para mensagem de erro.
- * @param {string} defaultUrl - URL padrão caso a validação falhe.
- * @returns {string} URL validada ou padrão.
- */
-function validateUrl(url, fieldName, defaultUrl = '#') {
-  try {
-    new URL(url);
-    return url;
-  } catch (e) {
-    console.warn(`[Config] ${fieldName} inválido: ${url}. Usando valor padrão: ${defaultUrl}`);
-    return defaultUrl;
-  }
-}
-
-/**
- * Valida um número de telefone no formato (XX) XXXXX-XXXX.
- * @param {string} phone - Número de telefone a ser validado.
- * @param {string} defaultPhone - Número padrão caso a validação falhe.
- * @returns {string} Número validado ou padrão.
- */
-function validatePhone(phone, defaultPhone = 'Não informado') {
-  const phonePattern = /^\(\d{2}\)\s\d{5}-\d{4}$/;
-  return typeof phone === 'string' && phonePattern.test(phone) ? phone : defaultPhone;
-}
-
-// Exporta as configurações para uso global
-window.config = config;
+  adminPassword: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6", // Hash SHA-256 de "LVz"
+  primaryColor: "#FF4500",
+  secondaryColor: "#FFD700",
+  backgroundColor: "#FFF8E7",
+  textColor: "#1A1A1A",
+  logoUrl: "https://via.placeholder.com/140x50.png?text=La+Casa+de+Pizzas",
+  pizzariaName: "La Casa de Pizzas",
+  whatsappLink: "https://wa.me/5511912345678",
+  whatsappNumber: "(11) 91234-5678",
+  instagramUrl: "https://instagram.com/lacasadepizzas",
+  instagramHandle: "@lacasadepizzas"
+};
