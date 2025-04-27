@@ -285,119 +285,6 @@
       document.querySelector("h1").textContent = window.config.pizzariaName;
     }
 
-    // Aplicar estilos dinâmicos via CSS
-    const styleSheet = document.createElement("style");
-    styleSheet.textContent = `
-      @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
-      .fade-in {
-        animation: fadeIn ${window.config.animations.fadeInDuration} ease-in-out;
-      }
-      .glow {
-        animation: glow ${window.config.animations.glowDuration} infinite;
-      }
-      .spin {
-        animation: spin ${window.config.animations.spinDuration} linear infinite;
-      }
-      .bounce {
-        animation: bounce ${window.config.animations.bounceDuration};
-      }
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      @keyframes glow {
-        0% { box-shadow: 0 0 5px ${window.config.colors.primary}80; }
-        50% { box-shadow: 0 0 20px ${window.config.colors.primary}CC; }
-        100% { box-shadow: 0 0 5px ${window.config.colors.primary}80; }
-      }
-      @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-      }
-      @keyframes bounce {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
-      }
-      .card-hover:hover {
-        transform: scale(1.05);
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-      }
-      img[alt="Imagem indisponível"] {
-        background-color: #f1f5f9;
-        color: #6b7280;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: ${window.config.fonts.sizes.small};
-        font-weight: 500;
-      }
-      .loader {
-        border: 4px solid #f3f3f3;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        margin: 20px auto;
-      }
-      .dark .card-bg, .dark section, .dark #page-info {
-        background-color: ${window.config.colors.cardBackgroundDark} !important;
-      }
-      .dark .text-dark-mode {
-        color: ${window.config.colors.textDark} !important;
-      }
-      .dark .bg-dark-mode {
-        background-color: ${window.config.colors.backgroundDark} !important;
-      }
-      #dark-mode-toggle {
-        padding: 0.5rem;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      #dark-mode-toggle i {
-        font-size: 1.25rem;
-      }
-      #back-to-top {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        color: white;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        transition: opacity 0.3s, transform 0.3s;
-      }
-      #back-to-top:hover {
-        transform: scale(1.1);
-      }
-      #toast {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background-color: #34D399;
-        color: white;
-        padding: 12px 24px;
-        border-radius: 8px;
-        display: none;
-        z-index: 100;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      }
-      .dark {
-        background: ${window.config.colors.backgroundDark} !important;
-        color: ${window.config.colors.textDark} !important;
-      }
-      .dark select {
-        background-color: ${window.config.colors.cardBackgroundDark};
-        color: ${window.config.colors.textDark};
-      }
-    `;
-    document.head.appendChild(styleSheet);
-
     // Função para carregar os dados do cardápio
     function loadCardapioData() {
       const storedData = localStorage.getItem("cardapioData");
@@ -406,12 +293,24 @@
           cardapioData = JSON.parse(storedData);
         } catch (err) {
           console.error("Erro ao carregar dados do localStorage:", err);
-          cardapioData = [...window.cardapio];
-          saveCardapioData();
+          if (Array.isArray(window.cardapio)) {
+            cardapioData = [...window.cardapio];
+            saveCardapioData();
+          } else {
+            console.error("window.cardapio não é um array válido.");
+            alert("Erro: Dados do cardápio inválidos.");
+            return;
+          }
         }
       } else {
-        cardapioData = [...window.cardapio];
-        saveCardapioData();
+        if (Array.isArray(window.cardapio)) {
+          cardapioData = [...window.cardapio];
+          saveCardapioData();
+        } else {
+          console.error("window.cardapio não é um array válido.");
+          alert("Erro: Dados do cardápio inválidos.");
+          return;
+        }
       }
       filteredItems = [...cardapioData];
       updateCartCount();
@@ -624,7 +523,7 @@
       const cartItemsContainer = document.getElementById("cart-items");
       cartItemsContainer.innerHTML = "";
       if (cart.length === 0) {
-        cartItemsContainer.innerHTML = '<p class="text-dark-mode">Seu carrinho está vazio.</p>';
+        cartItemsContainer.innerHTML = '<p class="text-dark   -mode">Seu carrinho está vazio.</p>';
       } else {
         cart.forEach((item, index) => {
           const cartItem = document.createElement("div");
@@ -747,6 +646,119 @@
     configScript.onload = function() {
       console.log("Config.js carregado.");
       if (window.config) {
+        // Definir estilos dinâmicos APÓS carregar config.js
+        const styleSheet = document.createElement("style");
+        styleSheet.textContent = `
+          @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+          .fade-in {
+            animation: fadeIn ${window.config.animations.fadeInDuration} ease-in-out;
+          }
+          .glow {
+            animation: glow ${window.config.animations.glowDuration} infinite;
+          }
+          .spin {
+            animation: spin ${window.config.animations.spinDuration} linear infinite;
+          }
+          .bounce {
+            animation: bounce ${window.config.animations.bounceDuration};
+          }
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes glow {
+            0% { box-shadow: 0 0 5px ${window.config.colors.primary}80; }
+            50% { box-shadow: 0 0 20px ${window.config.colors.primary}CC; }
+            100% { box-shadow: 0 0 5px ${window.config.colors.primary}80; }
+          }
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+          @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+          }
+          .card-hover:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+          }
+          img[alt="Imagem indisponível"] {
+            background-color: #f1f5f9;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: ${window.config.fonts.sizes.small};
+            font-weight: 500;
+          }
+          .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin: 20px auto;
+          }
+          .dark .card-bg, .dark section, .dark #page-info {
+            background-color: ${window.config.colors.cardBackgroundDark} !important;
+          }
+          .dark .text-dark-mode {
+            color: ${window.config.colors.textDark} !important;
+          }
+          .dark .bg-dark-mode {
+            background-color: ${window.config.colors.backgroundDark} !important;
+          }
+          #dark-mode-toggle {
+            padding: 0.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          #dark-mode-toggle i {
+            font-size: 1.25rem;
+          }
+          #back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: opacity 0.3s, transform 0.3s;
+          }
+          #back-to-top:hover {
+            transform: scale(1.1);
+          }
+          #toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #34D399;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            display: none;
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+          }
+          .dark {
+            background: ${window.config.colors.backgroundDark} !important;
+            color: ${window.config.colors.textDark} !important;
+          }
+          .dark select {
+            background-color: ${window.config.colors.cardBackgroundDark};
+            color: ${window.config.colors.textDark};
+          }
+        `;
+        document.head.appendChild(styleSheet);
+
         applyConfigStyles();
         cardapioScript.onload = function() {
           console.log("Cardapio.js carregado.");

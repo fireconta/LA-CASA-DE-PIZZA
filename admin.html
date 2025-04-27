@@ -236,53 +236,6 @@
       document.querySelector("h1").textContent = `Admin - ${window.config.pizzariaName}`;
     }
 
-    // Aplicar estilos dinâmicos via CSS
-    const styleSheet = document.createElement("style");
-    styleSheet.textContent = `
-      @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
-      .fade-in {
-        animation: fadeIn ${window.config.animations.fadeInDuration} ease-in-out;
-      }
-      .glow {
-        animation: glow ${window.config.animations.glowDuration} infinite;
-      }
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      @keyframes glow {
-        0% { box-shadow: 0 0 5px ${window.config.colors.primary}80; }
-        50% { box-shadow: 0 0 20px ${window.config.colors.primary}CC; }
-        100% { box-shadow: 0 0 5px ${window.config.colors.primary}80; }
-      }
-      @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-      }
-      .loader {
-        border: 4px solid #f3f3f3;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        margin: 20px auto;
-      }
-      .dark .card-bg, .dark section {
-        background-color: ${window.config.colors.cardBackgroundDark} !important;
-      }
-      .dark .text-dark-mode {
-        color: ${window.config.colors.textDark} !important;
-      }
-      .dark {
-        background: ${window.config.colors.backgroundDark} !important;
-        color: ${window.config.colors.textDark} !important;
-      }
-      .dark select {
-        background-color: ${window.config.colors.cardBackgroundDark};
-        color: ${window.config.colors.textDark};
-      }
-    `;
-    document.head.appendChild(styleSheet);
-
     function loadCardapioData() {
       const storedData = localStorage.getItem("cardapioData");
       if (storedData) {
@@ -290,12 +243,24 @@
           cardapioData = JSON.parse(storedData);
         } catch (err) {
           console.error("Erro ao carregar dados do localStorage:", err);
-          cardapioData = [...window.cardapio];
-          saveCardapioData();
+          if (Array.isArray(window.cardapio)) {
+            cardapioData = [...window.cardapio];
+            saveCardapioData();
+          } else {
+            console.error("window.cardapio não é um array válido.");
+            alert("Erro: Dados do cardápio inválidos.");
+            return;
+          }
         }
       } else {
-        cardapioData = [...window.cardapio];
-        saveCardapioData();
+        if (Array.isArray(window.cardapio)) {
+          cardapioData = [...window.cardapio];
+          saveCardapioData();
+        } else {
+          console.error("window.cardapio não é um array válido.");
+          alert("Erro: Dados do cardápio inválidos.");
+          return;
+        }
       }
       renderItemList();
       renderBorderList();
@@ -575,6 +540,44 @@
     configScript.onload = function() {
       console.log("Config.js carregado.");
       if (window.config) {
+        const styleSheet = document.createElement("style");
+        styleSheet.textContent = `
+          @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+          .fade-in {
+            animation: fadeIn ${window.config.animations.fadeInDuration} ease-in-out;
+          }
+          .glow {
+            animation: glow ${window.config.animations.glowDuration} infinite;
+          }
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes glow {
+            0% { box-shadow: 0 0 5px ${window.config.colors.primary}80; }
+            50% { box-shadow: 0 0 20px ${window.config.colors.primary}CC; }
+            100% { box-shadow: 0 0 5px ${window.config.colors.primary}80; }
+          }
+          .dark .card-bg, .dark section {
+            background-color: ${window.config.colors.cardBackgroundDark} !important;
+          }
+          .dark .text-dark-mode {
+            color: ${window.config.colors.textDark} !important;
+          }
+          .dark select {
+            background-color: ${window.config.colors.cardBackgroundDark};
+            color: ${window.config.colors.textDark};
+          }
+          .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin: 20px auto;
+          }
+        `;
+        document.head.appendChild(styleSheet);
+
         applyConfigStyles();
         cardapioScript.onload = function() {
           console.log("Cardapio.js carregado.");
