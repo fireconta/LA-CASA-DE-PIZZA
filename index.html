@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -45,31 +6,40 @@
   <title>La Casa de Pizzas - Cardápio</title>
   <script src="https://kit.fontawesome.com/1f7a5fcea1.js" crossorigin="anonymous"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="bg-beige-100 dark:bg-gray-800 font-roboto">
   <!-- Loader -->
   <div id="loader" class="fixed inset-0 bg-opacity-80 flex items-center justify-center z-50">
     <div class="loader"></div>
+  </div>
+
+  <!-- Banner de Erro -->
+  <div id="error-banner" class="fixed top-0 left-0 right-0 bg-red-600 text-white text-center py-4 z-50 hidden">
+    <p id="error-message"></p>
+    <button onclick="hideErrorBanner()" class="absolute top-2 right-4 text-white hover:text-gray-200" aria-label="Fechar notificação de erro">
+      <i class="fas fa-times"></i>
+    </button>
   </div>
 
   <!-- Toast -->
   <div id="toast" role="alert"></div>
 
   <!-- Cabeçalho -->
-  <header class="text-white shadow-2xl sticky top-0 z-10">
+  <header class="text-white shadow-xl sticky top-0 z-10">
     <div class="container mx-auto px-4 py-4 flex justify-between items-center">
       <div class="flex items-center gap-4">
         <a href="admin.html" title="Acessar área administrativa">
-          <img id="logo" src="" alt="Logo da La Casa de Pizzas" class="rounded-lg hover:scale-110 transition-transform duration-300 cursor-pointer" loading="lazy">
+          <img id="logo" src="" alt="Logo da La Casa de Pizzas" class="rounded-full hover:scale-110 transition-transform duration-300 cursor-pointer" loading="lazy">
         </a>
-        <h1 class="font-extrabold tracking-tight drop-shadow-lg"></h1>
+        <h1 class="font-playfair text-3xl font-bold tracking-tight drop-shadow-lg"></h1>
       </div>
       <div class="flex items-center gap-4">
-        <button id="cart-button" class="relative rounded-full font-semibold hover:bg-opacity-80 transition-all duration-300 flex items-center justify-center shadow-md p-2" title="Ver carrinho" aria-label="Ver carrinho de compras">
+        <button id="cart-button" class="relative rounded-full font-semibold hover:bg-opacity-80 transition-all duration-300 flex items-center justify-center shadow-md p-2 pizza-button" title="Ver carrinho" aria-label="Ver carrinho de compras">
           <i class="fas fa-shopping-cart text-xl"></i>
           <span id="cart-count" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">0</span>
         </button>
-        <button id="dark-mode-toggle" class="rounded-full font-semibold hover:bg-opacity-80 transition-all duration-300 flex items-center justify-center shadow-md" title="Alternar modo escuro" aria-label="Alternar modo escuro">
+        <button id="dark-mode-toggle" class="rounded-full font-semibold hover:bg-opacity-80 transition-all duration-300 flex items-center justify-center shadow-md pizza-button" title="Alternar modo escuro" aria-label="Alternar modo escuro">
           <i class="fas fa-moon"></i>
         </button>
       </div>
@@ -78,7 +48,7 @@
 
   <!-- Banner Promocional -->
   <section class="promo-banner text-center py-4 text-white shadow-lg">
-    <p class="font-bold flex items-center justify-center gap-3">
+    <p class="font-playfair text-xl font-bold flex items-center justify-center gap-3">
       <i class="fas fa-star spin"></i>
       Aproveite nossas promoções! Descontos em pizzas e combos hoje!
       <i class="fas fa-star spin"></i>
@@ -88,13 +58,13 @@
   <!-- Seção Principal -->
   <main class="container mx-auto px-4 py-8">
     <!-- Filtros -->
-    <section class="rounded-2xl shadow-xl p-6 mb-8 border-t-4">
-      <h2 class="font-bold mb-4 flex items-center gap-3">
+    <section class="rounded-2xl shadow-xl p-6 mb-8 border-t-4 border-green-600 pizza-section">
+      <h2 class="font-playfair text-2xl font-bold mb-4 flex items-center gap-3">
         <i class="fas fa-filter"></i> Filtrar Cardápio
       </h2>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <input type="text" id="search-input" placeholder="Pesquisar por nome..." class="border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" aria-label="Pesquisar por nome">
-        <select id="category-filter" class="border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" aria-label="Filtrar por categoria">
+        <input type="text" id="search-input" placeholder="Pesquisar por nome..." class="border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-600 shadow-sm transition-all duration-300" aria-label="Pesquisar por nome">
+        <select id="category-filter" class="border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-600 shadow-sm transition-all duration-300" aria-label="Filtrar por categoria">
           <option value="">Todas as Categorias</option>
           <option value="Salgadas">Salgadas</option>
           <option value="Doces">Doces</option>
@@ -102,7 +72,7 @@
           <option value="Bebidas">Bebidas</option>
           <option value="Combos">Combos</option>
         </select>
-        <button onclick="resetFilters()" class="text-white rounded-lg hover:bg-opacity-80 transition-all duration-300 flex items-center gap-2 shadow-sm glow" aria-label="Limpar filtros">
+        <button onclick="resetFilters()" class="text-white rounded-lg hover:bg-opacity-80 transition-all duration-300 flex items-center gap-2 shadow-sm pizza-button glow" aria-label="Limpar filtros">
           <i class="fas fa-sync-alt"></i> Limpar Filtros
         </button>
       </div>
@@ -115,11 +85,11 @@
 
     <!-- Paginação -->
     <div class="flex justify-center gap-4 mt-8">
-      <button onclick="changePage(-1)" id="prev-page" class="text-white rounded-full hover:bg-opacity-80 transition-all duration-300 flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md glow" aria-label="Página anterior">
+      <button onclick="changePage(-1)" id="prev-page" class="text-white rounded-full hover:bg-opacity-80 transition-all duration-300 flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md pizza-button glow" aria-label="Página anterior">
         <i class="fas fa-chevron-left"></i> Anterior
       </button>
-      <span id="page-info" class="self-center font-medium px-4 py-2 rounded-full shadow-md">Página 1</span>
-      <button onclick="changePage(1)" id="next-page" class="text-white rounded-full hover:bg-opacity-80 transition-all duration-300 flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md glow" aria-label="Próxima página">
+      <span id="page-info" class="self-center font-medium px-4 py-2 rounded-full shadow-md pizza-section">Página 1</span>
+      <button onclick="changePage(1)" id="next-page" class="text-white rounded-full hover:bg-opacity-80 transition-all duration-300 flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md pizza-button glow" aria-label="Próxima página">
         Próxima <i class="fas fa-chevron-right"></i>
       </button>
     </div>
@@ -127,29 +97,29 @@
 
   <!-- Modal de Detalhes do Item -->
   <div id="item-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-20 transition-opacity duration-300">
-    <div class="rounded-2xl p-8 w-full max-h-[90vh] overflow-y-auto relative shadow-2xl border-t-4 transform transition-all duration-300 scale-95">
+    <div class="rounded-2xl p-8 w-full max-h-[90vh] overflow-y-auto relative shadow-2xl border-t-4 border-green-600 pizza-section transform transition-all duration-300 scale-95">
       <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-600 hover:text-gray-800 transition-all duration-300" aria-label="Fechar modal">
         <i class="fas fa-times text-2xl"></i>
       </button>
       <img id="modal-image" src="" alt="Imagem do item" class="w-full object-cover rounded-lg mb-4 shadow-md" loading="lazy">
-      <h2 id="modal-name" class="font-bold mb-2"></h2>
+      <h2 id="modal-name" class="font-playfair text-2xl font-bold mb-2"></h2>
       <p id="modal-description" class="mb-4 leading-relaxed"></p>
-      <p id="modal-price" class="font-semibold mb-3 inline-block px-4 py-1 rounded-full"></p>
+      <p id="modal-price" class="font-semibold mb-3 inline-block px-4 py-1 rounded-full bg-yellow-200 text-red-800"></p>
       <p class="mb-2"><strong>Categoria:</strong> <span id="modal-category"></span></p>
       <p class="mb-2"><strong>Ingredientes:</strong> <span id="modal-ingredientes"></span></p>
       <p class="mb-4"><strong>Avaliação:</strong> <span id="modal-rating"></span> (<span id="modal-num-ratings"></span> avaliações)</p>
       <!-- Tamanhos -->
       <div class="mb-4">
-        <h3 class="font-semibold mb-2 flex items-center gap-2">
+        <h3 class="font-playfair font-semibold mb-2 flex items-center gap-2">
           <i class="fas fa-ruler"></i> Tamanhos
         </h3>
-        <select id="modal-sizes" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" onchange="updateModalPrice()" aria-label="Selecionar tamanho">
+        <select id="modal-sizes" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-green-600 shadow-sm transition-all duration-300" onchange="updateModalPrice()" aria-label="Selecionar tamanho">
           <!-- Opções serão preenchidas via JavaScript -->
         </select>
       </div>
       <!-- Extras -->
       <div class="mb-4">
-        <h3 class="font-semibold mb-2 flex items-center gap-2">
+        <h3 class="font-playfair font-semibold mb-2 flex items-center gap-2">
           <i class="fas fa-plus-circle"></i> Extras
         </h3>
         <div id="modal-extras" class="space-y-3">
@@ -158,22 +128,22 @@
       </div>
       <!-- Bordas -->
       <div class="mb-4">
-        <h3 class="font-semibold mb-2 flex items-center gap-2">
+        <h3 class="font-playfair font-semibold mb-2 flex items-center gap-2">
           <i class="fas fa-border-all"></i> Bordas
         </h3>
-        <select id="modal-borders" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 shadow-sm transition-all duration-300" onchange="updateModalPrice()" aria-label="Selecionar borda">
+        <select id="modal-borders" class="border border-gray-200 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-green-600 shadow-sm transition-all duration-300" onchange="updateModalPrice()" aria-label="Selecionar borda">
           <!-- Opções serão preenchidas via JavaScript -->
         </select>
       </div>
       <!-- Itens do Combo (se aplicável) -->
       <div id="modal-combo-items" class="mb-4 hidden">
-        <h3 class="font-semibold mb-2 flex items-center gap-2">
+        <h3 class="font-playfair font-semibold mb-2 flex items-center gap-2">
           <i class="fas fa-box-open"></i> Itens do Combo
         </h3>
         <ul id="modal-combo-items-list" class="list-disc list-inside space-y-1"></ul>
       </div>
       <!-- Botão de Pedido -->
-      <button onclick="addToCart()" class="text-white rounded-full hover:bg-opacity-80 transition-all duration-300 w-full flex items-center justify-center gap-2 shadow-md hover:shadow-lg glow" aria-label="Adicionar ao carrinho">
+      <button onclick="addToCart()" class="text-white rounded-full hover:bg-opacity-80 transition-all duration-300 w-full flex items-center justify-center gap-2 shadow-md hover:shadow-lg pizza-button glow" aria-label="Adicionar ao carrinho">
         <i class="fas fa-cart-plus"></i> Adicionar ao Pedido
       </button>
     </div>
@@ -181,18 +151,18 @@
 
   <!-- Modal do Carrinho -->
   <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-20 transition-opacity duration-300">
-    <div class="rounded-2xl p-8 w-full max-h-[90vh] overflow-y-auto relative shadow-2xl border-t-4 transform transition-all duration-300 scale-95">
+    <div class="rounded-2xl p-8 w-full max-h-[90vh] overflow-y-auto relative shadow-2xl border-t-4 border-green-600 pizza-section transform transition-all duration-300 scale-95">
       <button onclick="closeCartModal()" class="absolute top-4 right-4 text-gray-600 hover:text-gray-800 transition-all duration-300" aria-label="Fechar modal do carrinho">
         <i class="fas fa-times text-2xl"></i>
       </button>
-      <h2 class="font-bold mb-4 flex items-center gap-2">
+      <h2 class="font-playfair text-2xl font-bold mb-4 flex items-center gap-2">
         <i class="fas fa-shopping-cart"></i> Seu Carrinho
       </h2>
       <div id="cart-items" class="space-y-4 mb-4">
         <!-- Itens do carrinho serão inseridos aqui -->
       </div>
-      <p id="cart-total" class="font-semibold mb-4 inline-block px-4 py-1 rounded-full"></p>
-      <button onclick="clearCart()" class="text-white rounded-full hover:bg-opacity-80 transition-all duration-300 w-full flex items-center justify-center gap-2 shadow-md hover:shadow-lg glow" aria-label="Limpar carrinho">
+      <p id="cart-total" class="font-semibold mb-4 inline-block px-4 py-1 rounded-full bg-yellow-200 text-red-800"></p>
+      <button onclick="clearCart()" class="text-white rounded-full hover:bg-opacity-80 transition-all duration-300 w-full flex items-center justify-center gap-2 shadow-md hover:shadow-lg pizza-button glow" aria-label="Limpar carrinho">
         <i class="fas fa-trash"></i> Limpar Carrinho
       </button>
     </div>
@@ -206,7 +176,7 @@
   <!-- Rodapé -->
   <footer class="text-white py-6 mt-12">
     <div class="container mx-auto px-4 text-center">
-      <p class="font-semibold mb-4">Entre em contato conosco!</p>
+      <p class="font-playfair font-semibold mb-4">Entre em contato conosco!</p>
       <div class="flex justify-center gap-6">
         <a id="whatsapp-link" href="#" target="_blank" class="flex items-center gap-2 hover:text-opacity-80 transition-all duration-300" aria-label="Contato via WhatsApp">
           <i class="fab fa-whatsapp text-2xl"></i> WhatsApp
@@ -233,50 +203,40 @@
     let selectedExtras = [];
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
+    function showErrorBanner(message) {
+      const errorBanner = document.getElementById("error-banner");
+      const errorMessage = document.getElementById("error-message");
+      errorMessage.textContent = message;
+      errorBanner.classList.remove("hidden");
+    }
+
+    function hideErrorBanner() {
+      const errorBanner = document.getElementById("error-banner");
+      errorBanner.classList.add("hidden");
+    }
+
     function applyConfigStyles() {
       if (!window.config) {
         console.error("Configuração não disponível.");
+        showErrorBanner("Erro: Configurações não carregadas. O arquivo `config.js` pode estar ausente ou mal configurado no diretório raiz.");
         return;
       }
-      document.body.style.fontFamily = window.config.fonts.family;
       document.querySelector("h1").style.fontSize = window.config.fonts.sizes.header;
       document.querySelectorAll("h2").forEach(h2 => h2.style.fontSize = window.config.fonts.sizes.title);
       document.body.style.fontSize = window.config.fonts.sizes.body;
 
-      document.body.style.background = window.config.colors.background;
-      document.body.style.color = window.config.colors.text;
-      document.querySelector("header").style.background = `linear-gradient(to right, ${window.config.colors.primary}, ${window.config.colors.accent})`;
-      document.querySelector("footer").style.background = `linear-gradient(to right, ${window.config.colors.primary}, ${window.config.colors.accent})`;
-      document.querySelector(".promo-banner").style.background = window.config.colors.promoBackground;
-      document.querySelectorAll("section:not(.promo-banner), #page-info").forEach(section => {
-        section.style.backgroundColor = window.config.colors.cardBackground;
-        section.style.borderColor = window.config.colors.primary;
-      });
-      document.querySelectorAll("button:not(#dark-mode-toggle):not(#cart-button):not(#back-to-top), select").forEach(btn => {
-        btn.style.backgroundColor = window.config.colors.primary;
-        btn.style.color = "white";
-        btn.style.borderColor = window.config.colors.primary;
-      });
-      document.querySelectorAll("#dark-mode-toggle, #cart-button").forEach(btn => {
-        btn.style.backgroundColor = window.config.colors.secondary;
-        btn.style.color = window.config.colors.text;
-      });
-      document.querySelector("#back-to-top").style.backgroundColor = window.config.colors.primary;
+      document.getElementById("whatsapp-link").href = window.config.whatsappLink;
+      document.getElementById("whatsapp-link").innerHTML = `<i class="fab fa-whatsapp text-2xl"></i> WhatsApp (${window.config.whatsappNumber})`;
+      document.getElementById("instagram-link").href = window.config.instagramUrl;
+      document.getElementById("instagram-link").innerHTML = `<i class="fab fa-instagram text-2xl"></i> Instagram (${window.config.instagramHandle})`;
 
-      document.querySelector("#logo").style.height = window.config.sizes.logoHeight;
+      document.getElementById("logo").style.height = window.config.sizes.logoHeight;
       document.querySelectorAll("button:not(#dark-mode-toggle):not(#cart-button):not(#back-to-top)").forEach(btn => {
         btn.style.padding = window.config.sizes.buttonPadding;
       });
       document.querySelectorAll("#item-modal > div, #cart-modal > div").forEach(modal => {
         modal.style.maxWidth = window.config.sizes.modalMaxWidth;
       });
-
-      document.querySelector(".loader").style.borderTopColor = window.config.colors.primary;
-
-      document.getElementById("whatsapp-link").href = window.config.whatsappLink;
-      document.getElementById("whatsapp-link").innerHTML = `<i class="fab fa-whatsapp text-2xl"></i> WhatsApp (${window.config.whatsappNumber})`;
-      document.getElementById("instagram-link").href = window.config.instagramUrl;
-      document.getElementById("instagram-link").innerHTML = `<i class="fab fa-instagram text-2xl"></i> Instagram (${window.config.instagramHandle})`;
 
       document.getElementById("logo").src = window.config.logoUrl;
       document.querySelector("h1").textContent = window.config.pizzariaName;
@@ -285,7 +245,7 @@
     function loadCardapioData() {
       if (!window.cardapio) {
         console.error("Cardápio não disponível.");
-        alert("Erro: Dados do cardápio não foram carregados corretamente.");
+        showErrorBanner("Erro: Dados do cardápio não carregados. O arquivo `cardapio.js` pode estar ausente ou mal configurado no diretório raiz.");
         return;
       }
       const storedData = localStorage.getItem("cardapioData");
@@ -299,7 +259,7 @@
             saveCardapioData();
           } else {
             console.error("window.cardapio não é um array válido.");
-            alert("Erro: Dados do cardápio inválidos.");
+            showErrorBanner("Erro: Dados do cardápio em `cardapio.js` são inválidos. Verifique a estrutura do arquivo no diretório raiz.");
             return;
           }
         }
@@ -309,7 +269,7 @@
           saveCardapioData();
         } else {
           console.error("window.cardapio não é um array válido.");
-          alert("Erro: Dados do cardápio inválidos.");
+          showErrorBanner("Erro: Dados do cardápio em `cardapio.js` são inválidos. Verifique a estrutura do arquivo no diretório raiz.");
           return;
         }
       }
@@ -333,18 +293,18 @@
       itemsToShow.forEach(item => {
         const price = item.promocao?.ativo ? item.promocao.precoPromocional : item.preço;
         const card = document.createElement("div");
-        card.className = "rounded-2xl shadow-lg overflow-hidden transition-all duration-300 fade-in card-hover card-bg";
+        card.className = "rounded-2xl shadow-lg overflow-hidden transition-all duration-300 fade-in card-hover pizza-card";
         card.innerHTML = `
           <img src="${item.imagem}" alt="${item.nome}" class="w-full object-cover hover:opacity-90 transition-opacity duration-300" style="height: ${window.config.sizes.cardImageHeight}" loading="lazy">
           <div class="p-5">
-            <h3 class="font-bold mb-2 text-dark-mode">${item.nome}</h3>
+            <h3 class="font-playfair text-xl font-bold mb-2 text-dark-mode">${item.nome}</h3>
             <p class="text-sm mb-3 line-clamp-2 text-dark-mode">${item.descrição}</p>
             <p class="font-semibold mb-2 text-dark-mode ${item.promocao?.ativo ? 'line-through text-gray-500 dark:text-gray-400' : ''}">R$ ${item.preço.toFixed(2)}</p>
             ${item.promocao?.ativo ? `<p class="text-green-600 font-semibold mb-2 dark:text-green-400">Promoção: R$ ${item.promocao.precoPromocional.toFixed(2)}</p>` : ''}
             <p class="text-sm mb-3 flex items-center gap-1 text-dark-mode">
               <i class="fas fa-star text-yellow-400"></i> ${item.avaliacao ? item.avaliacao.toFixed(1) : 'N/A'} (${item.numAvaliacoes} avaliações)
             </p>
-            <button onclick="openModal(${item.id})" class="w-full flex items-center justify-center gap-2 shadow-sm hover:shadow-md glow" aria-label="Ver detalhes de ${item.nome}">
+            <button onclick="openModal(${item.id})" class="w-full flex items-center justify-center gap-2 shadow-sm hover:shadow-md pizza-button glow" aria-label="Ver detalhes de ${item.nome}">
               <i class="fas fa-eye"></i> Ver Detalhes
             </button>
           </div>
@@ -400,7 +360,7 @@
           const div = document.createElement("div");
           div.className = "flex items-center gap-2";
           div.innerHTML = `
-            <input type="checkbox" id="extra-${extra}" value="${extra}" onchange="updateSelectedExtras(this)" class="h-4 w-4 focus:ring-2 rounded">
+            <input type="checkbox" id="extra-${extra}" value="${extra}" onchange="updateSelectedExtras(this)" class="h-4 w-4 focus:ring-2 focus:ring-green-600 rounded">
             <label for="extra-${extra}" class="text-dark-mode">${extra} (+ R$ ${price.toFixed(2)})</label>
           `;
           extrasContainer.appendChild(div);
@@ -416,10 +376,15 @@
         borders.forEach(([border, price], index) => {
           const option = document.createElement("option");
           option.value = border;
-          option.textContent = `${border} - R sensor.getElementById("modal-borders").addEventListener("change", function() {
-        selectedBorder = this.value;
-        updateModalPrice();
-      });
+          option.textContent = `${border} - R$ ${price.toFixed(2)}`;
+          bordersSelect.appendChild(option);
+          if (index === 0) selectedBorder = border;
+        });
+      } else {
+        bordersSelect.innerHTML = '<option value="">Nenhuma borda</option>';
+        bordersSelect.disabled = true;
+        selectedBorder = null;
+      }
 
       const comboItemsDiv = document.getElementById("modal-combo-items");
       const comboItemsList = document.getElementById("modal-combo-items-list");
@@ -520,10 +485,10 @@
       } else {
         cart.forEach((item, index) => {
           const cartItem = document.createElement("div");
-          cartItem.className = "flex justify-between items-center p-4 rounded-lg dark:bg-gray-700";
+          cartItem.className = "flex justify-between items-center p-4 rounded-lg pizza-card";
           cartItem.innerHTML = `
             <div>
-              <h4 class="text-lg font-semibold text-dark-mode">${item.nome}</h4>
+              <h4 class="font-playfair text-lg font-semibold text-dark-mode">${item.nome}</h4>
               <p class="text-dark-mode">Tamanho: ${item.tamanho}</p>
               <p class="text-dark-mode">Borda: ${item.borda}</p>
               <p class="text-dark-mode">Extras: ${item.extras.length ? item.extras.join(", ") : 'Nenhum'}</p>
@@ -626,13 +591,13 @@
 
     configScript.onerror = function() {
       console.error("Erro ao carregar config.js.");
-      alert("Erro ao carregar as configurações. Verifique o arquivo config.js e se ele está no mesmo diretório.");
+      showErrorBanner("Erro: Não foi possível carregar o arquivo `config.js` no diretório raiz. Verifique se o arquivo existe e está no mesmo diretório que `index.html`.");
       document.getElementById("loader").classList.add("hidden");
     };
 
     cardapioScript.onerror = function() {
       console.error("Erro ao carregar cardapio.js.");
-      alert("Erro ao carregar o cardápio. Verifique o arquivo cardapio.js e se ele está no mesmo diretório.");
+      showErrorBanner("Erro: Não foi possível carregar o arquivo `cardapio.js` no diretório raiz. Verifique se o arquivo existe e está no mesmo diretório que `index.html`.");
       document.getElementById("loader").classList.add("hidden");
     };
 
@@ -641,7 +606,16 @@
       if (window.config) {
         const styleSheet = document.createElement("style");
         styleSheet.textContent = `
-          @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+          .font-playfair {
+            font-family: 'Playfair Display', serif;
+          }
+          .font-roboto {
+            font-family: 'Roboto', sans-serif;
+          }
+          .bg-beige-100 {
+            background-color: #F5DEB3;
+            background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+          }
           .fade-in {
             animation: fadeIn ${window.config.animations.fadeInDuration} ease-in-out;
           }
@@ -659,9 +633,9 @@
             to { opacity: 1; transform: translateY(0); }
           }
           @keyframes glow {
-            0% { box-shadow: 0 0 5px ${window.config.colors.primary}80; }
-            50% { box-shadow: 0 0 20px ${window.config.colors.primary}CC; }
-            100% { box-shadow: 0 0 5px ${window.config.colors.primary}80; }
+            0% { box-shadow: 0 0 5px #FFD70080; }
+            50% { box-shadow: 0 0 20px #FFD700CC; }
+            100% { box-shadow: 0 0 5px #FFD70080; }
           }
           @keyframes spin {
             from { transform: rotate(0deg); }
@@ -675,6 +649,35 @@
             transform: scale(1.05);
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
           }
+          .pizza-card {
+            background-color: #FFF8E1;
+            border: 4px solid #FFD700;
+            border-radius: 20px;
+            position: relative;
+          }
+          .pizza-card:before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            border: 4px dashed #FF6347;
+            border-radius: 24px;
+            pointer-events: none;
+          }
+          .pizza-section {
+            background-color: #FFF8E1;
+            border-color: #228B22;
+          }
+          .pizza-button {
+            background-color: #FF6347;
+            color: white;
+            border-color: #FF6347;
+          }
+          .pizza-button:hover {
+            box-shadow: 0 0 15px #FFD70080;
+          }
           img[alt="Imagem indisponível"] {
             background-color: #f1f5f9;
             color: #6b7280;
@@ -686,19 +689,21 @@
           }
           .loader {
             border: 4px solid #f3f3f3;
+            border-top: 4px solid #FF6347;
             border-radius: 50%;
             width: 40px;
             height: 40px;
             margin: 20px auto;
+            animation: spin 1s linear infinite;
           }
-          .dark .card-bg, .dark section, .dark #page-info {
-            background-color: ${window.config.colors.cardBackgroundDark} !important;
+          .dark .pizza-card, .dark .pizza-section {
+            background-color: #4B3F2F !important;
           }
           .dark .text-dark-mode {
-            color: ${window.config.colors.textDark} !important;
+            color: #F5DEB3 !important;
           }
           .dark .bg-dark-mode {
-            background-color: ${window.config.colors.backgroundDark} !important;
+            background-color: #3A2E1F !important;
           }
           #dark-mode-toggle {
             padding: 0.5rem;
@@ -707,14 +712,21 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            background-color: #FFD700;
+            color: #3A2E1F;
           }
           #dark-mode-toggle i {
             font-size: 1.25rem;
+          }
+          #cart-button {
+            background-color: #FFD700;
+            color: #3A2E1F;
           }
           #back-to-top {
             position: fixed;
             bottom: 20px;
             right: 20px;
+            background-color: #FF6347;
             color: white;
             width: 50px;
             height: 50px;
@@ -732,7 +744,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background-color: #34D399;
+            background-color: #228B22;
             color: white;
             padding: 12px 24px;
             border-radius: 8px;
@@ -741,12 +753,21 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
           }
           .dark {
-            background: ${window.config.colors.backgroundDark} !important;
-            color: ${window.config.colors.textDark} !important;
+            background: #3A2E1F !important;
+            color: #F5DEB3 !important;
           }
           .dark select {
-            background-color: ${window.config.colors.cardBackgroundDark};
-            color: ${window.config.colors.textDark};
+            background-color: #4B3F2F;
+            color: #F5DEB3;
+          }
+          header {
+            background: linear-gradient(to right, #FF6347, #FFD700);
+          }
+          footer {
+            background: linear-gradient(to right, #FF6347, #FFD700);
+          }
+          .promo-banner {
+            background-color: #228B22;
           }
         `;
         document.head.appendChild(styleSheet);
@@ -766,13 +787,13 @@
             window.addEventListener("scroll", handleScroll);
           } else {
             console.error("Erro: window.cardapio não foi definido.");
-            alert("Erro ao carregar o cardápio. Verifique o arquivo cardapio.js.");
+            showErrorBanner("Erro: Variável `window.cardapio` não foi definida no arquivo `cardapio.js` no diretório raiz. Verifique o arquivo.");
             document.getElementById("loader").classList.add("hidden");
           }
         };
       } else {
         console.error("Erro: window.config não foi definido.");
-        alert("Erro ao carregar as configurações. Verifique o arquivo config.js.");
+        showErrorBanner("Erro: Variável `window.config` não foi definida no arquivo `config.js` no diretório raiz. Verifique o arquivo.");
         document.getElementById("loader").classList.add("hidden");
       }
     };
