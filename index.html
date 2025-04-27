@@ -136,7 +136,7 @@
       <p id="modal-description" class="mb-4 leading-relaxed"></p>
       <p id="modal-price" class="font-semibold mb-3 inline-block px-4 py-1 rounded-full"></p>
       <p class="mb-2"><strong>Categoria:</strong> <span id="modal-category"></span></p>
-      <p class="mb-2"><strong>Ingredientes:</strong> <span id="modal-ingredients"></span></p>
+      <p class="mb-2"><strong>Ingredientes:</strong> <span id="modal-ingredientes"></span></p>
       <p class="mb-4"><strong>Avaliação:</strong> <span id="modal-rating"></span> (<span id="modal-num-ratings"></span> avaliações)</p>
       <!-- Tamanhos -->
       <div class="mb-4">
@@ -233,15 +233,16 @@
     let selectedExtras = [];
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    // Função para aplicar configurações visuais do config.js
     function applyConfigStyles() {
-      // Aplicar fontes
+      if (!window.config) {
+        console.error("Configuração não disponível.");
+        return;
+      }
       document.body.style.fontFamily = window.config.fonts.family;
       document.querySelector("h1").style.fontSize = window.config.fonts.sizes.header;
       document.querySelectorAll("h2").forEach(h2 => h2.style.fontSize = window.config.fonts.sizes.title);
       document.body.style.fontSize = window.config.fonts.sizes.body;
 
-      // Aplicar cores
       document.body.style.background = window.config.colors.background;
       document.body.style.color = window.config.colors.text;
       document.querySelector("header").style.background = `linear-gradient(to right, ${window.config.colors.primary}, ${window.config.colors.accent})`;
@@ -262,7 +263,6 @@
       });
       document.querySelector("#back-to-top").style.backgroundColor = window.config.colors.primary;
 
-      // Aplicar tamanhos
       document.querySelector("#logo").style.height = window.config.sizes.logoHeight;
       document.querySelectorAll("button:not(#dark-mode-toggle):not(#cart-button):not(#back-to-top)").forEach(btn => {
         btn.style.padding = window.config.sizes.buttonPadding;
@@ -271,22 +271,23 @@
         modal.style.maxWidth = window.config.sizes.modalMaxWidth;
       });
 
-      // Configurar loader
       document.querySelector(".loader").style.borderTopColor = window.config.colors.primary;
 
-      // Configurar links do rodapé
       document.getElementById("whatsapp-link").href = window.config.whatsappLink;
       document.getElementById("whatsapp-link").innerHTML = `<i class="fab fa-whatsapp text-2xl"></i> WhatsApp (${window.config.whatsappNumber})`;
       document.getElementById("instagram-link").href = window.config.instagramUrl;
       document.getElementById("instagram-link").innerHTML = `<i class="fab fa-instagram text-2xl"></i> Instagram (${window.config.instagramHandle})`;
 
-      // Configurar logo e título
       document.getElementById("logo").src = window.config.logoUrl;
       document.querySelector("h1").textContent = window.config.pizzariaName;
     }
 
-    // Função para carregar os dados do cardápio
     function loadCardapioData() {
+      if (!window.cardapio) {
+        console.error("Cardápio não disponível.");
+        alert("Erro: Dados do cardápio não foram carregados corretamente.");
+        return;
+      }
       const storedData = localStorage.getItem("cardapioData");
       if (storedData) {
         try {
@@ -318,12 +319,10 @@
       document.getElementById("loader").classList.add("hidden");
     }
 
-    // Função para salvar os dados do cardápio no localStorage
     function saveCardapioData() {
       localStorage.setItem("cardapioData", JSON.stringify(cardapioData));
     }
 
-    // Função para renderizar os itens do cardápio
     function renderMenuItems() {
       const start = (currentPage - 1) * itemsPerPage;
       const end = start + itemsPerPage;
@@ -359,7 +358,6 @@
       document.getElementById("next-page").disabled = currentPage === totalPages;
     }
 
-    // Função para abrir o modal com detalhes do item
     function openModal(itemId) {
       selectedItem = cardapioData.find(item => item.id === itemId);
       if (!selectedItem) return;
@@ -372,7 +370,7 @@
       document.getElementById("modal-name").textContent = selectedItem.nome;
       document.getElementById("modal-description").textContent = selectedItem.descrição;
       document.getElementById("modal-category").textContent = selectedItem.categoria;
-      document.getElementById("modal-ingredients").textContent = selectedItem.ingredientes.length ? selectedItem.ingredientes.join(", ") : "Nenhum ingrediente listado";
+      document.getElementById("modal-ingredientes").textContent = selectedItem.ingredientes.length ? selectedItem.ingredientes.join(", ") : "Nenhum ingrediente listado";
       document.getElementById("modal-rating").textContent = selectedItem.avaliacao ? selectedItem.avaliacao.toFixed(1) : 'N/A';
       document.getElementById("modal-num-ratings").textContent = selectedItem.numAvaliacoes;
 
@@ -418,15 +416,10 @@
         borders.forEach(([border, price], index) => {
           const option = document.createElement("option");
           option.value = border;
-          option.textContent = `${border} - R$ ${price.toFixed(2)}`;
-          bordersSelect.appendChild(option);
-          if (index === 0) selectedBorder = border;
-        });
-      } else {
-        bordersSelect.innerHTML = '<option value="">Sem borda disponível</option>';
-        bordersSelect.disabled = true;
-        selectedBorder = null;
-      }
+          option.textContent = `${border} - R sensor.getElementById("modal-borders").addEventListener("change", function() {
+        selectedBorder = this.value;
+        updateModalPrice();
+      });
 
       const comboItemsDiv = document.getElementById("modal-combo-items");
       const comboItemsList = document.getElementById("modal-combo-items-list");
@@ -523,7 +516,7 @@
       const cartItemsContainer = document.getElementById("cart-items");
       cartItemsContainer.innerHTML = "";
       if (cart.length === 0) {
-        cartItemsContainer.innerHTML = '<p class="text-dark   -mode">Seu carrinho está vazio.</p>';
+        cartItemsContainer.innerHTML = '<p class="text-dark-mode">Seu carrinho está vazio.</p>';
       } else {
         cart.forEach((item, index) => {
           const cartItem = document.createElement("div");
@@ -633,20 +626,19 @@
 
     configScript.onerror = function() {
       console.error("Erro ao carregar config.js.");
-      alert("Erro ao carregar as configurações. Verifique o arquivo config.js.");
+      alert("Erro ao carregar as configurações. Verifique o arquivo config.js e se ele está no mesmo diretório.");
       document.getElementById("loader").classList.add("hidden");
     };
 
     cardapioScript.onerror = function() {
       console.error("Erro ao carregar cardapio.js.");
-      alert("Erro ao carregar o cardápio. Verifique o arquivo cardapio.js.");
+      alert("Erro ao carregar o cardápio. Verifique o arquivo cardapio.js e se ele está no mesmo diretório.");
       document.getElementById("loader").classList.add("hidden");
     };
 
     configScript.onload = function() {
       console.log("Config.js carregado.");
       if (window.config) {
-        // Definir estilos dinâmicos APÓS carregar config.js
         const styleSheet = document.createElement("style");
         styleSheet.textContent = `
           @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');

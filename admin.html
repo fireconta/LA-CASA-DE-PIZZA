@@ -209,6 +209,10 @@
 
     // Função para aplicar configurações visuais do config.js
     function applyConfigStyles() {
+      if (!window.config) {
+        console.error("Configuração não disponível.");
+        return;
+      }
       document.body.style.fontFamily = window.config.fonts.family;
       document.body.style.background = window.config.colors.background;
       document.body.style.color = window.config.colors.text;
@@ -237,6 +241,11 @@
     }
 
     function loadCardapioData() {
+      if (!window.cardapio) {
+        console.error("Cardápio não disponível.");
+        alert("Erro: Dados do cardápio não foram carregados corretamente.");
+        return;
+      }
       const storedData = localStorage.getItem("cardapioData");
       if (storedData) {
         try {
@@ -283,7 +292,7 @@
         document.getElementById("header").classList.remove("hidden");
         document.getElementById("main-content").classList.remove("hidden");
       } else {
-        alert("Senha incorreta!");
+        alert("Senha incorreta! A senha padrão é 'LVz'.");
       }
     }
 
@@ -527,13 +536,13 @@
 
     configScript.onerror = function() {
       console.error("Erro ao carregar config.js.");
-      alert("Erro ao carregar as configurações. Verifique o arquivo config.js.");
+      alert("Erro ao carregar as configurações. Verifique o arquivo config.js e se ele está no mesmo diretório.");
       document.getElementById("loader").classList.add("hidden");
     };
 
     cardapioScript.onerror = function() {
       console.error("Erro ao carregar cardapio.js.");
-      alert("Erro ao carregar o cardápio. Verifique o arquivo cardapio.js.");
+      alert("Erro ao carregar o cardápio. Verifique o arquivo cardapio.js e se ele está no mesmo diretório.");
       document.getElementById("loader").classList.add("hidden");
     };
 
@@ -574,6 +583,11 @@
             width: 40px;
             height: 40px;
             margin: 20px auto;
+            animation: spin 1s linear infinite;
+          }
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
           }
         `;
         document.head.appendChild(styleSheet);
