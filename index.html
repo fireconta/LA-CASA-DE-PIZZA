@@ -38,13 +38,49 @@
         return gk_fileData[filename] || "";
         }
         </script><!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Casa de Pizza's</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .header {
+            text-align: center;
+            padding: 20px;
+            background-color: #fff;
+            width: 100%;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            color: #333;
+            font-weight: bold;
+        }
+        .order-info {
+            padding: 15px;
+            background-color: #e5e7eb;
+            text-align: center;
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 8px;
+        }
+        .order-info p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #4b5563;
+        }
         .modal {
             display: none;
             position: fixed;
@@ -53,257 +89,251 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
-            z-index: 50;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
+            z-index: 1000;
         }
         .modal-content {
-            background-color: white;
+            background-color: #fff;
             padding: 20px;
             border-radius: 8px;
-            text-align: center;
             width: 90%;
             max-width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .modal h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .modal p {
+            font-size: 14px;
+            color: #4b5563;
+            margin-bottom: 10px;
+        }
+        .modal select, .modal button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .modal button {
+            background-color: #22c55e;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        .modal button:hover {
+            background-color: #16a34a;
+        }
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            background-color: #e5e7eb;
+            padding: 10px 0;
+            margin: 20px;
+            width: 90%;
+            border-radius: 8px;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #4b5563;
+        }
+        .tab.active {
+            background-color: white;
+            border-radius: 8px;
+            color: black;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .promo-banner {
+            background-color: #fff;
+            margin: 20px;
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            width: 90%;
+        }
+        .promo-banner h2 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .promo-banner p {
+            font-size: 14px;
+            color: #4b5563;
+        }
+        .menu-item {
+            background-color: #fff;
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin: 20px;
+            margin-bottom: 15px;
+            width: 90%;
+        }
+        .menu-item .flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .menu-item .discount-tag {
+            background-color: #ef4444;
+            color: #fff;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+        .menu-item h3 {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .menu-item p {
+            font-size: 14px;
+            color: #4b5563;
+            margin: 5px 0;
+        }
+        .menu-item .price-old {
+            text-decoration: line-through;
+            color: #6b7280;
+        }
+        .menu-item .price-new {
+            color: #22c55e;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        .menu-item .availability {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .menu-item .menu-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
         }
     </style>
 </head>
-<body class="bg-gray-200 font-sans">
-    <!-- Cabeçalho -->
-    <header class="bg-white p-4 text-center">
-        <img src="https://i.imgur.com/3wbh5W3.jpeg" alt="Logotipo La Casa de Pizza's" class="mx-auto mb-2 w-24 h-24">
-        <h1 class="text-2xl font-bold">La Casa de Pizza's</h1>
-        <div class="flex justify-center space-x-4 mt-2">
-            <a href="#" class="text-gray-600"><i class="fab fa-instagram"></i></a>
-            <a href="#" class="text-gray-600"><i class="fas fa-info-circle"></i></a>
-        </div>
-        <div class="text-sm text-gray-600 mt-2">
-            <p>🛒 Pedido Mínimo R$ 10,00    🚴 30-50 min</p>
-            <p id="location">📍 Detectando sua localização...</p>
-            <p>⭐ 4,9 (2.136 avaliações)</p>
-        </div>
-    </header>
+<body>
+    <div class="header">
+        <h1>La Casa de Pizza's</h1>
+    </div>
 
-    <!-- Contêiner para o Cardápio -->
-    <div id="menuContainer"></div>
+    <div class="order-info">
+        <p>🛒 Pedido Mínimo R$ 10,00   🚴 30-50 min</p>
+        <p id="location">📍 Detectando sua localização...</p>
+        <p>⭐ 4,9 (2.136 avaliações)</p>
+    </div>
 
-    <!-- Modal de Seleção de Estado -->
-    <div id="stateModal" class="modal">
+    <div class="modal" id="locationModal">
         <div class="modal-content">
-            <h2 class="text-xl font-bold mb-4">Bem-vindo(a)!</h2>
-            <p class="mb-4">Em qual estado você mora?</p>
-            <select id="stateSelect" class="border rounded p-2 w-full mb-4">
-                <option value="">Selecione seu estado</option>
-                <option value="Acre">Acre</option>
-                <option value="Alagoas">Alagoas</option>
-                <option value="Amapá">Amapá</option>
-                <option value="Amazonas">Amazonas</option>
-                <option value="Bahia">Bahia</option>
-                <option value="Ceará">Ceará</option>
-                <option value="Distrito Federal">Distrito Federal</option>
-                <option value="Espírito Santo">Espírito Santo</option>
-                <option value="Goiás">Goiás</option>
-                <option value="Maranhão">Maranhão</option>
-                <option value="Mato Grosso">Mato Grosso</option>
-                <option value="Mato Grosso do Sul">Mato Grosso do Sul</option>
-                <option value="Minas Gerais">Minas Gerais</option>
-                <option value="Pará">Pará</option>
-                <option value="Paraíba">Paraíba</option>
-                <option value="Paraná">Paraná</option>
-                <option value="Pernambuco">Pernambuco</option>
-                <option value="Piauí">Piauí</option>
-                <option value="Rio de Janeiro">Rio de Janeiro</option>
-                <option value="Rio Grande do Norte">Rio Grande do Norte</option>
-                <option value="Rio Grande do Sul">Rio Grande do Sul</option>
-                <option value="Rondônia">Rondônia</option>
-                <option value="Roraima">Roraima</option>
-                <option value="Santa Catarina">Santa Catarina</option>
-                <option value="São Paulo">São Paulo</option>
-                <option value="Sergipe">Sergipe</option>
-                <option value="Tocantins">Tocantins</option>
-            </select>
-            <button onclick="showCityModal()" class="bg-green-600 text-white px-4 py-2 rounded">Confirmar</button>
+            <div id="stateStep">
+                <h2>Bem-vindo(a)!</h2>
+                <p>Em qual estado você mora?</p>
+                <select id="state" name="state">
+                    <option value="">Carregando estados...</option>
+                </select>
+                <button type="button" onclick="loadCities()">Confirmar</button>
+            </div>
+            <div id="cityStep" style="display: none;">
+                <h2>Quase lá...</h2>
+                <p>Em qual cidade você mora?</p>
+                <select id="city" name="city">
+                    <option value="">Selecione uma cidade</option>
+                </select>
+                <button type="button" onclick="showMenu()">Confirmar</button>
+            </div>
         </div>
     </div>
 
-    <!-- Modal de Seleção de Cidade -->
-    <div id="cityModal" class="modal">
-        <div class="modal-content">
-            <h2 class="text-xl font-bold mb-4">Quase lá...</h2>
-            <p class="mb-4">Em qual cidade você mora?</p>
-            <select id="citySelect" class="border rounded p-2 w-full mb-4">
-                <option value="">Selecione sua cidade</option>
-            </select>
-            <button onclick="closeModals()" class="bg-green-600 text-white px-4 py-2 rounded">Confirmar</button>
+    <div id="menuContent" style="display: none;">
+        <div class="tabs">
+            <div class="tab active" data-tab="combos">Combos</div>
+            <div class="tab" data-tab="pizzas-artesanais">Pizzas Artesanais</div>
+            <div class="tab" data-tab="pizzas-doces">Pizzas Doces</div>
         </div>
+
+        <div class="promo-banner">
+            <h2>Entrega Rápida para sua região!</h2>
+            <p>Somente hoje: Aproveite nossa promoção imperdível e exclusiva nos combos mais pedidos da casa!</p>
+        </div>
+
+        <div id="menuItems"></div>
     </div>
 
-    <!-- JavaScript para Geolocalização e Carregamento do Cardápio -->
     <script>
-        // Variáveis globais para armazenar as coordenadas
-        let userLatitude = null;
-        let userLongitude = null;
-
-        // Lista de cidades por estado (exemplo com algumas cidades principais)
-        const citiesByState = {
-            "Acre": ["Rio Branco", "Cruzeiro do Sul", "Sena Madureira"],
-            "Alagoas": ["Maceió", "Arapiraca", "Palmeira dos Índios"],
-            "Amapá": ["Macapá", "Santana", "Laranjal do Jari"],
-            "Amazonas": ["Manaus", "Parintins", "Itacoatiara"],
-            "Bahia": ["Salvador", "Feira de Santana", "Vitória da Conquista"],
-            "Ceará": ["Fortaleza", "Juazeiro do Norte", "Sobral"],
-            "Distrito Federal": ["Brasília"],
-            "Espírito Santo": ["Vitória", "Vila Velha", "Serra"],
-            "Goiás": ["Goiânia", "Aparecida de Goiânia", "Quirinópolis"],
-            "Maranhão": ["São Luís", "Imperatriz", "Caxias"],
-            "Mato Grosso": ["Cuiabá", "Várzea Grande", "Rondonópolis"],
-            "Mato Grosso do Sul": ["Campo Grande", "Dourados", "Três Lagoas"],
-            "Minas Gerais": ["Belo Horizonte", "Uberlândia", "Juiz de Fora"],
-            "Pará": ["Belém", "Ananindeua", "Santarém"],
-            "Paraíba": ["João Pessoa", "Campina Grande", "Patos"],
-            "Paraná": ["Curitiba", "Londrina", "Maringá"],
-            "Pernambuco": ["Recife", "Jaboatão dos Guararapes", "Olinda"],
-            "Piauí": ["Teresina", "Parnaíba", "Picos"],
-            "Rio de Janeiro": ["Rio de Janeiro", "Niterói", "Duque de Caxias"],
-            "Rio Grande do Norte": ["Natal", "Mossoró", "Parnamirim"],
-            "Rio Grande do Sul": ["Porto Alegre", "Caxias do Sul", "Pelotas"],
-            "Rondônia": ["Porto Velho", "Ji-Paraná", "Ariquemes"],
-            "Roraima": ["Boa Vista", "Rorainópolis", "Caracaraí"],
-            "Santa Catarina": ["Florianópolis", "Joinville", "Blumenau"],
-            "São Paulo": ["São Paulo", "Campinas", "Santos"],
-            "Sergipe": ["Aracaju", "Nossa Senhora do Socorro", "Lagarto"],
-            "Tocantins": ["Palmas", "Araguaína", "Gurupi"]
-        };
-
-        // Exibir o modal de estado ao carregar a página
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('stateModal').style.display = 'flex';
-            getUserLocation();
-            loadMenu();
-        });
-
-        // Função para carregar o cardápio
-        function loadMenu() {
-            fetch('menu.html')
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('menuContainer').innerHTML = data;
-                    // Inicializar a funcionalidade das abas após carregar o cardápio
-                    initializeTabs();
-                })
-                .catch(error => {
-                    console.error('Erro ao carregar o cardápio:', error);
-                    document.getElementById('menuContainer').innerHTML = '<p>Erro ao carregar o cardápio.</p>';
+        // Carrega os estados da API do IBGE
+        async function loadStates() {
+            try {
+                const response = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome');
+                const states = await response.json();
+                const stateSelect = document.getElementById('state');
+                stateSelect.innerHTML = '<option value="">Selecione um estado</option>';
+                states.forEach(state => {
+                    const option = document.createElement('option');
+                    option.value = state.sigla;
+                    option.textContent = state.nome;
+                    stateSelect.appendChild(option);
                 });
-        }
-
-        // Função para inicializar as abas
-        function initializeTabs() {
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(content => content.classList.add('hidden'));
-                    tab.classList.add('active');
-                    const contentId = tab.getAttribute('data-tab');
-                    document.getElementById(contentId).classList.remove('hidden');
-                });
-            });
-        }
-
-        // Função para obter a localização do usuário
-        function getUserLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        userLatitude = position.coords.latitude;
-                        userLongitude = position.coords.longitude;
-                        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLatitude}&lon=${userLongitude}&format=json`)
-                            .then(response => response.json())
-                            .then(data => {
-                                const state = data.address.state || '';
-                                const city = data.address.city || data.address.town || data.address.village || '';
-                                const distance = calculateDistance(userLatitude, userLongitude, -17.8856, -51.7219); // Coordenadas de Quirinópolis, GO
-
-                                // Atualizar o cabeçalho com a localização detectada
-                                document.getElementById('location').textContent = `📍 ${city}, ${state} • ${distance.toFixed(1)}km de você`;
-
-                                // Preselecionar o estado detectado
-                                const stateSelect = document.getElementById('stateSelect');
-                                if (stateSelect.querySelector(`option[value="${state}"]`)) {
-                                    stateSelect.value = state;
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Erro ao obter localização:', error);
-                                document.getElementById('location').textContent = '📍 Localização não detectada';
-                            });
-                    },
-                    (error) => {
-                        console.error('Erro na geolocalização:', error.message);
-                        document.getElementById('location').textContent = '📍 Localização não permitida';
-                    }
-                );
-            } else {
-                document.getElementById('location').textContent = '📍 Geolocalização não suportada';
+                document.getElementById('locationModal').style.display = 'flex';
+            } catch (error) {
+                console.error('Erro ao carregar estados:', error);
+                alert('Não foi possível carregar os estados. Tente novamente mais tarde.');
             }
         }
 
-        // Função para calcular a distância entre dois pontos (em km)
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371; // Raio da Terra em km
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c;
-        }
-
-        // Função para exibir o modal de cidade
-        function showCityModal() {
-            const stateSelect = document.getElementById('stateSelect');
+        // Carrega as cidades com base no estado selecionado
+        async function loadCities() {
+            const stateSelect = document.getElementById('state');
+            const cityStep = document.getElementById('cityStep');
+            const stateStep = document.getElementById('stateStep');
+            const citySelect = document.getElementById('city');
             const selectedState = stateSelect.value;
+
             if (!selectedState) {
                 alert('Por favor, selecione um estado.');
                 return;
             }
 
-            // Preencher o select de cidades com base no estado selecionado
-            const citySelect = document.getElementById('citySelect');
-            citySelect.innerHTML = '<option value="">Selecione sua cidade</option>';
-            const cities = citiesByState[selectedState] || [];
-            cities.forEach(city => {
-                const option = document.createElement('option');
-                option.value = city;
-                option.textContent = city;
-                citySelect.appendChild(option);
-            });
+            try {
+                const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedState}/municipios?orderBy=nome`);
+                const cities = await response.json();
+                citySelect.innerHTML = '<option value="">Selecione uma cidade</option>';
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city.nome;
+                    option.textContent = city.nome;
+                    citySelect.appendChild(option);
+                });
 
-            // Exibir o modal de cidade
-            document.getElementById('stateModal').style.display = 'none';
-            document.getElementById('cityModal').style.display = 'flex';
-
-            // Tentar preselecionar a cidade detectada
-            if (userLatitude && userLongitude) {
-                fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLatitude}&lon=${userLongitude}&format=json`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const city = data.address.city || data.address.town || data.address.village || '';
-                        if (citySelect.querySelector(`option[value="${city}"]`)) {
-                            citySelect.value = city;
-                        }
-                    })
-                    .catch(error => console.error('Erro ao obter cidade:', error));
+                stateStep.style.display = 'none';
+                cityStep.style.display = 'block';
+            } catch (error) {
+                console.error('Erro ao carregar cidades:', error);
+                alert('Não foi possível carregar as cidades. Tente novamente mais tarde.');
             }
         }
 
-        // Função para fechar os modais e atualizar o cabeçalho
-        function closeModals() {
-            const stateSelect = document.getElementById('stateSelect');
-            const citySelect = document.getElementById('citySelect');
-            const selectedState = stateSelect.value;
+        // Carrega e exibe o cardápio
+        async function showMenu() {
+            const citySelect = document.getElementById('city');
+            const location = document.getElementById('location');
+            const menuContent = document.getElementById('menuContent');
+            const menuItems = document.getElementById('menuItems');
             const selectedCity = citySelect.value;
 
             if (!selectedCity) {
@@ -311,16 +341,37 @@
                 return;
             }
 
-            // Atualizar o cabeçalho com a cidade e estado selecionados
-            const distance = calculateDistance(userLatitude || -17.8856, userLongitude || -51.7219, -17.8856, -51.7219); // Fallback para Quirinópolis
-            document.getElementById('location').textContent = `📍 ${selectedCity}, ${selectedState} • ${distance.toFixed(1)}km de você`;
+            const selectedState = document.getElementById('state').value;
+            location.textContent = `📍 ${selectedCity} - ${selectedState}`;
+            document.getElementById('locationModal').style.display = 'none';
 
-            // Fechar o modal
-            document.getElementById('cityModal').style.display = 'none';
+            // Carrega o conteúdo do menu.html
+            try {
+                const response = await fetch('menu.html');
+                const html = await response.text();
+                menuItems.innerHTML = html;
+
+                // Exibe o menu e ativa a aba "Combos" por padrão
+                menuContent.style.display = 'block';
+                document.querySelector('#combos').classList.add('active');
+
+                // Adiciona eventos para as abas
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                        tab.classList.add('active');
+                        document.getElementById(tab.getAttribute('data-tab')).classList.add('active');
+                    });
+                });
+            } catch (error) {
+                console.error('Erro ao carregar o cardápio:', error);
+                alert('Não foi possível carregar o cardápio. Tente novamente mais tarde.');
+            }
         }
-    </script>
 
-    <!-- Font Awesome para Ícones -->
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+        // Carrega os estados ao iniciar a página
+        window.onload = loadStates;
+    </script>
 </body>
 </html>
