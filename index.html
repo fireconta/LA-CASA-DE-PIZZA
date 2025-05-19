@@ -1,0 +1,326 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Casa de Pizza's</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 50;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body class="bg-gray-200 font-sans">
+    <!-- Cabeçalho -->
+    <header class="bg-white p-4 text-center">
+        <img src="https://i.imgur.com/3wbh5W3.jpeg" alt="Logotipo La Casa de Pizza's" class="mx-auto mb-2 w-24 h-24">
+        <h1 class="text-2xl font-bold">La Casa de Pizza's</h1>
+        <div class="flex justify-center space-x-4 mt-2">
+            <a href="#" class="text-gray-600"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="text-gray-600"><i class="fas fa-info-circle"></i></a>
+        </div>
+        <div class="text-sm text-gray-600 mt-2">
+            <p>🛒 Pedido Mínimo R$ 10,00    🚴 30-50 min</p>
+            <p id="location">📍 Detectando sua localização...</p>
+            <p>⭐ 4,9 (2.136 avaliações)</p>
+        </div>
+    </header>
+
+    <!-- Contêiner para o Cardápio -->
+    <div id="menuContainer"></div>
+
+    <!-- Modal de Seleção de Estado -->
+    <div id="stateModal" class="modal">
+        <div class="modal-content">
+            <h2 class="text-xl font-bold mb-4">Bem-vindo(a)!</h2>
+            <p class="mb-4">Em qual estado você mora?</p>
+            <select id="stateSelect" class="border rounded p-2 w-full mb-4">
+                <option value="">Selecione seu estado</option>
+                <option value="Acre">Acre</option>
+                <option value="Alagoas">Alagoas</option>
+                <option value="Amapá">Amapá</option>
+                <option value="Amazonas">Amazonas</option>
+                <option value="Bahia">Bahia</option>
+                <option value="Ceará">Ceará</option>
+                <option value="Distrito Federal">Distrito Federal</option>
+                <option value="Espírito Santo">Espírito Santo</option>
+                <option value="Goiás">Goiás</option>
+                <option value="Maranhão">Maranhão</option>
+                <option value="Mato Grosso">Mato Grosso</option>
+                <option value="Mato Grosso do Sul">Mato Grosso do Sul</option>
+                <option value="Minas Gerais">Minas Gerais</option>
+                <option value="Pará">Pará</option>
+                <option value="Paraíba">Paraíba</option>
+                <option value="Paraná">Paraná</option>
+                <option value="Pernambuco">Pernambuco</option>
+                <option value="Piauí">Piauí</option>
+                <option value="Rio de Janeiro">Rio de Janeiro</option>
+                <option value="Rio Grande do Norte">Rio Grande do Norte</option>
+                <option value="Rio Grande do Sul">Rio Grande do Sul</option>
+                <option value="Rondônia">Rondônia</option>
+                <option value="Roraima">Roraima</option>
+                <option value="Santa Catarina">Santa Catarina</option>
+                <option value="São Paulo">São Paulo</option>
+                <option value="Sergipe">Sergipe</option>
+                <option value="Tocantins">Tocantins</option>
+            </select>
+            <button onclick="showCityModal()" class="bg-green-600 text-white px-4 py-2 rounded">Confirmar</button>
+        </div>
+    </div>
+
+    <!-- Modal de Seleção de Cidade -->
+    <div id="cityModal" class="modal">
+        <div class="modal-content">
+            <h2 class="text-xl font-bold mb-4">Quase lá...</h2>
+            <p class="mb-4">Em qual cidade você mora?</p>
+            <select id="citySelect" class="border rounded p-2 w-full mb-4">
+                <option value="">Selecione sua cidade</option>
+            </select>
+            <button onclick="closeModals()" class="bg-green-600 text-white px-4 py-2 rounded">Confirmar</button>
+        </div>
+    </div>
+
+    <!-- JavaScript para Geolocalização e Carregamento do Cardápio -->
+    <script>
+        // Variáveis globais para armazenar as coordenadas
+        let userLatitude = null;
+        let userLongitude = null;
+
+        // Lista de cidades por estado (exemplo com algumas cidades principais)
+        const citiesByState = {
+            "Acre": ["Rio Branco", "Cruzeiro do Sul", "Sena Madureira"],
+            "Alagoas": ["Maceió", "Arapiraca", "Palmeira dos Índios"],
+            "Amapá": ["Macapá", "Santana", "Laranjal do Jari"],
+            "Amazonas": ["Manaus", "Parintins", "Itacoatiara"],
+            "Bahia": ["Salvador", "Feira de Santana", "Vitória da Conquista"],
+            "Ceará": ["Fortaleza", "Juazeiro do Norte", "Sobral"],
+            "Distrito Federal": ["Brasília"],
+            "Espírito Santo": ["Vitória", "Vila Velha", "Serra"],
+            "Goiás": ["Goiânia", "Aparecida de Goiânia", "Quirinópolis"],
+            "Maranhão": ["São Luís", "Imperatriz", "Caxias"],
+            "Mato Grosso": ["Cuiabá", "Várzea Grande", "Rondonópolis"],
+            "Mato Grosso do Sul": ["Campo Grande", "Dourados", "Três Lagoas"],
+            "Minas Gerais": ["Belo Horizonte", "Uberlândia", "Juiz de Fora"],
+            "Pará": ["Belém", "Ananindeua", "Santarém"],
+            "Paraíba": ["João Pessoa", "Campina Grande", "Patos"],
+            "Paraná": ["Curitiba", "Londrina", "Maringá"],
+            "Pernambuco": ["Recife", "Jaboatão dos Guararapes", "Olinda"],
+            "Piauí": ["Teresina", "Parnaíba", "Picos"],
+            "Rio de Janeiro": ["Rio de Janeiro", "Niterói", "Duque de Caxias"],
+            "Rio Grande do Norte": ["Natal", "Mossoró", "Parnamirim"],
+            "Rio Grande do Sul": ["Porto Alegre", "Caxias do Sul", "Pelotas"],
+            "Rondônia": ["Porto Velho", "Ji-Paraná", "Ariquemes"],
+            "Roraima": ["Boa Vista", "Rorainópolis", "Caracaraí"],
+            "Santa Catarina": ["Florianópolis", "Joinville", "Blumenau"],
+            "São Paulo": ["São Paulo", "Campinas", "Santos"],
+            "Sergipe": ["Aracaju", "Nossa Senhora do Socorro", "Lagarto"],
+            "Tocantins": ["Palmas", "Araguaína", "Gurupi"]
+        };
+
+        // Exibir o modal de estado ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('stateModal').style.display = 'flex';
+            getUserLocation();
+            loadMenu();
+        });
+
+        // Função para carregar o cardápio
+        function loadMenu() {
+            fetch('menu.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('menuContainer').innerHTML = data;
+                    // Inicializar a funcionalidade das abas após carregar o cardápio
+                    initializeTabs();
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar o cardápio:', error);
+                    document.getElementById('menuContainer').innerHTML = '<p>Erro ao carregar o cardápio.</p>';
+                });
+        }
+
+        // Função para inicializar as abas
+        function initializeTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.add('hidden'));
+                    tab.classList.add('active');
+                    const contentId = tab.getAttribute('data-tab');
+                    document.getElementById(contentId).classList.remove('hidden');
+                });
+            });
+        }
+
+        // Função para obter a localização do usuário
+        function getUserLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userLatitude = position.coords.latitude;
+                        userLongitude = position.coords.longitude;
+                        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLatitude}&lon=${userLongitude}&format=json`)
+                            .then(response => response.json())
+                            .then(data => {
+                                const state = data.address.state || '';
+                                const city = data.address.city || data.address.town || data.address.village || '';
+                                const distance = calculateDistance(userLatitude, userLongitude, -17.8856, -51.7219); // Coordenadas de Quirinópolis, GO
+
+                                // Atualizar o cabeçalho com a localização detectada
+                                document.getElementById('location').textContent = `📍 ${city}, ${state} • ${distance.toFixed(1)}km de você`;
+
+                                // Preselecionar o estado detectado
+                                const stateSelect = document.getElementById('stateSelect');
+                                if (stateSelect.querySelector(`option[value="${state}"]`)) {
+                                    stateSelect.value = state;
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Erro ao obter localização:', error);
+                                document.getElementById('location').textContent = '📍 Localização não detectada';
+                            });
+                    },
+                    (error) => {
+                        console.error('Erro na geolocalização:', error.message);
+                        document.getElementById('location').textContent = '📍 Localização não permitida';
+                    }
+                );
+            } else {
+                document.getElementById('location').textContent = '📍 Geolocalização não suportada';
+            }
+        }
+
+        // Função para calcular a distância entre dois pontos (em km)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Raio da Terra em km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+
+        // Função para exibir o modal de cidade
+        function showCityModal() {
+            const stateSelect = document.getElementById('stateSelect');
+            const selectedState = stateSelect.value;
+            if (!selectedState) {
+                alert('Por favor, selecione um estado.');
+                return;
+            }
+
+            // Preencher o select de cidades com base no estado selecionado
+            const citySelect = document.getElementById('citySelect');
+            citySelect.innerHTML = '<option value="">Selecione sua cidade</option>';
+            const cities = citiesByState[selectedState] || [];
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                citySelect.appendChild(option);
+            });
+
+            // Exibir o modal de cidade
+            document.getElementById('stateModal').style.display = 'none';
+            document.getElementById('cityModal').style.display = 'flex';
+
+            // Tentar preselecionar a cidade detectada
+            if (userLatitude && userLongitude) {
+                fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLatitude}&lon=${userLongitude}&format=json`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const city = data.address.city || data.address.town || data.address.village || '';
+                        if (citySelect.querySelector(`option[value="${city}"]`)) {
+                            citySelect.value = city;
+                        }
+                    })
+                    .catch(error => console.error('Erro ao obter cidade:', error));
+            }
+        }
+
+        // Função para fechar os modais e atualizar o cabeçalho
+        function closeModals() {
+            const stateSelect = document.getElementById('stateSelect');
+            const citySelect = document.getElementById('citySelect');
+            const selectedState = stateSelect.value;
+            const selectedCity = citySelect.value;
+
+            if (!selectedCity) {
+                alert('Por favor, selecione uma cidade.');
+                return;
+            }
+
+            // Atualizar o cabeçalho com a cidade e estado selecionados
+            const distance = calculateDistance(userLatitude || -17.8856, userLongitude || -51.7219, -17.8856, -51.7219); // Fallback para Quirinópolis
+            document.getElementById('location').textContent = `📍 ${selectedCity}, ${selectedState} • ${distance.toFixed(1)}km de você`;
+
+            // Fechar o modal
+            document.getElementById('cityModal').style.display = 'none';
+        }
+    </script>
+
+    <!-- Font Awesome para Ícones -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</body>
+</html>
