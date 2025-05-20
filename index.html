@@ -418,8 +418,8 @@
     <!-- Notificação -->
     <div id="notification" class="notification" aria-live="assertive"></div>
 
-    <!-- Inclusão dos modals via iframe -->
-    <iframe src="modals.html" style="display: none;" id="modals-iframe"></iframe>
+    <!-- Inclusão do modal via iframe -->
+    <iframe src="modal.html" style="display: none;" id="modals-iframe"></iframe>
 
     <!-- Inclusão do arquivo de configuração -->
     <script src="config.js"></script>
@@ -564,7 +564,7 @@
             iframe.postMessage({ action: 'updateFlavorModal', combo: currentCombo, item: currentItem }, '*');
         }
 
-        // Comunicação com modals.html
+        // Comunicação com modal.html
         window.addEventListener('message', (event) => {
             if (event.data.action === 'confirmFlavors') {
                 const { flavors, borders, totalBorderPrice } = event.data;
