@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -422,7 +383,6 @@
                 <p id="store-info"></p>
                 <div class="modal-buttons">
                     <button onclick="confirmStore()" aria-label="Confirmar loja encontrada">Confirmar</button>
-                    <button class="secondary" onclick="retryLocationSearch()" aria-label="Tentar novamente">Tentar Novamente</button>
                 </div>
             </div>
             <p id="error-message" class="error-message"></p>
@@ -458,6 +418,8 @@
         let selectedCity = '';
         let cartItems = [];
         let currentCombo = null;
+        let states = [];
+        let cities = {};
         let stock = {
             casal: 10,
             familia: 10,
@@ -544,12 +506,12 @@
             }
         }
 
-        // Carregar estados via API do IBGE
-        async function fetchStates() {
+        // Função para carregar estados via API do IBGE
+        async function fetchStates(retryCount = 3) {
             try {
                 const response = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome');
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const states = await response.json();
+                states = await response.json();
                 const stateSelect = document.getElementById('state');
                 stateSelect.innerHTML = '<option value="">Selecione um estado</option>';
                 states.forEach(state => {
@@ -559,31 +521,71 @@
                     stateSelect.appendChild(option);
                 });
                 stateSelect.focus();
+                // Iniciar pré-carregamento de cidades
+                fetchAllCities();
             } catch (error) {
                 console.error('Erro ao carregar estados:', error);
-                showModalError('Não foi possível carregar os estados. Verifique sua conexão.');
+                if (retryCount > 0) {
+                    setTimeout(() => fetchStates(retryCount - 1), 1000);
+                } else {
+                    showModalError('Não foi possível carregar os estados. Verifique sua conexão.');
+                }
             }
         }
 
-        // Carregar cidades via API do IBGE
-        async function fetchCities(stateId) {
+        // Função para pré-carregar todas as cidades
+        async function fetchAllCities() {
             try {
-                const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${stateId}/municipios?orderBy=nome`);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const cities = await response.json();
+                for (const state of states) {
+                    if (!cities[state.id]) {
+                        const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${state.id}/municipios?orderBy=nome`);
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                        cities[state.id] = await response.json();
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao pré-carregar cidades:', error);
+            }
+        }
+
+        // Função para carregar cidades para um estado específico
+        function loadCities(stateId) {
+            try {
                 const citySelect = document.getElementById('city');
                 citySelect.innerHTML = '<option value="">Selecione uma cidade</option>';
-                cities.forEach(city => {
-                    const option = document.createElement('option');
-                    option.value = city.nome;
-                    option.textContent = city.nome;
-                    citySelect.appendChild(option);
-                });
-                citySelect.disabled = false;
-                citySelect.focus();
+                if (cities[stateId] && cities[stateId].length > 0) {
+                    cities[stateId].forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city.nome;
+                        option.textContent = city.nome;
+                        citySelect.appendChild(option);
+                    });
+                    citySelect.disabled = false;
+                    citySelect.focus();
+                } else {
+                    // Fallback: carregar cidades diretamente se não estiverem pré-carregadas
+                    fetchCities(stateId);
+                }
             } catch (error) {
                 console.error('Erro ao carregar cidades:', error);
                 showModalError('Não foi possível carregar as cidades. Tente novamente.');
+            }
+        }
+
+        // Função para carregar cidades via API do IBGE (fallback)
+        async function fetchCities(stateId, retryCount = 3) {
+            try {
+                const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${stateId}/municipios?orderBy=nome`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                cities[stateId] = await response.json();
+                loadCities(stateId);
+            } catch (error) {
+                console.error('Erro ao carregar cidades:', error);
+                if (retryCount > 0) {
+                    setTimeout(() => fetchCities(stateId, retryCount - 1), 1000);
+                } else {
+                    showModalError('Não foi possível carregar as cidades. Tente novamente.');
+                }
             }
         }
 
@@ -596,7 +598,6 @@
                     modal.classList.add('active');
                     overlay.classList.add('active');
                     modal.setAttribute('aria-hidden', 'false');
-                    fetchStates();
                     updateProgress(1);
                     trapFocus(modal);
                 } else {
@@ -618,7 +619,7 @@
                     return;
                 }
                 selectedState = stateSelect.options[stateSelect.selectedIndex].text;
-                fetchCities(stateSelect.value);
+                loadCities(stateSelect.value);
                 document.getElementById('state-step').classList.remove('active');
                 document.getElementById('city-step').classList.add('active');
                 updateProgress(2);
@@ -666,20 +667,6 @@
             } catch (error) {
                 console.error('Erro ao selecionar cidade:', error);
                 showModalError('Erro ao processar cidade.');
-            }
-        }
-
-        // Tentar novamente a busca de localização
-        function retryLocationSearch() {
-            try {
-                document.getElementById('store-found-step').classList.remove('active');
-                document.getElementById('state-step').classList.add('active');
-                updateProgress(1);
-                document.getElementById('state').focus();
-                document.getElementById('error-message').classList.remove('visible');
-            } catch (error) {
-                console.error('Erro ao tentar novamente:', error);
-                showNotification('Erro ao tentar novamente!', true);
             }
         }
 
@@ -757,7 +744,13 @@
         }
 
         // Inicializar página
-        showLocationModal();
+        async function init() {
+            await fetchStates(); // Carregar estados imediatamente
+            showLocationModal();
+        }
+
+        // Iniciar carregamento
+        init();
     </script>
 </body>
 </html>
