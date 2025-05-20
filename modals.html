@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -508,6 +469,11 @@
             });
         }
 
+        // Variáveis globais
+        let cartItems = [];
+        let currentCombo = null;
+        let currentItem = null;
+
         // Receber mensagens do index.html
         window.addEventListener('message', (event) => {
             if (event.data.action === 'showModal') {
@@ -554,6 +520,8 @@
                 stateModal.classList.add('active');
                 stateModal.setAttribute('aria-hidden', 'false');
             } else if (event.data.action === 'updateFlavorModal') {
+                currentCombo = event.data.combo;
+                currentItem = event.data.item;
                 const selections = document.getElementById('flavor-selections');
                 const progress = document.getElementById('flavor-progress');
                 selections.innerHTML = '';
@@ -566,41 +534,41 @@
                     { name: 'Chocolate', price: 6 }
                 ];
                 let totalFlavors = 0;
-                if (event.data.combo) {
-                    totalFlavors = event.data.combo.traditionalCount + event.data.combo.sweetCount;
+                if (currentCombo) {
+                    totalFlavors = currentCombo.traditionalCount + currentCombo.sweetCount;
                     progress.textContent = `Selecione ${totalFlavors} sabor${totalFlavors > 1 ? 'es' : ''} e bordas para o seu combo`;
-                    for (let i = 0; i < event.data.combo.traditionalCount; i++) {
+                    for (let i = 0; i < currentCombo.traditionalCount; i++) {
                         selections.innerHTML += `
                             <label>Pizza Tradicional ${i + 1}</label>
-                            <select aria-label="Selecione o sabor tradicional ${i + 1}">
+                            <select class="flavor-select" data-type="traditional" aria-label="Selecione o sabor tradicional ${i + 1}">
                                 <option value="">Selecione o sabor tradicional</option>
                                 ${traditionalFlavors.map(f => `<option value="${f}">${f}</option>`).join('')}
                             </select>
                             <label>Borda Tradicional ${i + 1}</label>
-                            <select aria-label="Selecione a borda para a pizza tradicional ${i + 1}">
+                            <select class="border-select" aria-label="Selecione a borda para a pizza tradicional ${i + 1}">
                                 ${borderOptions.map(b => `<option value="${b.name}" data-price="${b.price}">${b.name} (R$ ${b.price.toFixed(2)})</option>`).join('')}
                             </select>
                         `;
                     }
-                    for (let i = 0; i < event.data.combo.sweetCount; i++) {
+                    for (let i = 0; i < currentCombo.sweetCount; i++) {
                         selections.innerHTML += `
                             <label>Pizza Doce ${i + 1}</label>
-                            <select aria-label="Selecione o sabor doce ${i + 1}">
+                            <select class="flavor-select" data-type="sweet" aria-label="Selecione o sabor doce ${i + 1}">
                                 <option value="">Selecione o sabor doce</option>
                                 ${sweetFlavors.map(f => `<option value="${f}">${f}</option>`).join('')}
                             </select>
                             <label>Borda Doce ${i + 1}</label>
-                            <select aria-label="Selecione a borda para a pizza doce ${i + 1}">
+                            <select class="border-select" aria-label="Selecione a borda para a pizza doce ${i + 1}">
                                 ${borderOptions.map(b => `<option value="${b.name}" data-price="${b.price}">${b.name} (R$ ${b.price.toFixed(2)})</option>`).join('')}
                             </select>
                         `;
                     }
-                } else if (event.data.item) {
+                } else if (currentItem) {
                     totalFlavors = 1;
                     progress.textContent = `Selecione a borda para a sua pizza`;
                     selections.innerHTML = `
-                        <label>Borda para ${event.data.item.name}</label>
-                        <select aria-label="Selecione a borda para ${event.data.item.name}">
+                        <label>Borda para ${currentItem.name}</label>
+                        <select class="border-select" aria-label="Selecione a borda para ${currentItem.name}">
                             ${borderOptions.map(b => `<option value="${b.name}" data-price="${b.price}">${b.name} (R$ ${b.price.toFixed(2)})</option>`).join('')}
                         </select>
                     `;
@@ -709,25 +677,38 @@
         }
 
         function confirmFlavors() {
-            const selections = document.getElementById('flavor-selections').querySelectorAll('select');
+            const selections = document.getElementById('flavor-selections');
+            const flavorSelects = selections.querySelectorAll('.flavor-select');
+            const borderSelects = selections.querySelectorAll('.border-select');
             let flavors = [];
             let borders = [];
             let totalBorderPrice = 0;
-            if (selections.length > 1) {
-                flavors = Array.from(selections).filter((_, i) => i % 2 === 0).map(s => s.value).filter(v => v);
-                borders = Array.from(selections).filter((_, i) => i % 2 === 1).map(s => ({
+
+            if (currentCombo) {
+                flavors = Array.from(flavorSelects).map(s => s.value).filter(v => v);
+                borders = Array.from(borderSelects).map(s => ({
                     name: s.value,
                     price: parseFloat(s.options[s.selectedIndex].dataset.price || 0)
                 }));
                 totalBorderPrice = borders.reduce((sum, b) => sum + b.price, 0);
-            } else if (selections.length === 1) {
-                borders = [{ name: selections[0].value, price: parseFloat(selections[0].options[selections[0].selectedIndex].dataset.price || 0) }];
-                totalBorderPrice = borders[0].price;
+                const expectedFlavors = currentCombo.traditionalCount + currentCombo.sweetCount;
+                if (flavors.length < expectedFlavors || borders.length < expectedFlavors) {
+                    showNotification('Selecione todos os sabores e bordas!', true);
+                    return;
+                }
+            } else if (currentItem) {
+                borders = Array.from(borderSelects).map(s => ({
+                    name: s.value,
+                    price: parseFloat(s.options[s.selectedIndex].dataset.price || 0)
+                }));
+                totalBorderPrice = borders.reduce((sum, b) => sum + b.price, 0);
+                flavors = [currentItem.name];
+                if (borders.length < 1) {
+                    showNotification('Selecione a borda!', true);
+                    return;
+                }
             }
-            if (flavors.length < (currentCombo ? (currentCombo.traditionalCount + currentCombo.sweetCount) : 0) || (borders.length < (currentCombo ? (currentCombo.traditionalCount + currentCombo.sweetCount) : 1))) {
-                showNotification('Selecione todos os sabores e bordas!', true);
-                return;
-            }
+
             window.parent.postMessage({ action: 'confirmFlavors', flavors, borders, totalBorderPrice }, '*');
             window.parent.postMessage({ action: 'hideModal', modalId: 'flavor-modal' }, '*');
         }
@@ -761,7 +742,7 @@
         function confirmCheckout() {
             const name = document.getElementById('name').value.trim();
             const address = document.getElementById('address').value.trim();
-            const phone = document.getElementById('phone').value.trim();
+            let phone = document.getElementById('phone').value.trim();
             const errorMessage = document.getElementById('checkout-error');
 
             if (!name || !address || !phone) {
@@ -770,11 +751,15 @@
                 return;
             }
 
-            if (!/^\(\d{2}\)\s\d{5}-\d{4}$/.test(phone) && !/^\d{11}$/.test(phone.replace(/\D/g, ''))) {
+            // Formatar telefone se necessário
+            phone = phone.replace(/\D/g, '');
+            if (!/^\d{10,11}$/.test(phone)) {
                 errorMessage.textContent = 'Por favor, insira um telefone válido! Exemplo: (XX) XXXXX-XXXX';
                 errorMessage.classList.add('visible');
                 return;
             }
+            // Formatar para o padrão (XX) XXXXX-XXXX
+            phone = `(${phone.substring(0, 2)}) ${phone.substring(2, 7)}-${phone.substring(7)}`;
 
             errorMessage.classList.remove('visible');
 
@@ -812,10 +797,6 @@
             document.getElementById('address').value = '';
             document.getElementById('phone').value = '';
         }
-
-        // Variáveis globais
-        let cartItems = [];
-        let currentCombo = null;
     </script>
 </body>
 </html>
