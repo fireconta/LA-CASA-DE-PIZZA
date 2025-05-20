@@ -661,141 +661,115 @@
             searchingModal.classList.add('active');
             searchingModal.setAttribute('aria-hidden', 'false');
             setTimeout(() => {
-                searchingModal.classList.remove('active');
-                document.getElementById('store-location').textContent = `${city}, ${document.getElementById('state-select').options[document.getElementById('state-select').selectedIndex].text}`;
+                window.parent.postMessage({ action: 'hideModal', modalId: 'searching-modal' }, '*');
                 const storeFoundModal = document.getElementById('store-found-modal');
                 storeFoundModal.classList.add('active');
                 storeFoundModal.setAttribute('aria-hidden', 'false');
-            }, 1500);
+                document.getElementById('store-location').textContent = `${city}, ${document.getElementById('state-select').value}`;
+            }, 2000);
         }
 
         function confirmStore() {
             const city = document.getElementById('city-select').value;
-            const state = document.getElementById('state-select').options[document.getElementById('state-select').selectedIndex].text;
+            const state = document.getElementById('state-select').value;
             window.parent.postMessage({ action: 'confirmLocation', city, state }, '*');
             window.parent.postMessage({ action: 'hideModal', modalId: 'store-found-modal' }, '*');
         }
 
         function confirmFlavors() {
-            const selections = document.getElementById('flavor-selections');
-            const flavorSelects = selections.querySelectorAll('.flavor-select');
-            const borderSelects = selections.querySelectorAll('.border-select');
+            const flavorSelects = document.querySelectorAll('.flavor-select');
+            const borderSelects = document.querySelectorAll('.border-select');
             let flavors = [];
             let borders = [];
             let totalBorderPrice = 0;
 
-            if (currentCombo) {
-                flavors = Array.from(flavorSelects).map(s => s.value).filter(v => v);
-                borders = Array.from(borderSelects).map(s => ({
-                    name: s.value,
-                    price: parseFloat(s.options[s.selectedIndex].dataset.price || 0)
-                }));
-                totalBorderPrice = borders.reduce((sum, b) => sum + b.price, 0);
-                const expectedFlavors = currentCombo.traditionalCount + currentCombo.sweetCount;
-                if (flavors.length < expectedFlavors || borders.length < expectedFlavors) {
-                    showNotification('Selecione todos os sabores e bordas!', true);
-                    return;
+            flavorSelects.forEach(select => {
+                if (select.value) {
+                    flavors.push(select.value);
                 }
-            } else if (currentItem) {
-                borders = Array.from(borderSelects).map(s => ({
-                    name: s.value,
-                    price: parseFloat(s.options[s.selectedIndex].dataset.price || 0)
-                }));
-                totalBorderPrice = borders.reduce((sum, b) => sum + b.price, 0);
-                flavors = [currentItem.name];
-                if (borders.length < 1) {
-                    showNotification('Selecione a borda!', true);
-                    return;
-                }
+            });
+
+            borderSelects.forEach(select => {
+                const price = parseFloat(select.options[select.selectedIndex].dataset.price);
+                borders.push({ name: select.value, price });
+                totalBorderPrice += price;
+            });
+
+            if (currentCombo && flavors.length !== (currentCombo.traditionalCount + currentCombo.sweetCount)) {
+                showNotification('Selecione todos os sabores necessários!', true);
+                return;
             }
 
-            window.parent.postMessage({ action: 'confirmFlavors', flavors, borders, totalBorderPrice }, '*');
+            window.parent.postMessage({
+                action: 'confirmFlavors',
+                flavors,
+                borders,
+                totalBorderPrice
+            }, '*');
             window.parent.postMessage({ action: 'hideModal', modalId: 'flavor-modal' }, '*');
         }
 
         function openConfirmClearModal() {
-            const modal = document.getElementById('confirm-clear-modal');
-            modal.classList.add('active');
-            modal.setAttribute('aria-hidden', 'false');
+            const confirmClearModal = document.getElementById('confirm-clear-modal');
+            confirmClearModal.classList.add('active');
+            confirmClearModal.setAttribute('aria-hidden', 'false');
+            trapFocus('confirm-clear-modal');
         }
 
         function confirmClearCart() {
             window.parent.postMessage({ action: 'clearCart' }, '*');
             window.parent.postMessage({ action: 'hideModal', modalId: 'confirm-clear-modal' }, '*');
-            showNotification('Carrinho limpo com sucesso!', false);
+            window.parent.postMessage({ action: 'toggleCart' }, '*');
         }
 
         function openCheckoutModal() {
-            const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            if (total < 10) {
-                showNotification('O pedido mínimo é R$ 10,00!', true);
-                return;
-            }
-            const modal = document.getElementById('checkout-modal');
-            modal.classList.add('active');
-            modal.setAttribute('aria-hidden', 'false');
-            document.getElementById('name').value = '';
-            document.getElementById('address').value = '';
-            document.getElementById('phone').value = '';
+            const checkoutModal = document.getElementById('checkout-modal');
+            checkoutModal.classList.add('active');
+            checkoutModal.setAttribute('aria-hidden', 'false');
+            document.getElementById('name').focus();
+            trapFocus('checkout-modal');
         }
 
         function confirmCheckout() {
             const name = document.getElementById('name').value.trim();
             const address = document.getElementById('address').value.trim();
-            let phone = document.getElementById('phone').value.trim();
-            const errorMessage = document.getElementById('checkout-error');
+            const phone = document.getElementById('phone').value.trim();
+            const checkoutError = document.getElementById('checkout-error');
 
             if (!name || !address || !phone) {
-                errorMessage.textContent = 'Por favor, preencha todos os campos!';
-                errorMessage.classList.add('visible');
+                checkoutError.textContent = 'Preencha todos os campos!';
+                checkoutError.classList.add('visible');
                 return;
             }
 
-            // Formatar telefone se necessário
-            phone = phone.replace(/\D/g, '');
-            if (!/^\d{10,11}$/.test(phone)) {
-                errorMessage.textContent = 'Por favor, insira um telefone válido! Exemplo: (XX) XXXXX-XXXX';
-                errorMessage.classList.add('visible');
+            const phoneRegex = /^\(\d{2}\)\s\d{4,5}-\d{4}$/;
+            if (!phoneRegex.test(phone)) {
+                checkoutError.textContent = 'Telefone inválido! Use o formato (XX) XXXXX-XXXX';
+                checkoutError.classList.add('visible');
                 return;
             }
-            // Formatar para o padrão (XX) XXXXX-XXXX
-            phone = `(${phone.substring(0, 2)}) ${phone.substring(2, 7)}-${phone.substring(7)}`;
 
-            errorMessage.classList.remove('visible');
-
-            // Geração da mensagem para o WhatsApp
-            let message = `🛒 *Novo Pedido - La Casa de Pizza's* 🛒\n\n`;
-            message += `👤 *Cliente*: ${escapeHTML(name)}\n`;
-            message += `📍 *Endereço*: ${escapeHTML(address)}\n`;
-            message += `📞 *Telefone*: ${escapeHTML(phone)}\n\n`;
-            message += `*Itens do Pedido:*\n`;
+            checkoutError.classList.remove('visible');
+            const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            let orderDetails = `Novo Pedido\n\n`;
+            orderDetails += `Cliente: ${escapeHTML(name)}\n`;
+            orderDetails += `Endereço: ${escapeHTML(address)}\n`;
+            orderDetails += `Telefone: ${escapeHTML(phone)}\n\n`;
+            orderDetails += `Itens:\n`;
             cartItems.forEach(item => {
-                message += `- ${escapeHTML(item.name)} (x${item.quantity})\n`;
+                orderDetails += `- ${item.quantity}x ${escapeHTML(item.name)} - R$ ${(item.price * item.quantity).toFixed(2)}\n`;
                 if (item.flavors.length > 1) {
-                    message += `  Sabores: ${escapeHTML(item.flavors.join(', '))}\n`;
+                    orderDetails += `  Sabores: ${escapeHTML(item.flavors.join(', '))}\n`;
                 }
                 if (item.borders.length > 0) {
-                    message += `  Bordas: ${escapeHTML(item.borders.map(b => b.name).join(', '))}\n`;
+                    orderDetails += `  Bordas: ${escapeHTML(item.borders.map(b => b.name).join(', '))}\n`;
                 }
-                message += `  Total: R$ ${(item.price * item.quantity).toFixed(2)}\n`;
             });
-            const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            message += `\n💰 *Total*: R$ ${total.toFixed(2)}`;
-
-            // Envio via WhatsApp
-            const whatsappNumber = window.parent.config.whatsapp.replace(/\D/g, '');
-            const whatsappUrl = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`;
+            orderDetails += `\nTotal: R$ ${total.toFixed(2)}`;
+            const whatsappUrl = `https://api.whatsapp.com/send?phone=+5562995771104&text=${encodeURIComponent(orderDetails)}`;
             window.open(whatsappUrl, '_blank');
-
-            // Enviar dados para o index.html
             window.parent.postMessage({ action: 'confirmCheckout', name, address, phone }, '*');
             window.parent.postMessage({ action: 'hideModal', modalId: 'checkout-modal' }, '*');
-            window.parent.postMessage({ action: 'toggleCart' }, '*');
-
-            // Limpar campos
-            document.getElementById('name').value = '';
-            document.getElementById('address').value = '';
-            document.getElementById('phone').value = '';
         }
     </script>
 </body>
