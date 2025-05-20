@@ -9,10 +9,9 @@
         /* Estilos do header */
         header {
             background-color: #f3f4f6;
-            padding: 4rem 1rem 3rem;
+            padding: 2rem 1rem;
             text-align: center;
             position: relative;
-            margin-top: 0;
         }
         .logo {
             width: 120px;
@@ -419,15 +418,13 @@
     <div id="notification" class="notification" aria-live="assertive"></div>
 
     <!-- Inclusão do modal via iframe -->
-    <iframe src="modal.html" style="display: none;" id="modals-iframe"></iframe>
+    <iframe src="modals.html" style="display: none;" id="modals-iframe"></iframe>
 
     <!-- Inclusão do arquivo de configuração -->
     <script src="config.js"></script>
     <script>
-        // Configuração dinâmica da logo
+        // Configuração dinâmica da logo e imagens
         document.querySelector('.logo img').src = window.config.logo;
-
-        // Configuração dinâmica das imagens
         document.getElementById('combo-casal-img').src = window.config.images.comboCasal;
         document.getElementById('combo-familia-img').src = window.config.images.comboFamilia;
         document.getElementById('combo-supremo-img').src = window.config.images.comboSupremo;
@@ -564,7 +561,7 @@
             iframe.postMessage({ action: 'updateFlavorModal', combo: currentCombo, item: currentItem }, '*');
         }
 
-        // Comunicação com modal.html
+        // Comunicação com modals.html
         window.addEventListener('message', (event) => {
             if (event.data.action === 'confirmFlavors') {
                 const { flavors, borders, totalBorderPrice } = event.data;
