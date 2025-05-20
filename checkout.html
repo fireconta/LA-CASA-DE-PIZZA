@@ -1,0 +1,793 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><div id="cart" aria-live="polite">
+    <div id="cart-header">
+        <h3>Carrinho <i class="fas fa-shopping-cart"></i></h3>
+        <button onclick="toggleCart()" aria-label="Fechar carrinho">✖</button>
+    </div>
+    <div id="cart-items"></div>
+    <div id="cart-total">Total: R$ 0,00</div>
+    <div id="minimum-order-message">O pedido mínimo é R$ 10,00</div>
+    <div id="cart-actions">
+        <button id="clear-cart-btn" onclick="openConfirmClearModal()" aria-label="Limpar carrinho">Limpar</button>
+        <button id="checkout-btn" onclick="openCheckoutModal()" aria-label="Finalizar pedido">Finalizar Pedido</button>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Limpeza -->
+<div id="confirm-clear-modal" class="notification-modal" aria-hidden="true">
+    <div class="notification-modal-content">
+        <button class="notification-close-btn" onclick="closeConfirmClearModal()" aria-label="Fechar notificação de confirmação">✖</button>
+        <h2><i class="fas fa-trash-alt"></i> Confirmar Limpeza</h2>
+        <p>Tem certeza que deseja limpar o carrinho?</p>
+        <button id="confirm-clear-btn" onclick="confirmClearCart()" aria-label="Confirmar limpeza do carrinho">Confirmar</button>
+        <button id="cancel-clear-btn" class="secondary" onclick="closeConfirmClearModal()" aria-label="Cancelar limpeza do carrinho">Cancelar</button>
+    </div>
+</div>
+
+<!-- Modal de Escolha de Sabores -->
+<div id="flavor-modal" class="notification-modal" aria-hidden="true" role="dialog">
+    <div class="notification-modal-content">
+        <button class="notification-close-btn" onclick="closeFlavorModal()" aria-label="Fechar notificação de sabores">✖</button>
+        <h2><i class="fas fa-pizza-slice"></i> Escolha os Sabores</h2>
+        <p id="flavor-progress">Selecione os sabores para o seu combo</p>
+        <div id="flavor-selections" class="flavor-selections"></div>
+        <div class="modal-buttons">
+            <button id="confirm-flavor-btn" onclick="confirmFlavors()" aria-label="Confirmar sabores">Confirmar</button>
+            <button id="cancel-flavor-btn" class="secondary" onclick="closeFlavorModal()" aria-label="Cancelar seleção de sabores">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Checkout -->
+<div id="checkout-modal" class="notification-modal" aria-hidden="true">
+    <div class="notification-modal-content">
+        <button class="notification-close-btn" onclick="closeCheckoutModal()" aria-label="Fechar notificação de checkout">✖</button>
+        <h2><i class="fas fa-check-circle"></i> Finalizar Pedido</h2>
+        <label for="name">Nome:</label>
+        <input type="text" id="name" placeholder="Seu nome" required aria-label="Digite seu nome">
+        <label for="address">Endereço:</label>
+        <input type="text" id="address" placeholder="Seu endereço" required aria-label="Digite seu endereço">
+        <label for="phone">Telefone:</label>
+        <input type="tel" id="phone" placeholder="(XX) XXXXX-XXXX" required aria-label="Digite seu telefone">
+        <p id="checkout-error" class="error-message"></p>
+        <button id="confirm-checkout-btn" onclick="confirmCheckout()" aria-label="Confirmar pedido">Confirmar</button>
+        <button id="cancel-checkout-btn" class="secondary" onclick="closeCheckoutModal()" aria-label="Cancelar checkout">Cancelar</button>
+    </div>
+</div>
+
+<style>
+    /* Estilos gerais para notificações */
+    .notification-modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.95);
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        opacity: 0;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        z-index: 2000;
+        font-size: 0.875rem;
+        font-weight: 500;
+        width: 300px;
+        max-width: 90%;
+    }
+    .notification-modal.active {
+        display: block;
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    .notification-modal h2 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .notification-modal p {
+        font-size: 0.875rem;
+        margin-bottom: 0.75rem;
+    }
+    .notification-close-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: none;
+        border: none;
+        font-size: 1rem;
+        color: white;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    .notification-close-btn:hover {
+        color: #ddd;
+    }
+    .notification-modal select,
+    .notification-modal input {
+        margin-top: 0.5rem;
+        display: block;
+        width: 100%;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        background: white;
+        color: #4b5563;
+        font-size: 0.875rem;
+    }
+    .notification-modal select:focus,
+    .notification-modal input:focus {
+        outline: none;
+        border-color: #16a34a;
+        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+    }
+    .notification-modal button {
+        margin-top: 0.75rem;
+        width: 100%;
+        background: linear-gradient(135deg, #16a34a, #15803d);
+        color: white;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+    .notification-modal button:hover {
+        background: linear-gradient(135deg, #15803d, #16a34a);
+    }
+    .notification-modal button.secondary {
+        background: linear-gradient(135deg, #6b7280, #4b5563);
+    }
+    .notification-modal button.secondary:hover {
+        background: linear-gradient(135deg, #4b5563, #6b7280);
+    }
+    .error-message {
+        display: none;
+        color: #dc2626;
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-top: 0.5rem;
+        text-align: center;
+        background-color: #fee2e2;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+    }
+    .error-message.visible {
+        display: block;
+    }
+    .modal-buttons {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+    .modal-buttons button {
+        flex: 1;
+    }
+    .notification-modal select {
+        margin-bottom: 0.75rem;
+    }
+    .flavor-selections {
+        margin: 1rem 0;
+        padding: 0.75rem;
+        background: #f9fafb;
+        border-radius: 0.5rem;
+    }
+    .flavor-selections label {
+        display: block;
+        font-weight: 600;
+        color: #4b5563;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+    .flavor-selections select {
+        margin-bottom: 1rem;
+        border: 2px solid #e5e7eb;
+        transition: border-color 0.2s;
+    }
+    .flavor-selections select:focus {
+        border-color: #16a34a;
+    }
+    #flavor-progress {
+        font-size: 0.875rem;
+        color: #4b5563;
+        margin-bottom: 0.75rem;
+    }
+
+    /* Estilos do carrinho pop-up */
+    #cart {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.95);
+        width: 360px;
+        background-color: white;
+        border-radius: 1rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        padding: 1.5rem;
+        z-index: 1000;
+        max-height: 80vh;
+        overflow-y: auto;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        opacity: 0;
+    }
+    #cart.active {
+        display: block;
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    #cart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.25rem;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 0.5rem;
+    }
+    #cart-header h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #dc2626;
+    }
+    #cart-header button {
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        color: #4b5563;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    #cart-header button:hover {
+        color: #dc2626;
+    }
+    .cart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+    .cart-item-details {
+        flex-grow: 1;
+    }
+    .cart-item span {
+        font-size: 0.875rem;
+        color: #4b5563;
+        display: block;
+    }
+    .quantity-controls {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    .quantity-btn {
+        background: linear-gradient(135deg, #16a34a, #15803d);
+        color: white;
+        border: none;
+        padding: 0.25rem 0.75rem;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: background 0.2s;
+    }
+    .quantity-btn:hover {
+        background: linear-gradient(135deg, #15803d, #16a34a);
+    }
+    .remove-from-cart {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        color: white;
+        border: none;
+        padding: 0.25rem 0.75rem;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .remove-from-cart:hover {
+        background: linear-gradient(135deg, #b91c1c, #dc2626);
+    }
+    #cart-total {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #dc2626;
+        margin-top: 1.25rem;
+        text-align: right;
+    }
+    #cart-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1.25rem;
+    }
+    #clear-cart-btn, #checkout-btn {
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        font-weight: 600;
+        transition: transform 0.2s, background 0.2s;
+    }
+    #clear-cart-btn {
+        background: linear-gradient(135deg, #6b7280, #4b5563);
+        color: white;
+    }
+    #clear-cart-btn:hover {
+        transform: scale(1.05);
+        background: linear-gradient(135deg, #4b5563, #6b7280);
+    }
+    #checkout-btn {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+    }
+    #checkout-btn:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+    }
+    #checkout-btn:hover:not(:disabled) {
+        transform: scale(1.05);
+        background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    }
+    #minimum-order-message {
+        display: none;
+        color: #dc2626;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-top: 0.75rem;
+        text-align: center;
+    }
+    #minimum-order-message.visible {
+        display: block;
+    }
+
+    /* Responsividade */
+    @media (max-width: 640px) {
+        #cart {
+            width: 95%;
+        }
+    }
+</style>
+
+<script>
+    // Função para debouncing
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Função para adicionar ao carrinho
+    function addToCart(button) {
+        try {
+            if (!localStorage.getItem('locationSelected')) {
+                showNotification('Selecione sua localização primeiro!', true);
+                showLocationModal();
+                return;
+            }
+            const stockKey = button.dataset.comboStock || button.dataset.itemStock;
+            if (stock[stockKey] <= 0) {
+                showNotification('Item fora de estoque!', true);
+                return;
+            }
+            button.classList.add('loading');
+            button.disabled = true;
+            setTimeout(() => {
+                button.classList.remove('loading');
+                button.disabled = stock[stockKey] <= 0;
+                if (button.dataset.comboName) {
+                    currentCombo = {
+                        name: button.dataset.comboName,
+                        price: parseFloat(button.dataset.comboPrice),
+                        stockKey: button.dataset.comboStock,
+                        traditionalCount: parseInt(button.dataset.comboTraditional || 0),
+                        sweetCount: parseInt(button.dataset.comboSweet || 0)
+                    };
+                    openFlavorModal();
+                } else {
+                    const item = {
+                        id: Date.now(),
+                        name: button.dataset.itemName,
+                        price: parseFloat(button.dataset.itemPrice),
+                        quantity: 1,
+                        stockKey: button.dataset.itemStock
+                    };
+                    const existingItem = cartItems.find(i => i.name === item.name);
+                    if (existingItem) {
+                        existingItem.quantity++;
+                    } else {
+                        cartItems.push(item);
+                    }
+                    stock[stockKey]--;
+                    updateStockDisplay(stockKey);
+                    updateCartDisplay();
+                    showNotification(`${item.name} adicionado ao carrinho!`);
+                }
+            }, 1000);
+        } catch (error) {
+            console.error('Erro ao adicionar ao carrinho:', error);
+            button.classList.remove('loading');
+            button.disabled = false;
+            showNotification('Erro ao adicionar ao carrinho!', true);
+        }
+    }
+
+    // Abrir modal de escolha de sabores
+    function openFlavorModal() {
+        try {
+            const modal = document.getElementById('flavor-modal');
+            const selections = document.getElementById('flavor-selections');
+            const progress = document.getElementById('flavor-progress');
+            selections.innerHTML = '';
+            const totalFlavors = currentCombo.traditionalCount + currentCombo.sweetCount;
+            progress.textContent = `Selecione ${totalFlavors} sabor${totalFlavors > 1 ? 'es' : ''} para o seu combo`;
+            const traditionalFlavors = [
+                'Calabresa', 'Margherita', 'Quatro Queijos', 'Frango com Catupiry', 'Portuguesa'
+            ];
+            const sweetFlavors = [
+                'Chocolate', 'Brigadeiro', 'Banana com Canela', 'Morango com Chocolate'
+            ];
+            for (let i = 0; i < currentCombo.traditionalCount; i++) {
+                const label = document.createElement('label');
+                label.textContent = `Pizza Tradicional ${i + 1}`;
+                const select = document.createElement('select');
+                select.setAttribute('aria-label', `Selecione o sabor tradicional ${i + 1}`);
+                select.innerHTML = '<option value="">Selecione o sabor tradicional</option>' +
+                    traditionalFlavors.map(f => `<option value="${f}">${f}</option>`).join('');
+                selections.appendChild(label);
+                selections.appendChild(select);
+            }
+            for (let i = 0; i < currentCombo.sweetCount; i++) {
+                const label = document.createElement('label');
+                label.textContent = `Pizza Doce ${i + 1}`;
+                const select = document.createElement('select');
+                select.setAttribute('aria-label', `Selecione o sabor doce ${i + 1}`);
+                select.innerHTML = '<option value="">Selecione o sabor doce</option>' +
+                    sweetFlavors.map(f => `<option value="${f}">${f}</option>`).join('');
+                selections.appendChild(label);
+                selections.appendChild(select);
+            }
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden', 'false');
+            selections.querySelector('select').focus();
+            trapFocus(modal);
+        } catch (error) {
+            console.error('Erro ao abrir modal de sabores:', error);
+            showNotification('Erro ao abrir modal de sabores!', true);
+        }
+    }
+
+    // Confirmar sabores
+    function confirmFlavors() {
+        try {
+            const selections = document.getElementById('flavor-selections').querySelectorAll('select');
+            const flavors = Array.from(selections).map(s => s.value).filter(v => v);
+            if (flavors.length !== (currentCombo.traditionalCount + currentCombo.sweetCount)) {
+                showNotification('Selecione todos os sabores!', true);
+                return;
+            }
+            const item = {
+                id: Date.now(),
+                name: currentCombo.name,
+                price: currentCombo.price,
+                quantity: 1,
+                stockKey: currentCombo.stockKey,
+                flavors
+            };
+            cartItems.push(item);
+            stock[currentCombo.stockKey]--;
+            updateStockDisplay(currentCombo.stockKey);
+            updateCartDisplay();
+            showNotification(`${currentCombo.name Palestina - 35% OFF adicionado ao carrinho!`, false, true);
+            closeFlavorModal();
+            currentCombo = null;
+        } catch (error) {
+            console.error('Erro ao confirmar sabores:', error);
+            showNotification('Erro ao confirmar sabores!', true);
+        }
+    }
+
+    // Fechar modal de sabores
+    function closeFlavorModal() {
+        try {
+            const modal = document.getElementById('flavor-modal');
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+            currentCombo = null;
+        } catch (error) {
+            console.error('Erro ao fechar modal de sabores:', error);
+            showNotification('Erro ao fechar modal de sabores!', true);
+        }
+    }
+
+    // Atualizar quantidade no carrinho
+    function updateQuantity(id, change) {
+        try {
+            const item = cartItems.find(i => i.id === id);
+            if (!item) return;
+            if (change > 0 && stock[item.stockKey] <= 0) {
+                showNotification('Item fora de estoque!', true);
+                return;
+            }
+            item.quantity += change;
+            if (change > 0) {
+                stock[item.stockKey]--;
+            } else {
+                stock[item.stockKey]++;
+            }
+            if (item.quantity <= 0) {
+                cartItems = cartItems.filter(i => i.id !== id);
+            }
+            updateStockDisplay(item.stockKey);
+            updateCartDisplay();
+        } catch (error) {
+            console.error('Erro ao atualizar quantidade:', error);
+            showNotification('Erro ao atualizar quantidade!', true);
+        }
+    }
+
+    // Remover item do carrinho
+    function removeFromCart(id) {
+        try {
+            const item = cartItems.find(i => i.id === id);
+            if (!item) return;
+            stock[item.stockKey] += item.quantity;
+            cartItems = cartItems.filter(i => i.id !== id);
+            updateStockDisplay(item.stockKey);
+            updateCartDisplay();
+            showNotification(`${item.name} removido do carrinho!`);
+        } catch (error) {
+            console.error('Erro ao remover do carrinho:', error);
+            showNotification('Erro ao remover do carrinho!', true);
+        }
+    }
+
+    // Atualizar exibição de estoque
+    function updateStockDisplay(stockKey) {
+        try {
+            const stockElement = document.getElementById(`stock-${stockKey}`);
+            if (stockElement) {
+                stockElement.textContent = `Restam ${stock[stockKey]} unidades`;
+            }
+            const button = document.querySelector(`[data-combo-stock="${stockKey}"], [data-item-stock="${stockKey}"]`);
+            if (button) {
+                button.disabled = stock[stockKey] <= 0;
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar estoque:', error);
+        }
+    }
+
+    // Atualizar exibição do carrinho
+    function updateCartDisplay() {
+        try {
+            const cartItemsDiv = document.getElementById('cart-items');
+            const cartTotalDiv = document.getElementById('cart-total');
+            const cartCountSpan = document.getElementById('cart-count');
+            const checkoutBtn = document.getElementById('checkout-btn');
+            cartItemsDiv.innerHTML = '';
+            let total = 0;
+            let itemCount = 0;
+            cartItems.forEach(item => {
+                total += item.price * item.quantity;
+                itemCount += item.quantity;
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'cart-item';
+                itemDiv.innerHTML = `
+                    <div class="cart-item-details">
+                        <span>${escapeHTML(item.name)}</span>
+                        ${item.flavors ? `<span>Sabores: ${escapeHTML(item.flavors.join(', '))}</span>` : ''}
+                        <span>R$ ${(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="quantity-btn" onclick="updateQuantity(${item.id}, -1)" aria-label="Reduzir quantidade de ${item.name}">-</button>
+                        <span>${item.quantity}</span>
+                        <button class="quantity-btn" onclick="updateQuantity(${item.id}, 1)" aria-label="Aumentar quantidade de ${item.name}">+</button>
+                        <button class="remove-from-cart" onclick="removeFromCart(${item.id})" aria-label="Remover ${item.name} do carrinho">Remover</button>
+                    </div>
+                `;
+                cartItemsDiv.appendChild(itemDiv);
+            });
+            cartTotalDiv.textContent = `Total: R$ ${total.toFixed(2)}`;
+            cartCountSpan.textContent = itemCount;
+            const minimumMessage = document.getElementById('minimum-order-message');
+            minimumMessage.classList.toggle('visible', total < 10 && itemCount > 0);
+            checkoutBtn.disabled = itemCount === 0 || total < 10;
+        } catch (error) {
+            console.error('Erro ao atualizar carrinho:', error);
+            showNotification('Erro ao atualizar carrinho!', true);
+        }
+    }
+
+    // Alternar visibilidade do carrinho
+    function toggleCart() {
+        try {
+            const cart = document.getElementById('cart');
+            cart.classList.toggle('active');
+            cart.setAttribute('aria-hidden', !cart.classList.contains('active'));
+            if (cart.classList.contains('active')) {
+                const firstQuantityButton = cart.querySelector('.quantity-btn');
+                if (firstQuantityButton) firstQuantityButton.focus();
+            }
+        } catch (error) {
+            console.error('Erro ao alternar carrinho:', error);
+            showNotification('Erro ao abrir/fechar carrinho!', true);
+        }
+    }
+
+    // Abrir modal de confirmação de limpeza
+    function openConfirmClearModal() {
+        try {
+            if (cartItems.length === 0) {
+                showNotification('O carrinho já está vazio!', true);
+                return;
+            }
+            const modal = document.getElementById('confirm-clear-modal');
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden', 'false');
+            document.getElementById('confirm-clear-btn').focus();
+            trapFocus(modal);
+        } catch (error) {
+            console.error('Erro ao abrir modal de limpeza:', error);
+            showNotification('Erro ao abrir modal de limpeza!', true);
+        }
+    }
+
+    // Confirmar limpeza do carrinho
+    function confirmClearCart() {
+        try {
+            cartItems.forEach(item => {
+                stock[item.stockKey] += item.quantity;
+                updateStockDisplay(item.stockKey);
+            });
+            cartItems = [];
+            updateCartDisplay();
+            closeConfirmClearModal();
+            showNotification('Carrinho limpo com sucesso!');
+        } catch (error) {
+            console.error('Erro ao limpar carrinho:', error);
+            showNotification('Erro ao limpar carrinho!', true);
+        }
+    }
+
+    // Fechar modal de confirmação de limpeza
+    function closeConfirmClearModal() {
+        try {
+            const modal = document.getElementById('confirm-clear-modal');
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+        } catch (error) {
+            console.error('Erro ao fechar modal de limpeza:', error);
+            showNotification('Erro ao fechar modal de limpeza!', true);
+        }
+    }
+
+    // Abrir modal de checkout
+    function openCheckoutModal() {
+        try {
+            const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            if (total < 10) {
+                showNotification('O pedido mínimo é R$ 10,00!', true);
+                return;
+            }
+            const modal = document.getElementById('checkout-modal');
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden', 'false');
+            document.getElementById('name').focus();
+            trapFocus(modal);
+        } catch (error) {
+            console.error('Erro ao abrir modal de checkout:', error);
+            showNotification('Erro ao abrir modal de checkout!', true);
+        }
+    }
+
+    // Fechar modal de checkout
+    function closeCheckoutModal() {
+        try {
+            const modal = document.getElementById('checkout-modal');
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+            document.getElementById('checkout-error').classList.remove('visible');
+        } catch (error) {
+            console.error('Erro ao fechar modal de checkout:', error);
+            showNotification('Erro ao fechar modal de checkout!', true);
+        }
+    }
+
+    // Confirmar checkout
+    function confirmCheckout() {
+        try {
+            const name = document.getElementById('name').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            if (!name || !address || !phone) {
+                document.getElementById('checkout-error').textContent = 'Por favor, preencha todos os campos!';
+                document.getElementById('checkout-error').classList.add('visible');
+                return;
+            }
+            if (!/^\(\d{2}\)\s\d{4,5}-\d{4}$/.test(phone)) {
+                document.getElementById('checkout-error').textContent = 'Formato de telefone inválido! Use (XX) XXXXX-XXXX';
+                document.getElementById('checkout-error').classList.add('visible');
+                return;
+            }
+            let message = `Novo pedido de ${escapeHTML(name)}\n`;
+            message += `Endereço: ${escapeHTML(address)}\n`;
+            message += `Telefone: ${escapeHTML(phone)}\n`;
+            message += `Cidade: ${escapeHTML(selectedCity)}, ${escapeHTML(selectedState)}\n\n`;
+            message += 'Itens do pedido:\n';
+            let total = 0;
+            cartItems.forEach(item => {
+                message += `- ${escapeHTML(item.name)} x${item.quantity}: R$ ${(item.price * item.quantity).toFixed(2)}\n`;
+                if (item.flavors) {
+                    message += `  Sabores: ${escapeHTML(item.flavors.join(', '))}\n`;
+                }
+                total += item.price * item.quantity;
+            });
+            message += `\nTotal: R$ ${total.toFixed(2)}`;
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/5562995771104?text=${encodedMessage}`;
+            document.getElementById('confirmation-details').innerHTML = message.replace(/\n/g, '<br>');
+            document.getElementById('confirmation-page').classList.add('active');
+            document.getElementById('menu-section').classList.remove('active');
+            document.getElementById('pizzas-artesanais').classList.remove('active');
+            document.getElementById('pizzas-doces').classList.remove('active');
+            document.getElementById('cart').classList.remove('active');
+            closeCheckoutModal();
+            window.open(whatsappUrl, '_blank');
+            showNotification('Pedido enviado com sucesso!', false, true);
+        } catch (error) {
+            console.error('Erro ao confirmar checkout:', error);
+            document.getElementById('checkout-error').textContent = 'Erro ao processar pedido!';
+            document.getElementById('checkout-error').classList.add('visible');
+        }
+    }
+</script>
