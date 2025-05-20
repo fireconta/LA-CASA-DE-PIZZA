@@ -1,0 +1,727 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Casa de Pizza's</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Estilos do header */
+        header {
+            background-color: #f3f4f6;
+            padding: 4rem 1rem 3rem;
+            text-align: center;
+            position: relative;
+            margin-top: 0;
+        }
+        .logo {
+            width: 120px;
+            height: 120px;
+            background-color: white;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        .logo:hover {
+            transform: scale(1.05);
+        }
+        .logo span {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #dc2626;
+            text-transform: uppercase;
+        }
+        .status {
+            background-color: #10b981;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #dc2626;
+            margin-bottom: 0.5rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        header p {
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+        #location-display {
+            font-weight: 500;
+            color: #1f2937;
+            margin-top: 0.5rem;
+        }
+
+        /* Estilos gerais */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f3f4f6;
+        }
+
+        /* Estilos do menu */
+        .menu-section {
+            background-color: white;
+            padding: 1.5rem;
+            margin: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .menu-section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #dc2626;
+            margin-bottom: 1.25rem;
+            text-transform: uppercase;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.25rem;
+            border: 2px solid #34d399;
+            border-radius: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .menu-img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .discount-tag {
+            background: linear-gradient(135deg, #ff0000, #b91c1c);
+            color: white;
+            padding: 0.3rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+        .price-old {
+            text-decoration: line-through;
+            color: #6b7280;
+            margin-right: 0.5rem;
+        }
+        .price-new {
+            color: #dc2626;
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+        .availability {
+            color: #dc2626;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .stock-info {
+            font-size: 0.75rem;
+            color: #4b5563;
+            margin-top: 0.25rem;
+        }
+        .add-to-cart {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .add-to-cart:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .add-to-cart:hover:not(:disabled) {
+            transform: scale(1.05);
+            background: linear-gradient(135deg, #15803d, #16a34a);
+        }
+        .add-to-cart.loading {
+            background: #6b7280;
+            cursor: wait;
+        }
+        .add-to-cart.loading::after {
+            content: '';
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Botão do carrinho flutuante */
+        #cart-toggle-btn {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transition: transform 0.2s, background 0.2s;
+        }
+        #cart-toggle-btn:hover {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #b91c1c, #dc2626);
+        }
+        #cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #16a34a;
+            color: white;
+            border-radius: 50%;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        /* Notificação */
+        .notification {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 3000;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .notification.error {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
+        .notification.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsividade */
+        @media (max-width: 640px) {
+            .logo {
+                width: 100px;
+                height: 100px;
+            }
+            header h1 {
+                font-size: 1.5rem;
+            }
+            .menu-item {
+                flex-direction: column;
+                text-align: center;
+            }
+            .menu-img {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo" style="background-image: url('');">
+            <img src="" alt="Logo La Casa de Pizza's" style="width: 100%; height: 100%; border-radius: 50%; object-fit: contain;">
+        </div>
+        <span class="status">ABERTO</span>
+        <h1>La Casa de Pizza's</h1>
+        <p>Pedido Mínimo R$ 10,00 | 30-50 min</p>
+        <p id="location-display">Detectando sua localização...</p>
+        <p>4,9 (2.136 avaliações)</p>
+    </header>
+
+    <!-- Seção do Menu -->
+    <section id="combos" class="menu-section">
+        <h2>Combos</h2>
+        <div class="menu-item" aria-label="Combo La Casa de Pizza's Casal">
+            <img src="" alt="Imagem do Combo Casal" class="menu-img" id="combo-casal-img">
+            <div>
+                <span class="discount-tag">SOMENTE HOJE 35% OFF</span>
+                <h3 class="text-lg font-semibold">Combo La Casa de Pizza's Casal</h3>
+                <p>1 Pizza Grande Tradicional + 1 Pizza Doce Média + 1 Refrigerante 1,5L</p>
+                <p><span class="price-old">de R$ 63,80</span> <span class="price-new">por R$ 41,90</span></p>
+                <p class="availability">🔥 Apenas 10 combos com esse preço especial</p>
+                <p class="stock-info" id="stock-casal">Restam 10 unidades</p>
+                <button class="add-to-cart" data-combo-name="Combo La Casa de Pizza's Casal" data-combo-price="41.90" data-combo-stock="casal" data-combo-traditional="1" data-combo-sweet="1" aria-label="Adicionar Combo La Casa de Pizza's Casal ao carrinho">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+        <div class="menu-item" aria-label="Combo La Casa de Pizza's Familia">
+            <img src="" alt="Imagem do Combo Familia" class="menu-img" id="combo-familia-img">
+            <div>
+                <span class="discount-tag">SOMENTE HOJE 40% OFF</span>
+                <h3 class="text-lg font-semibold">Combo La Casa de Pizza's Familia</h3>
+                <p>2 Pizzas Grandes Tradicionais + 1 Pizza Doce Média + 1 Refrigerante 2L</p>
+                <p><span class="price-old">de R$ 95,80</span> <span class="price-new">por R$ 64,90</span></p>
+                <p class="availability">🔥 Apenas 10 combos com esse preço especial</p>
+                <p class="stock-info" id="stock-familia">Restam 10 unidades</p>
+                <button class="add-to-cart" data-combo-name="Combo La Casa de Pizza's Familia" data-combo-price="64.90" data-combo-stock="familia" data-combo-traditional="2" data-combo-sweet="1" aria-label="Adicionar Combo La Casa de Pizza's Familia ao carrinho">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+        <div class="menu-item" aria-label="Combo La Casa de Pizza's Supremo">
+            <img src="" alt="Imagem do Combo Supremo" class="menu-img" id="combo-supremo-img">
+            <div>
+                <span class="discount-tag">SOMENTE HOJE 60% OFF</span>
+                <h3 class="text-lg font-semibold">Combo La Casa de Pizza's Supremo</h3>
+                <p>3 Pizzas Grandes Tradicionais + 1 Pizza Doce Grande + 2 Refrigerantes 2L + 1 Porção de Batata Frita + 1 Pão de Alho</p>
+                <p><span class="price-old">de R$ 300,00</span> <span class="price-new">por R$ 120,00</span></p>
+                <p class="availability">🔥 Quantidade limitada</p>
+                <p class="stock-info" id="stock-supremo">Restam 5 unidades</p>
+                <button class="add-to-cart" data-combo-name="Combo La Casa de Pizza's Supremo" data-combo-price="120.00" data-combo-stock="supremo" data-combo-traditional="3" data-combo-sweet="1" aria-label="Adicionar Combo La Casa de Pizza's Supremo ao carrinho">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="pizzas-artesanais" class="menu-section">
+        <h2>Pizzas Artesanais</h2>
+        <div class="menu-item" aria-label="Pizza de Calabresa">
+            <img src="" alt="Imagem da Pizza de Calabresa" class="menu-img" id="pizza-calabresa-img">
+            <div>
+                <h3 class="text-lg font-semibold">Pizza de Calabresa</h3>
+                <p>Calabresa fatiada artesanal, cebola caramelizada, muçarela de búfala, orégano fresco e azeitonas pretas</p>
+                <p class="price-new">R$ 39,90</p>
+                <p class="stock-info" id="stock-calabresa">Restam 20 unidades</p>
+                <button class="add-to-cart" data-item-name="Pizza de Calabresa" data-item-price="39.90" data-item-stock="calabresa" aria-label="Adicionar Pizza de Calabresa ao carrinho">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+        <div class="menu-item" aria-label="Pizza Margherita">
+            <img src="" alt="Imagem da Pizza Margherita" class="menu-img" id="pizza-margherita-img">
+            <div>
+                <h3 class="text-lg font-semibold">Pizza Margherita</h3>
+                <p>Molho de tomate San Marzano, muçarela de búfala, manjericão fresco, parmesão ralado e azeite de oliva extra virgem</p>
+                <p class="price-new">R$ 42,90</p>
+                <p class="stock-info" id="stock-margherita">Restam 20 unidades</p>
+                <button class="add-to-cart" data-item-name="Pizza Margherita" data-item-price="42.90" data-item-stock="margherita" aria-label="Adicionar Pizza Margherita ao carrinho">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+        <div class="menu-item" aria-label="Pizza Quatro Queijos">
+            <img src="" alt="Imagem da Pizza Quatro Queijos" class="menu-img" id="pizza-quatroqueijos-img">
+            <div>
+                <h3 class="text-lg font-semibold">Pizza Quatro Queijos</h3>
+                <p>Muçarela, parmesão, gorgonzola, catupiry artesanal, com toque de mel trufado e nozes picadas</p>
+                <p class="price-new">R$ 45,90</p>
+                <p class="stock-info" id="stock-quatroqueijos">Restam 20 unidades</p>
+                <button class="add-to-cart" data-item-name="Pizza Quatro Queijos" data-item-price="45.90" data-item-stock="quatroqueijos" aria-label="Adicionar Pizza Quatro Queijos ao carrinho">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+        <div class="menu-item" aria-label="Pizza Frango com Catupiry">
+            <img src="" alt="Imagem da Pizza Frango com Catupiry" class="menu-img" id="pizza-frangocatupiry-img">
+            <div>
+                <h3 class="text-lg font-semibold">Pizza Frango com Catupiry</h3>
+                <p>Frango desfiado temperado, catupiry original, milho fresco, tomate cereja, manjericão e muçarela</p>
+                <p class="price-new">R$ 43,90</p>
+                <p class="stock-info" id="stock-frangocatupiry">Restam 20 unidades</p>
+                <button class="add-to-cart" data-item-name="Pizza Frango com Catupiry" data-item-price="43.90" data-item-stock="frangocatupiry" aria-label="Adicionar Pizza Frango com Catupiry ao carrinho">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+        <div class="menu-item" aria-label="Pizza Portuguesa">
+            <img src="" alt="Imagem da Pizza Portuguesa" class="menu-img" id="pizza-portuguesa-img">
+            <div>
+                <h3 class="text-lg font-semibold">Pizza Portuguesa</h3>
+                <p>Presunto cozido, muçarela, ovo cozido, cebola roxa, pimentão verde, azeitonas verdes e orégano</p>
+                <p class="price-new">R$ 41,90</p>
+                <p class="stock-info" id="stock-portuguesa">Restam 20 unidades</p>
+                <button class="add-to-cart" data-item-name="Pizza Portuguesa" data-item-price="41.90" data-item-stock="portuguesa" aria-label="Adicionar Pizza Portuguesa ao carrinho">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+        <div class="menu-item" aria-label="Pizza Pepperoni">
+            <img src="" alt="Imagem da Pizza Pepperoni" class="menu-img" id="pizza-pepperoni-img">
+            <div>
+                <h3 class="text-lg font-semibold">Pizza Pepperoni</h3>
+                <p>Pepperoni artesanal, molho de tomate picante, muçarela, parmesão e orégano fresco</p>
+                <p class="price-new">R$ 44,90</p>
+                <p class="stock-info" id="stock-pepperoni">Restam 20 unidades</p>
+                <button class="add-to-cart" data-item-name="Pizza Pepperoni" data-item-price="44.90" data-item-stock="pepperoni" aria-label="Adicionar Pizza Pepperoni ao carrinho">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="pizzas-doces" class="menu-section">
+        <h2>Pizzas Doces</h2>
+        <div class="menu-item" aria-label="Pizza de Chocolate">
+            <img src="" alt="Imagem da Pizza de Chocolate" class="menu-img" id="pizza-chocolate-img">
+            <div>
+                <h3 class="text-lg font-semibold">Pizza de Chocolate</h3>
+                <p>Chocolate ao leite derretido, granulado belga, morangos frescos e chantilly artesanal</p>
+                <p class="price-new">R$ 29,90</p>
+                <p class="stock-info" id="stock-chocolate">Restam 15 unidades</p>
+                <button class="add-to-cart" data-item-name="Pizza de Chocolate" data-item-price="29.90" data-item-stock="chocolate" aria-label="Adicionar Pizza de Chocolate ao carrinho">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+        <div class="menu-item" aria-label="Pizza de Brigadeiro">
+            <img src="" alt="Imagem da Pizza de Brigadeiro" class="menu-img" id="pizza-brigadeiro-img">
+            <div>
+                <h3 class="text-lg font-semibold">Pizza de Brigadeiro</h3>
+                <p>Brigadeiro gourmet, chocolate granulado, amendoim torrado e raspas de chocolate meio amargo</p>
+                <p class="price-new">R$ 31,90</p>
+                <p class="stock-info" id="stock-brigadeiro">Restam 15 unidades</p>
+                <button class="add-to-cart" data-item-name="Pizza de Brigadeiro" data-item-price="31.90" data-item-stock="brigadeiro" aria-label="Adicionar Pizza de Brigadeiro ao carrinho">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+        <div class="menu-item" aria-label="Pizza de Banana com Canela">
+            <img src="" alt="Imagem da Pizza de Banana com Canela" class="menu-img" id="pizza-banana-img">
+            <div>
+                <h3 class="text-lg font-semibold">Pizza de Banana com Canela</h3>
+                <p>Bananas caramelizadas, canela em pó, leite condensado e toque de açúcar mascavo</p>
+                <p class="price-new">R$ 28,90</p>
+                <p class="stock-info" id="stock-banana">Restam 15 unidades</p>
+                <button class="add-to-cart" data-item-name="Pizza de Banana com Canela" data-item-price="28.90" data-item-stock="banana" aria-label="Adicionar Pizza de Banana com Canela ao carrinho">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+        <div class="menu-item" aria-label="Pizza de Morango com Chocolate">
+            <img src="" alt="Imagem da Pizza de Morango com Chocolate" class="menu-img" id="pizza-morango-img">
+            <div>
+                <h3 class="text-lg font-semibold">Pizza de Morango com Chocolate</h3>
+                <p>Chocolate ao leite, morangos frescos, chantilly artesanal e raspas de chocolate branco</p>
+                <p class="price-new">R$ 32,90</p>
+                <p class="stock-info" id="stock-morango">Restam 15 unidades</p>
+                <button class="add-to-cart" data-item-name="Pizza de Morango com Chocolate" data-item-price="32.90" data-item-stock="morango" aria-label="Adicionar Pizza de Morango com Chocolate ao carrinho">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Botão do Carrinho -->
+    <button id="cart-toggle-btn" aria-label="Abrir carrinho">
+        <i class="fas fa-shopping-cart"></i>
+        <span id="cart-count">0</span>
+    </button>
+
+    <!-- Notificação -->
+    <div id="notification" class="notification" aria-live="assertive"></div>
+
+    <!-- Inclusão dos modals via iframe -->
+    <iframe src="modals.html" style="display: none;" id="modals-iframe"></iframe>
+
+    <!-- Inclusão do arquivo de configuração -->
+    <script src="config.js"></script>
+    <script>
+        // Configuração dinâmica da logo
+        document.querySelector('.logo img').src = window.config.logo;
+
+        // Configuração dinâmica das imagens
+        document.getElementById('combo-casal-img').src = window.config.images.comboCasal;
+        document.getElementById('combo-familia-img').src = window.config.images.comboFamilia;
+        document.getElementById('combo-supremo-img').src = window.config.images.comboSupremo;
+        document.getElementById('pizza-calabresa-img').src = window.config.images.pizzaCalabresa;
+        document.getElementById('pizza-margherita-img').src = window.config.images.pizzaMargherita;
+        document.getElementById('pizza-quatroqueijos-img').src = window.config.images.pizzaQuatroQueijos;
+        document.getElementById('pizza-frangocatupiry-img').src = window.config.images.pizzaFrangoCatupiry;
+        document.getElementById('pizza-portuguesa-img').src = window.config.images.pizzaPortuguesa;
+        document.getElementById('pizza-pepperoni-img').src = window.config.images.pizzaPepperoni;
+        document.getElementById('pizza-chocolate-img').src = window.config.images.pizzaChocolate;
+        document.getElementById('pizza-brigadeiro-img').src = window.config.images.pizzaBrigadeiro;
+        document.getElementById('pizza-banana-img').src = window.config.images.pizzaBanana;
+        document.getElementById('pizza-morango-img').src = window.config.images.pizzaMorango;
+
+        // Variáveis globais
+        let cartItems = [];
+        let currentCombo = null;
+        let currentItem = null;
+        let selectedCity = '';
+        let selectedState = '';
+        const stock = {
+            casal: 10,
+            familia: 10,
+            supremo: 5,
+            calabresa: 20,
+            margherita: 20,
+            quatroqueijos: 20,
+            frangocatupiry: 20,
+            portuguesa: 20,
+            pepperoni: 20,
+            chocolate: 15,
+            brigadeiro: 15,
+            banana: 15,
+            morango: 15
+        };
+        const borderOptions = [
+            { name: 'Sem Borda', price: 0 },
+            { name: 'Catupiry', price: 5 },
+            { name: 'Cheddar', price: 5 },
+            { name: 'Chocolate', price: 6 }
+        ];
+
+        // Função para escapar HTML
+        function escapeHTML(str) {
+            return str.replace(/[&<>"'\/]/g, function (char) {
+                return {
+                    '&': '&',
+                    '<': '<',
+                    '>': '>',
+                    '"': '"',
+                    "'": ''',
+                    '/': '/'
+                }[char];
+            });
+        }
+
+        // Função para mostrar notificação
+        function showNotification(message, isError = false, autoHide = true) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('visible');
+            if (isError) {
+                notification.classList.add('error');
+            } else {
+                notification.classList.remove('error');
+            }
+            if (autoHide) {
+                setTimeout(() => {
+                    notification.classList.remove('visible');
+                }, 3000);
+            }
+        }
+
+        // Função de localização
+        async function showLocationModal() {
+            const iframe = document.getElementById('modals-iframe').contentWindow;
+            iframe.postMessage({ action: 'showModal', modalId: 'state-modal' }, '*');
+            await loadStates();
+        }
+
+        async function loadStates() {
+            try {
+                const response = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados');
+                if (!response.ok) throw new Error('Erro ao carregar estados');
+                const states = await response.json();
+                const iframe = document.getElementById('modals-iframe').contentWindow;
+                iframe.postMessage({
+                    action: 'updateSelect',
+                    selectId: 'state-select',
+                    options: states.sort((a, b) => a.nome.localeCompare(b.nome)).map(s => `<option value="${s.sigla}" data-id="${s.id}">${s.nome}</option>`).join('')
+                }, '*');
+            } catch (error) {
+                console.error('Erro ao carregar estados:', error);
+                showNotification('Erro ao carregar estados. Tente novamente.', true);
+            }
+        }
+
+        // Funções de adição ao carrinho
+        function addToCart(button) {
+            if (!localStorage.getItem('locationSelected')) {
+                showNotification('Selecione sua localização primeiro!', true);
+                showLocationModal();
+                return;
+            }
+            const stockKey = button.dataset.comboStock || button.dataset.itemStock;
+            if (stock[stockKey] <= 0) {
+                showNotification('Item fora de estoque!', true);
+                return;
+            }
+            button.classList.add('loading');
+            button.disabled = true;
+            setTimeout(() => {
+                button.classList.remove('loading');
+                button.disabled = stock[stockKey] <= 0;
+                if (button.dataset.comboName) {
+                    currentCombo = {
+                        name: button.dataset.comboName,
+                        price: parseFloat(button.dataset.comboPrice),
+                        stockKey: button.dataset.comboStock,
+                        traditionalCount: parseInt(button.dataset.comboTraditional || 0),
+                        sweetCount: parseInt(button.dataset.comboSweet || 0)
+                    };
+                    currentItem = null;
+                    openFlavorModal();
+                } else {
+                    currentItem = {
+                        name: button.dataset.itemName,
+                        price: parseFloat(button.dataset.itemPrice),
+                        stockKey: button.dataset.itemStock
+                    };
+                    currentCombo = null;
+                    openFlavorModal();
+                }
+            }, 1000);
+        }
+
+        function openFlavorModal() {
+            const iframe = document.getElementById('modals-iframe').contentWindow;
+            iframe.postMessage({ action: 'showModal', modalId: 'flavor-modal' }, '*');
+            iframe.postMessage({ action: 'updateFlavorModal', combo: currentCombo, item: currentItem }, '*');
+        }
+
+        // Comunicação com modals.html
+        window.addEventListener('message', (event) => {
+            if (event.data.action === 'confirmFlavors') {
+                const { flavors, borders, totalBorderPrice } = event.data;
+                const item = {
+                    id: Date.now(),
+                    name: currentCombo ? currentCombo.name : currentItem.name,
+                    price: (currentCombo ? currentCombo.price : currentItem.price) + totalBorderPrice,
+                    quantity: 1,
+                    stockKey: currentCombo ? currentCombo.stockKey : currentItem.stockKey,
+                    flavors,
+                    borders
+                };
+                const existingItem = cartItems.find(i => i.name === item.name && JSON.stringify(i.flavors) === JSON.stringify(item.flavors) && JSON.stringify(i.borders) === JSON.stringify(item.borders));
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    cartItems.push(item);
+                }
+                stock[item.stockKey]--;
+                updateStockDisplay(item.stockKey);
+                updateCartDisplay();
+                showNotification(`${item.name} adicionado ao carrinho!`, false, true);
+                currentCombo = null;
+                currentItem = null;
+            } else if (event.data.action === 'confirmLocation') {
+                selectedCity = event.data.city;
+                selectedState = event.data.state;
+                localStorage.setItem('locationSelected', 'true');
+                localStorage.setItem('selectedCity', selectedCity);
+                localStorage.setItem('selectedState', selectedState);
+                document.getElementById('location-display').textContent = `Você está em ${selectedCity}, ${selectedState}`;
+                showNotification('Localização confirmada!');
+            } else if (event.data.action === 'confirmCheckout') {
+                const { name, address, phone } = event.data;
+                const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+                document.getElementById('location-display').textContent = `Pedido confirmado para ${selectedCity}, ${selectedState}`;
+                showNotification(`Pedido de R$ ${total.toFixed(2)} confirmado para ${name}!`, false);
+                cartItems = [];
+                updateCartDisplay();
+                const iframe = document.getElementById('modals-iframe').contentWindow;
+                iframe.postMessage({ action: 'showModal', modalId: 'confirmation-page' }, '*');
+                iframe.postMessage({ action: 'updateConfirmation', details: `Nome: ${name}\nEndereço: ${address}\nTelefone: ${phone}\nTotal: R$ ${total.toFixed(2)}` }, '*');
+            } else if (event.data.action === 'updateQuantity') {
+                const item = cartItems.find(i => i.id === event.data.id);
+                if (item) {
+                    if (event.data.change > 0 && stock[item.stockKey] > 0) {
+                        item.quantity++;
+                        stock[item.stockKey]--;
+                    } else if (event.data.change < 0 && item.quantity > 1) {
+                        item.quantity--;
+                        stock[item.stockKey]++;
+                    }
+                    updateStockDisplay(item.stockKey);
+                    updateCartDisplay();
+                }
+            } else if (event.data.action === 'removeFromCart') {
+                const itemIndex = cartItems.findIndex(i => i.id === event.data.id);
+                if (itemIndex !== -1) {
+                    stock[cartItems[itemIndex].stockKey] += cartItems[itemIndex].quantity;
+                    cartItems.splice(itemIndex, 1);
+                    updateStockDisplay(cartItems[itemIndex]?.stockKey || event.data.stockKey);
+                    updateCartDisplay();
+                }
+            } else if (event.data.action === 'clearCart') {
+                cartItems.forEach(item => {
+                    stock[item.stockKey] += item.quantity;
+                    updateStockDisplay(item.stockKey);
+                });
+                cartItems = [];
+                updateCartDisplay();
+            }
+        });
+
+        // Funções de atualização de estoque e carrinho
+        function updateStockDisplay(stockKey) {
+            const stockElement = document.getElementById(`stock-${stockKey}`);
+            if (stockElement) {
+                stockElement.textContent = `Restam ${stock[stockKey]} unidades`;
+            }
+            const button = document.querySelector(`[data-combo-stock="${stockKey}"], [data-item-stock="${stockKey}"]`);
+            if (button) {
+                button.disabled = stock[stockKey] <= 0;
+            }
+        }
+
+        function updateCartDisplay() {
+            const cartCountSpan = document.getElementById('cart-count');
+            const iframe = document.getElementById('modals-iframe').contentWindow;
+            let itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+            cartCountSpan.textContent = itemCount;
+            iframe.postMessage({ action: 'updateCart', items: cartItems }, '*');
+        }
+
+        // Toggle do carrinho
+        function toggleCart() {
+            const iframe = document.getElementById('modals-iframe').contentWindow;
+            iframe.postMessage({ action: 'toggleCart' }, '*');
+        }
+
+        // Inicialização
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', () => addToCart(button));
+        });
+        document.getElementById('cart-toggle-btn').addEventListener('click', toggleCart);
+
+        if (!localStorage.getItem('locationSelected')) {
+            showLocationModal();
+        } else {
+            selectedCity = localStorage.getItem('selectedCity');
+            selectedState = localStorage.getItem('selectedState');
+            document.getElementById('location-display').textContent = `Você está em ${selectedCity}, ${selectedState}`;
+        }
+    </script>
+</body>
+</html>
