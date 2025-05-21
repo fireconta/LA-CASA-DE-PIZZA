@@ -282,21 +282,6 @@
             text-align: center;
             animation: slideIn 0.4s ease;
         }
-        .modal-content.checkout {
-            max-width: 450px;
-            padding: 2rem;
-            text-align: left;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        .modal-content.cart {
-            max-width: 450px;
-            text-align: left;
-            display: flex;
-            flex-direction: column;
-            max-height: 80vh;
-        }
         @keyframes slideIn {
             from { transform: translateY(-50px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
@@ -327,61 +312,6 @@
         }
         .modal-content h2 i:hover {
             transform: rotate(15deg);
-        }
-        .modal-content.checkout h2, .modal-content.cart h2 {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-            justify-content: flex-start;
-        }
-        .modal-content.checkout .order-summary {
-            background-color: #f9fafb;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-        .modal-content.checkout .order-summary p {
-            font-size: 0.875rem;
-            color: #1f2937;
-            margin: 0.25rem 0;
-        }
-        .modal-content.checkout .order-summary .total {
-            font-weight: 700;
-            color: #dc2626;
-            margin-top: 0.5rem;
-        }
-        .modal-content.checkout .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-            position: relative;
-        }
-        .modal-content.checkout label {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #1f2937;
-        }
-        .modal-content.checkout input {
-            width: 100%;
-            padding: 0.75rem 0.75rem 0.75rem 2.5rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            background: #fff;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .modal-content.checkout input:focus {
-            border-color: #16a34a;
-            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
-            outline: none;
-        }
-        .modal-content.checkout .input-icon {
-            position: absolute;
-            left: 0.75rem;
-            top: 2.25rem;
-            color: #6b7280;
-            font-size: 1rem;
         }
         .modal-content button {
             padding: 0.75rem 1.5rem;
@@ -421,12 +351,6 @@
             background: linear-gradient(135deg, #6b7280, #4b5563);
             color: white;
             flex: 1;
-        }
-        .modal-content.checkout .button-group, .modal-content.cart .button-group {
-            display: flex;
-            gap: 0.75rem;
-            justify-content: flex-end;
-            margin-top: 1rem;
         }
         .modal-content .button-group {
             display: flex;
@@ -574,6 +498,116 @@
             font-size: 0.75rem;
             margin-bottom: 0.5rem;
         }
+        .modal-content.checkout {
+            max-width: 500px;
+            padding: 2rem;
+            background: linear-gradient(135deg, #ffffff, #f9fafb);
+            border-radius: 1.2rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .modal-content.checkout h2 {
+            font-size: 1.8rem;
+            color: #dc2626;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .modal-content.checkout .order-summary {
+            background-color: #fef2f2;
+            padding: 1.2rem;
+            border-radius: 0.8rem;
+            margin-bottom: 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #fee2e2;
+        }
+        .modal-content.checkout .order-summary p {
+            font-size: 0.9rem;
+            color: #1f2937;
+            margin: 0.3rem 0;
+        }
+        .modal-content.checkout .order-summary .total {
+            font-weight: 700;
+            color: #dc2626;
+            margin-top: 0.75rem;
+            font-size: 1.1rem;
+        }
+        .modal-content.checkout .input-group {
+            position: relative;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        .modal-content.checkout label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.3rem;
+            display: block;
+            text-align: left;
+        }
+        .modal-content.checkout input {
+            width: 100%;
+            padding: 0.9rem 1rem 0.9rem 2.8rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.6rem;
+            font-size: 0.9rem;
+            background: #fff;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .modal-content.checkout input:focus {
+            border-color: #16a34a;
+            box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.15);
+            outline: none;
+        }
+        .modal-content.checkout .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 2.8rem;
+            color: #6b7280;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+        .modal-content.checkout input:focus + .input-icon {
+            color: #16a34a;
+        }
+        .modal-content.checkout .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+            width: 100%;
+        }
+        .modal-content.checkout .btn-primary {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            padding: 0.9rem 2rem;
+            font-size: 1rem;
+            border-radius: 0.6rem;
+            transition: all 0.3s ease;
+        }
+        .modal-content.checkout .btn-secondary {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            padding: 0.9rem 2rem;
+            font-size: 1rem;
+            border-radius: 0.6rem;
+            transition: all 0.3s ease;
+        }
+        .modal-content.checkout .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #b91c1c, #dc2626);
+            transform: translateY(-2px);
+        }
+        .modal-content.checkout .btn-secondary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #4b5563, #6b7280);
+            transform: translateY(-2px);
+        }
         @media (max-width: 640px) {
             .logo {
                 width: 100px;
@@ -600,10 +634,6 @@
             }
             .modal-content {
                 max-width: 350px;
-            }
-            .modal-content.checkout {
-                max-width: 90%;
-                padding: 1.5rem;
             }
             .modal-content.cart {
                 max-width: 300px;
@@ -797,17 +827,10 @@
     <div id="state-modal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal('state-modal')">×</span>
-            <div class="progress-bar">
-                <div class="progress-step active">1</div>
-                <div class="progress-step">2</div>
-                <div class="progress-step">3</div>
-                <div class="progress-step">4</div>
-                <div class="progress-line"><div class="progress-line-fill" style="width: 0%"></div></div>
-            </div>
             <i class="fas fa-pizza-slice pizza-icon"></i>
             <h2><i class="fas fa-map-marker-alt"></i> Escolha seu Estado</h2>
             <div class="loading-bar" id="state-loading" style="display: none;"><div></div></div>
-            <select id="state-select">
+            <select id="state-select" onchange="updateStateNextBtn()">
                 <option value="">Selecione um estado</option>
             </select>
             <div class="button-group">
@@ -818,17 +841,10 @@
     <div id="city-modal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal('city-modal')">×</span>
-            <div class="progress-bar">
-                <div class="progress-step active">1</div>
-                <div class="progress-step active">2</div>
-                <div class="progress-step">3</div>
-                <div class="progress-step">4</div>
-                <div class="progress-line"><div class="progress-line-fill" style="width: 33.33%"></div></div>
-            </div>
             <i class="fas fa-pizza-slice pizza-icon"></i>
             <h2><i class="fas fa-city"></i> Escolha sua Cidade</h2>
             <div class="loading-bar" id="city-loading" style="display: none;"><div></div></div>
-            <select id="city-select">
+            <select id="city-select" onchange="updateCityNextBtn()">
                 <option value="">Selecione uma cidade</option>
             </select>
             <div class="button-group">
@@ -840,13 +856,6 @@
     <div id="searching-modal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal('searching-modal')">×</span>
-            <div class="progress-bar">
-                <div class="progress-step active">1</div>
-                <div class="progress-step active">2</div>
-                <div class="progress-step active">3</div>
-                <div class="progress-step">4</div>
-                <div class="progress-line"><div class="progress-line-fill" style="width: 66.67%"></div></div>
-            </div>
             <i class="fas fa-pizza-slice pizza-icon"></i>
             <h2><i class="fas fa-search-location"></i> Procurando Loja</h2>
             <p id="searching-text">Procurando loja mais próxima de...</p>
@@ -856,13 +865,6 @@
     <div id="found-modal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal('found-modal')">×</span>
-            <div class="progress-bar">
-                <div class="progress-step active">1</div>
-                <div class="progress-step active">2</div>
-                <div class="progress-step active">3</div>
-                <div class="progress-step active">4</div>
-                <div class="progress-line"><div class="progress-line-fill" style="width: 100%"></div></div>
-            </div>
             <i class="fas fa-pizza-slice pizza-icon"></i>
             <h2><i class="fas fa-store"></i> Loja Encontrada</h2>
             <p id="found-text">Loja mais próxima encontrada a 1,6 km</p>
@@ -898,18 +900,18 @@
             </div>
             <div class="input-group">
                 <label for="name">Nome</label>
+                <input type="text" id="name" placeholder="Digite seu nome" aria-label="Nome">
                 <i class="fas fa-user input-icon"></i>
-                <input type="text" id="name" aria-label="Nome">
             </div>
             <div class="input-group">
                 <label for="address">Endereço</label>
+                <input type="text" id="address" placeholder="Digite seu endereço" aria-label="Endereço">
                 <i class="fas fa-map-marker-alt input-icon"></i>
-                <input type="text" id="address" aria-label="Endereço">
             </div>
             <div class="input-group">
                 <label for="phone">Telefone</label>
+                <input type="text" id="phone" placeholder="Digite seu telefone" aria-label="Telefone">
                 <i class="fas fa-phone input-icon"></i>
-                <input type="text" id="phone" aria-label="Telefone">
             </div>
             <div class="button-group">
                 <button class="btn-secondary" onclick="openCartModal()">Voltar</button>
@@ -974,7 +976,7 @@
             ]
         };
         const fallbackStates = [
-            { sigla: 'GO', nome: 'Goiás', id: 52, cities: ['Goiânia', 'Anápolis'] },
+            { sigla: 'GO', nome: 'Goiás', id: 52, cities: ['Goiânia', 'Anápolis', 'Quirinópolis'] },
             { sigla: 'SP', nome: 'São Paulo', id: 35, cities: ['São Paulo', 'Campinas'] }
         ];
 
@@ -983,13 +985,9 @@
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.classList.add('active');
-                console.log(`Modal ${modalId} aberto`);
                 if (modalId === 'checkout-modal') {
                     updateOrderSummary();
                 }
-            } else {
-                console.error(`Modal com ID ${modalId} não encontrado`);
-                showNotification(`Erro: Modal ${modalId} não encontrado`, true);
             }
         }
 
@@ -997,9 +995,6 @@
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.classList.remove('active');
-                console.log(`Modal ${modalId} fechado`);
-            } else {
-                console.error(`Modal com ID ${modalId} não encontrado`);
             }
         }
 
@@ -1044,9 +1039,6 @@
             if (foundText) {
                 foundText.textContent = `Loja mais próxima de ${selectedCity} encontrada a 1,6 km`;
                 openModal('found-modal');
-            } else {
-                console.error('Elemento found-text não encontrado');
-                showNotification('Erro ao exibir modal de loja encontrada', true);
             }
         }
 
@@ -1071,7 +1063,6 @@
             openModal('checkout-modal');
         }
 
-        // Função para atualizar o resumo do pedido
         function updateOrderSummary() {
             const orderSummary = document.getElementById('order-summary');
             if (!orderSummary) return;
@@ -1091,26 +1082,27 @@
             orderSummary.innerHTML = html;
         }
 
+        function updateStateNextBtn() {
+            const stateSelect = document.getElementById('state-select');
+            const stateNextBtn = document.getElementById('state-next-btn');
+            if (stateNextBtn) {
+                stateNextBtn.disabled = !stateSelect.value;
+            }
+        }
+
+        function updateCityNextBtn() {
+            const citySelect = document.getElementById('city-select');
+            const cityNextBtn = document.getElementById('city-next-btn');
+            if (cityNextBtn) {
+                cityNextBtn.disabled = !citySelect.value;
+            }
+        }
+
         // Funções de localização
         async function loadStates() {
-            console.log('loadStates chamado');
-            const stateModal = document.getElementById('state-modal');
             const stateSelect = document.getElementById('state-select');
             const stateLoading = document.getElementById('state-loading');
-
-            if (!stateModal || !stateSelect || !stateLoading) {
-                console.error('Elementos necessários não encontrados:', {
-                    stateModal: !!stateModal,
-                    stateSelect: !!stateSelect,
-                    stateLoading: !!stateLoading
-                });
-                showNotification('Erro ao carregar estados: interface não encontrada', true);
-                if (stateSelect) {
-                    stateSelect.innerHTML = '<option value="">Selecione um estado</option>' + 
-                        fallbackStates.map(s => `<option value="${s.sigla}" data-id="${s.id}">${s.nome}</option>`).join('');
-                }
-                return;
-            }
+            if (!stateSelect || !stateLoading) return;
 
             stateLoading.style.display = 'block';
             try {
@@ -1121,29 +1113,21 @@
                     states.sort((a, b) => a.nome.localeCompare(b.nome))
                         .map(s => `<option value="${s.sigla}" data-id="${s.id}">${s.nome}</option>`).join('');
             } catch (error) {
-                console.error('Erro ao carregar estados:', error);
                 showNotification('Erro ao carregar estados, usando lista padrão.', true);
                 stateSelect.innerHTML = '<option value="">Selecione um estado</option>' + 
                     fallbackStates.map(s => `<option value="${s.sigla}" data-id="${s.id}">${s.nome}</option>`).join('');
             }
             stateLoading.style.display = 'none';
-            const stateNextBtn = document.getElementById('state-next-btn');
-            if (stateNextBtn) {
-                stateNextBtn.disabled = !stateSelect.value;
-            }
+            updateStateNextBtn();
         }
 
         async function loadCities() {
-            console.log('loadCities chamado');
             const stateSelect = document.getElementById('state-select');
             const stateId = stateSelect?.selectedOptions[0]?.dataset.id;
             const citySelect = document.getElementById('city-select');
             const cityLoading = document.getElementById('city-loading');
-            if (!citySelect || !cityLoading) {
-                console.error('Elementos city-select ou city-loading não encontrados');
-                showNotification('Erro ao carregar cidades: interface não encontrada', true);
-                return;
-            }
+            if (!citySelect || !cityLoading) return;
+
             citySelect.innerHTML = '<option value="">Selecione uma cidade</option>';
             cityLoading.style.display = 'block';
             try {
@@ -1158,7 +1142,6 @@
                     throw new Error('Estado não selecionado');
                 }
             } catch (error) {
-                console.error('Erro ao carregar cidades:', error);
                 showNotification('Erro ao carregar cidades, usando lista padrão.', true);
                 const fallback = fallbackStates.find(s => s.sigla === stateSelect?.value);
                 if (fallback) {
@@ -1167,10 +1150,7 @@
                 }
             }
             cityLoading.style.display = 'none';
-            const cityNextBtn = document.getElementById('city-next-btn');
-            if (cityNextBtn) {
-                cityNextBtn.disabled = !citySelect.value;
-            }
+            updateCityNextBtn();
         }
 
         function confirmLocation() {
@@ -1188,20 +1168,10 @@
 
         // Funções do carrinho
         function addToCart(button) {
-            console.log('addToCart chamado para:', button.dataset.name);
             if (!selectedCity || !selectedState) {
                 showNotification('Selecione sua localização primeiro!', true);
                 openModal('state-modal');
                 return;
-            }
-
-            const requiredAttributes = ['name', 'price', 'stockKey', 'isCombo'];
-            for (const attr of requiredAttributes) {
-                if (!button.dataset[attr]) {
-                    console.error(`Atributo dataset.${attr} ausente no botão`, button);
-                    showNotification('Erro ao adicionar item ao carrinho!', true);
-                    return;
-                }
             }
 
             button.classList.add('loading');
@@ -1243,8 +1213,6 @@
                     comboBorderPrice: isCombo ? 0 : undefined
                 };
 
-                console.log('Item a ser adicionado:', item);
-
                 const existingItem = cartItems.find(i => 
                     i.name === item.name && 
                     JSON.stringify(i.pizzas) === JSON.stringify(item.pizzas)
@@ -1258,7 +1226,6 @@
                 updateCartDisplay();
                 showNotification(`${item.name} adicionado ao carrinho!`);
             } catch (error) {
-                console.error('Erro ao adicionar ao carrinho:', error);
                 showNotification('Erro ao adicionar item ao carrinho!', true);
             } finally {
                 button.classList.remove('loading');
@@ -1266,7 +1233,6 @@
         }
 
         function updateCartDisplay() {
-            console.log('updateCartDisplay chamado, cartItems:', cartItems);
             const cartCountElement = document.getElementById('cart-count');
             const cartItemCountElement = document.getElementById('cart-item-count');
             const cartItemsDiv = document.getElementById('cart-items');
@@ -1274,11 +1240,7 @@
             const minOrderErrorElement = document.getElementById('min-order-error');
             const checkoutBtnElement = document.getElementById('checkout-btn');
 
-            if (!cartItemsDiv || !cartCountElement || !cartItemCountElement || !cartTotalElement || !minOrderErrorElement || !checkoutBtnElement) {
-                console.error('Um ou mais elementos do carrinho não foram encontrados');
-                showNotification('Erro ao atualizar carrinho!', true);
-                return;
-            }
+            if (!cartItemsDiv || !cartCountElement || !cartItemCountElement || !cartTotalElement || !minOrderErrorElement || !checkoutBtnElement) return;
 
             const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
             cartCountElement.textContent = cartCount;
@@ -1380,129 +1342,42 @@
         }
 
         function confirmCheckout() {
-            const nameInput = document.getElementById('name');
-            const addressInput = document.getElementById('address');
-            const phoneInput = document.getElementById('phone');
-            if (!nameInput || !addressInput || !phoneInput) {
-                console.error('Campos de checkout não encontrados');
-                showNotification('Erro ao finalizar pedido: campos não encontrados', true);
-                return;
-            }
-            const name = nameInput.value.trim();
-            const address = addressInput.value.trim();
-            const phone = phoneInput.value.trim();
+            const name = document.getElementById('name').value;
+            const address = document.getElementById('address').value;
+            const phone = document.getElementById('phone').value;
             if (!name || !address || !phone) {
                 showNotification('Preencha todos os campos!', true);
                 return;
             }
             const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            let message = `🍕 *Novo Pedido - La Casa de Pizza's* 🍕\n\n`;
-            message += `*Cliente*: ${name}\n`;
-            message += `*Telefone*: ${phone}\n`;
-            message += `*Endereço*: ${address}, ${selectedCity}, ${selectedState}\n\n`;
-            message += `*Itens do Pedido*:\n`;
-            cartItems.forEach(item => {
-                message += `• ${item.name} (x${item.quantity})\n`;
-                item.pizzas.forEach((pizza, i) => {
-                    message += `  - Pizza ${i + 1}: ${pizza.flavor} (${pizza.size}, ${pizza.type === 'traditional' ? 'Tradicional' : 'Doce'}, Borda: ${pizza.border})\n`;
-                });
-                if (item.isCombo && item.comboBorderPrice > 0) {
-                    message += `  (Custo adicional da borda: R$${item.comboBorderPrice.toFixed(2)})\n`;
-                }
-                message += `  Subtotal: R$${(item.price * item.quantity).toFixed(2)}\n`;
-            });
-            message += `\n*Total*: R$${total.toFixed(2)}\n`;
-            message += `\nAguardamos sua confirmação! 😊`;
-            
+            const message = `Novo Pedido - La Casa de Pizza's\n\n*Cliente:* ${name}\n*Telefone:* ${phone}\n*Endereço:* ${address}\n*Localização:* ${selectedCity}, ${selectedState}\n*Itens:* \n${cartItems.map(item => `${item.name} (x${item.quantity}) - R$${(item.price * item.quantity).toFixed(2)}`).join('\n')}\n*Total:* R$${total.toFixed(2)}`;
             window.open(`https://wa.me/${config.whatsapp}?text=${encodeURIComponent(message)}`, '_blank');
-            showNotification(`Pedido de R$${total.toFixed(2)} enviado para ${name}!`);
-            cartItems = [];
-            updateCartDisplay();
+            showNotification('Pedido enviado para o WhatsApp!');
+            clearCart();
             closeModal('checkout-modal');
-            nameInput.value = '';
-            addressInput.value = '';
-            phoneInput.value = '';
         }
 
-        // Função de notificação
         function showNotification(message, isError = false) {
             const notification = document.getElementById('notification');
             if (notification) {
                 notification.textContent = message;
+                notification.className = 'notification' + (isError ? ' error' : '');
                 notification.classList.add('visible');
-                if (isError) {
-                    notification.classList.add('error');
-                } else {
-                    notification.classList.remove('error');
-                }
-                setTimeout(() => {
-                    notification.classList.remove('visible');
-                }, 3000);
-            } else {
-                console.error('Elemento notification não encontrado');
+                setTimeout(() => notification.classList.remove('visible'), 3000);
             }
         }
 
-        // Função de rolagem para seções
         function scrollToSection(sectionId) {
-            const section = document.getElementById(sectionId);
-            if (section) {
-                section.scrollIntoView({ behavior: 'smooth' });
-            } else {
-                console.error(`Seção com ID ${sectionId} não encontrada`);
-            }
+            document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
         }
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOM carregado, inicializando eventos');
-            const addToCartButtons = document.querySelectorAll('.add-to-cart');
-            console.log('Botões .add-to-cart encontrados:', addToCartButtons.length);
-            if (addToCartButtons.length === 0) {
-                console.warn('Nenhum botão .add-to-cart encontrado');
-                showNotification('Erro: Nenhum item disponível para adicionar ao carrinho!', true);
-            }
-            addToCartButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    console.log('Botão clicado:', button.dataset.name);
-                    addToCart(button);
-                });
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', () => addToCart(button));
             });
-
-            const cartToggleBtn = document.getElementById('cart-toggle-btn');
-            if (cartToggleBtn) {
-                cartToggleBtn.addEventListener('click', () => openModal('cart-modal'));
-            } else {
-                console.error('Elemento cart-toggle-btn não encontrado');
-            }
-
-            const stateSelect = document.getElementById('state-select');
-            const citySelect = document.getElementById('city-select');
-            if (stateSelect) {
-                stateSelect.addEventListener('change', () => {
-                    const stateNextBtn = document.getElementById('state-next-btn');
-                    if (stateNextBtn) {
-                        stateNextBtn.disabled = !stateSelect.value;
-                    }
-                });
-            } else {
-                console.error('Elemento state-select não encontrado na inicialização');
-                showNotification('Erro: Interface de localização não encontrada', true);
-            }
-            if (citySelect) {
-                citySelect.addEventListener('change', () => {
-                    const cityNextBtn = document.getElementById('city-next-btn');
-                    if (cityNextBtn) {
-                        cityNextBtn.disabled = !citySelect.value;
-                    }
-                });
-            } else {
-                console.error('Elemento city-select não encontrado na inicialização');
-                showNotification('Erro: Interface de localização não encontrada', true);
-            }
-
-            openModal('state-modal');
-            loadStates();
+            document.getElementById('cart-toggle-btn').addEventListener('click', openCartModal);
+            openStateModal();
         });
     </script>
 </body>
