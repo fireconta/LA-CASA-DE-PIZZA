@@ -273,21 +273,24 @@
         }
         .modal-content {
             background: linear-gradient(135deg, #fef2f2, #ffffff);
-            padding: 1.5rem;
-            border-radius: 1rem;
-            max-width: 400px;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            max-width: 450px;
             width: 90%;
             position: relative;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             text-align: center;
             animation: slideIn 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
         }
         @keyframes slideIn {
             from { transform: translateY(-50px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
         .modal-content .pizza-icon {
-            font-size: 2rem;
+            font-size: 2.5rem;
             color: #dc2626;
             margin-bottom: 0.5rem;
             animation: pulse 2s infinite;
@@ -298,28 +301,29 @@
             100% { transform: scale(1); }
         }
         .modal-content h2 {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: 700;
             color: #dc2626;
             margin-bottom: 0.75rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
         }
         .modal-content h2 i {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             transition: transform 0.3s;
         }
         .modal-content h2 i:hover {
             transform: rotate(15deg);
         }
         .modal-content button {
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
+            padding: 0.9rem 1.8rem;
+            border-radius: 0.6rem;
             border: none;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.875rem;
+            font-size: 1rem;
             transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
         }
         .modal-content button:hover:not(:disabled) {
@@ -328,9 +332,9 @@
         }
         .modal-content .close {
             position: absolute;
-            top: 0.75rem;
-            right: 0.75rem;
-            font-size: 1.5rem;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.8rem;
             color: #dc2626;
             cursor: pointer;
             transition: transform 0.2s;
@@ -354,9 +358,48 @@
         }
         .modal-content .button-group {
             display: flex;
-            gap: 0.5rem;
+            gap: 1rem;
             justify-content: center;
             margin-top: 0.75rem;
+        }
+        .custom-select {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .custom-select select {
+            width: 100%;
+            padding: 1rem 2rem 1rem 1rem;
+            border: 2px solid #d1d5db;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            color: #1f2937;
+            background-color: white;
+            appearance: none;
+            cursor: pointer;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .custom-select select:focus {
+            border-color: #dc2626;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.15);
+        }
+        .custom-select::after {
+            content: '\f078';
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: #dc2626;
+            transition: transform 0.3s;
+        }
+        .custom-select select:focus + ::after {
+            transform: translateY(-50%) rotate(180deg);
         }
         .loading-bar {
             width: 100%;
@@ -829,10 +872,11 @@
             <span class="close" onclick="closeModal('state-modal')">×</span>
             <i class="fas fa-pizza-slice pizza-icon"></i>
             <h2><i class="fas fa-map-marker-alt"></i> Escolha seu Estado</h2>
-            <div class="loading-bar" id="state-loading" style="display: none;"><div></div></div>
-            <select id="state-select" onchange="updateStateNextBtn()">
-                <option value="">Selecione um estado</option>
-            </select>
+            <div class="custom-select">
+                <select id="state-select" onchange="updateStateNextBtn()">
+                    <option value="">Selecione um estado</option>
+                </select>
+            </div>
             <div class="button-group">
                 <button class="btn-primary" onclick="openCityModal()" disabled id="state-next-btn">Próximo</button>
             </div>
@@ -843,10 +887,11 @@
             <span class="close" onclick="closeModal('city-modal')">×</span>
             <i class="fas fa-pizza-slice pizza-icon"></i>
             <h2><i class="fas fa-city"></i> Escolha sua Cidade</h2>
-            <div class="loading-bar" id="city-loading" style="display: none;"><div></div></div>
-            <select id="city-select" onchange="updateCityNextBtn()">
-                <option value="">Selecione uma cidade</option>
-            </select>
+            <div class="custom-select">
+                <select id="city-select" onchange="updateCityNextBtn()">
+                    <option value="">Selecione uma cidade</option>
+                </select>
+            </div>
             <div class="button-group">
                 <button class="btn-secondary" onclick="openStateModal()">Voltar</button>
                 <button class="btn-primary" onclick="openSearchingModal()" disabled id="city-next-btn">Próximo</button>
@@ -1101,10 +1146,8 @@
         // Funções de localização
         async function loadStates() {
             const stateSelect = document.getElementById('state-select');
-            const stateLoading = document.getElementById('state-loading');
-            if (!stateSelect || !stateLoading) return;
+            if (!stateSelect) return;
 
-            stateLoading.style.display = 'block';
             try {
                 const response = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados');
                 if (!response.ok) throw new Error('Erro ao carregar estados');
@@ -1117,7 +1160,6 @@
                 stateSelect.innerHTML = '<option value="">Selecione um estado</option>' + 
                     fallbackStates.map(s => `<option value="${s.sigla}" data-id="${s.id}">${s.nome}</option>`).join('');
             }
-            stateLoading.style.display = 'none';
             updateStateNextBtn();
         }
 
@@ -1125,11 +1167,9 @@
             const stateSelect = document.getElementById('state-select');
             const stateId = stateSelect?.selectedOptions[0]?.dataset.id;
             const citySelect = document.getElementById('city-select');
-            const cityLoading = document.getElementById('city-loading');
-            if (!citySelect || !cityLoading) return;
+            if (!citySelect) return;
 
             citySelect.innerHTML = '<option value="">Selecione uma cidade</option>';
-            cityLoading.style.display = 'block';
             try {
                 if (stateId) {
                     const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${stateId}/municipios`);
@@ -1149,7 +1189,6 @@
                         fallback.cities.map(c => `<option value="${c}">${c}</option>`).join('');
                 }
             }
-            cityLoading.style.display = 'none';
             updateCityNextBtn();
         }
 
@@ -1268,7 +1307,7 @@
                         details += `<p>Sabor: ${pizza.flavor}</p>`;
                     }
                     details += `
-                        <select onchange="updatePizzaBorder(${item.id}, ${index}, this.value, parseFloat(this.selectedOptions[0].dataset.price))">
+                        <select onchange="updatePizzaBorder(${item.id}, ${index}, this.value, parseFloat(this.selectedOptions[0].data-price))">
                             ${borders.map(b => `<option value="${b.name}" data-price="${b.price}" ${pizza.border === b.name ? 'selected' : ''}>${b.name}</option>`).join('')}
                         </select>
                     `;
