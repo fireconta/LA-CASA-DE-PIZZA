@@ -1307,7 +1307,7 @@
                         details += `<p>Sabor: ${pizza.flavor}</p>`;
                     }
                     details += `
-                        <select onchange="updatePizzaBorder(${item.id}, ${index}, this.value, parseFloat(this.selectedOptions[0].data-price))">
+                        <select onchange="updatePizzaBorder(${item.id}, ${index}, this.value, parseFloat(this.selectedOptions[0].dataset.price))">
                             ${borders.map(b => `<option value="${b.name}" data-price="${b.price}" ${pizza.border === b.name ? 'selected' : ''}>${b.name}</option>`).join('')}
                         </select>
                     `;
@@ -1389,7 +1389,28 @@
                 return;
             }
             const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            const message = `Novo Pedido - La Casa de Pizza's\n\n*Cliente:* ${name}\n*Telefone:* ${phone}\n*Endereço:* ${address}\n*Localização:* ${selectedCity}, ${selectedState}\n*Itens:* \n${cartItems.map(item => `${item.name} (x${item.quantity}) - R$${(item.price * item.quantity).toFixed(2)}`).join('\n')}\n*Total:* R$${total.toFixed(2)}`;
+            
+            // Montagem da mensagem aprimorada
+            let message = `🍕 *Novo Pedido - La Casa de Pizza's* 🍕\n\n`;
+            message += `Olá! Aqui está o pedido de *${name}*:\n\n`;
+            message += `📋 *Detalhes do Pedido:*\n`;
+            
+            cartItems.forEach(item => {
+                message += `- *${item.name}* (x${item.quantity}) - R$${item.price.toFixed(2)}\n`;
+                if (item.isCombo) {
+                    item.pizzas.forEach((pizza, index) => {
+                        message += `  • Pizza ${index + 1}: ${pizza.flavor} (${pizza.size}, Borda: ${pizza.border})\n`;
+                    });
+                } else {
+                    message += `  • Sabor: ${item.pizzas[0].flavor}, Borda: ${item.pizzas[0].border}\n`;
+                }
+            });
+            
+            message += `\n💰 *Total:* R$${total.toFixed(2)}\n\n`;
+            message += `📍 *Entrega em:* ${address}, ${selectedCity}, ${selectedState}\n`;
+            message += `📞 *Telefone para contato:* ${phone}\n\n`;
+            message += `Obrigado por escolher a La Casa de Pizza's! 😊\nAguarde a confirmação do seu pedido.`;
+
             window.open(`https://wa.me/${config.whatsapp}?text=${encodeURIComponent(message)}`, '_blank');
             showNotification('Pedido enviado para o WhatsApp!');
             clearCart();
