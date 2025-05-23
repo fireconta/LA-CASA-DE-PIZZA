@@ -399,6 +399,7 @@
             transition: transform 0.3s;
         }
         .custom-select select:focus + ::after {
+            transform Maggiore
             transform: translateY(-50%) rotate(180deg);
         }
         .loading-bar {
@@ -739,10 +740,10 @@
                 <span class="discount-tag">SOMENTE HOJE 60% OFF</span>
                 <h3 class="text-lg font-semibold">Combo La Casa de Pizza's Supremo</h3>
                 <p>3 Pizzas Grandes Tradicionais + 1 Pizza Doce Grande + 2 Refrigerantes 2L + 1 Porção de Batata Frita + 1 Pão de Alho</p>
-                <p><span class="price-old">de R$ 300,00</span> <span class="price-new">por R$ 120,00</span></p>
+                <p><span class="price-old">de R$ 300,00</span> <span class="price-new">por R$ 149,90</span></p>
                 <p class="availability">🔥 Quantidade limitada</p>
                 <p class="stock-info" data-stock-key="supremo">Restam 5 unidades</p>
-                <button class="add-to-cart" data-name="Combo La Casa de Pizza's Supremo" data-price="120.00" data-stock-key="supremo" data-is-combo="true" data-pizza-count="4" aria-label="Adicionar Combo La Casa de Pizza's Supremo ao carrinho">Adicionar ao Carrinho</button>
+                <button class="add-to-cart" data-name="Combo La Casa de Pizza's Supremo" data-price="149.90" data-stock-key="supremo" data-is-combo="true" data-pizza-count="4" aria-label="Adicionar Combo La Casa de Pizza's Supremo ao carrinho">Adicionar ao Carrinho</button>
             </div>
         </div>
     </section>
@@ -1279,7 +1280,9 @@
             const minOrderErrorElement = document.getElementById('min-order-error');
             const checkoutBtnElement = document.getElementById('checkout-btn');
 
-            if (!cartItemsDiv || !cartCountElement || !cartItemCountElement || !cartTotalElement || !minOrderErrorElement || !checkoutBtnElement) return;
+            if (!cartItemsDiv || !cartCountElement || !cartItem
+
+CountElement || !cartTotalElement || !minOrderErrorElement || !checkoutBtnElement) return;
 
             const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
             cartCountElement.textContent = cartCount;
