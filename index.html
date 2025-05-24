@@ -399,7 +399,6 @@
             transition: transform 0.3s;
         }
         .custom-select select:focus + ::after {
-            transform Maggiore
             transform: translateY(-50%) rotate(180deg);
         }
         .loading-bar {
@@ -740,10 +739,10 @@
                 <span class="discount-tag">SOMENTE HOJE 60% OFF</span>
                 <h3 class="text-lg font-semibold">Combo La Casa de Pizza's Supremo</h3>
                 <p>3 Pizzas Grandes Tradicionais + 1 Pizza Doce Grande + 2 Refrigerantes 2L + 1 Porção de Batata Frita + 1 Pão de Alho</p>
-                <p><span class="price-old">de R$ 300,00</span> <span class="price-new">por R$ 149,90</span></p>
+                <p><span class="price-old">de R$ 200,00</span> <span class="price-new">por R$ 89,90</span></p>
                 <p class="availability">🔥 Quantidade limitada</p>
                 <p class="stock-info" data-stock-key="supremo">Restam 5 unidades</p>
-                <button class="add-to-cart" data-name="Combo La Casa de Pizza's Supremo" data-price="149.90" data-stock-key="supremo" data-is-combo="true" data-pizza-count="4" aria-label="Adicionar Combo La Casa de Pizza's Supremo ao carrinho">Adicionar ao Carrinho</button>
+                <button class="add-to-cart" data-name="Combo La Casa de Pizza's Supremo" data-price="89.90" data-stock-key="supremo" data-is-combo="true" data-pizza-count="4" aria-label="Adicionar Combo La Casa de Pizza's Supremo ao carrinho">Adicionar ao Carrinho</button>
             </div>
         </div>
     </section>
@@ -783,7 +782,7 @@
             <img src="https://imgur.com/3wbh5W3.jpeg" alt="Imagem da Pizza Suprema" class="menu-img">
             <div>
                 <h3 class="text-lg font-semibold">Pizza Suprema</h3>
-                <p>Pepperoni artesanal, muçarela, bacon crocante, champignon fatiado, cebola roxa, pimentão verde, azeitonas verdes, molho de tomate rústico e orégano</p>
+                <p>Pepperoni artesanal, muçarela, bacon crocante, champignon fatiado, cebola roxa, pimentão verde, azeitonas verdes, molho de tomate rústico e oregano</p>
                 <p class="price-new">R$ 49,90</p>
                 <p class="stock-info" data-stock-key="suprema">Restam 15 unidades</p>
                 <button class="add-to-cart" data-name="Pizza Suprema" data-price="49.90" data-stock-key="suprema" data-is-combo="false" aria-label="Adicionar Pizza Suprema ao carrinho">Adicionar ao Carrinho</button>
@@ -1280,9 +1279,7 @@
             const minOrderErrorElement = document.getElementById('min-order-error');
             const checkoutBtnElement = document.getElementById('checkout-btn');
 
-            if (!cartItemsDiv || !cartCountElement || !cartItem
-
-CountElement || !cartTotalElement || !minOrderErrorElement || !checkoutBtnElement) return;
+            if (!cartItemsDiv || !cartCountElement || !cartItemCountElement || !cartTotalElement || !minOrderErrorElement || !checkoutBtnElement) return;
 
             const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
             cartCountElement.textContent = cartCount;
